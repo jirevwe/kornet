@@ -9,6 +9,7 @@ var session = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
 
+//define the routes 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
@@ -18,8 +19,9 @@ var mongo = process.env.MONGOLAB_URI || 'mongodb://localhost/node-local-test'
 mongoose.connect(mongo);
 
 // mongo model
-// var Model_Name = require('add_your_models_here');
 var User = require('./models/user');
+var Mail = require('./models/mail');
+var Questions = require('./models/security_question');
 
 var app = express();
 app.set('port', process.env.PORT || 3000);
@@ -51,6 +53,7 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+//add routes to the app
 app.use('/', index);
 app.use('/users', users);
 

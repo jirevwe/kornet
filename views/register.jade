@@ -5,13 +5,23 @@ block content
 		h1 Register Page
 		p.lead Say something worthwhile here.
 		br
-		form(role='form', action="/register",method="post", style='max-width: 300px;')
+		form(role='form', action="/register",method="post", enctype='multipart/form-data', style='max-width: 300px;')
 			.form-group
-					input.form-control(type='text', name="username", placeholder='Enter Username')
+				input.form-control(type='text', name="username", placeholder='Enter Username')
 			.form-group
 				input.form-control(type='password', name="password", placeholder='Password')
-			button.btn.btn-default(type='submit') Submit
-			&nbsp;
+			.form-group
+				input.form-control(type='text', name="phone", placeholder='Phone Number')
+			.form-group
+				input.form-control(type='text', name="email", placeholder='Email')
+			.form-group
+				input.form-control(type='text', name="first_name", placeholder='First Name')
+			.form-group
+				input.form-control(type='text', name="last_name", placeholder='Last Name')
+			.form-group
+				input.form-control(type='text', name="first_name", placeholder='First Name')
+			
+			button.btn.btn-default(type='submit') Submit &nbsp;
 			a(href='/')
 				button.btn.btn-primary(type="button") Cancel
 			h4= info
