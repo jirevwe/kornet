@@ -1,0 +1,19 @@
+extends layout
+
+block content
+	#page-content-wrapper
+		.page-content.inset
+			.row
+				a#menu-toggle.btn.btn-default(href='#')
+					i.fa.fa-bars
+				.col-md-12
+					h1 Hi, You are a dumbass
+					p.lead LOL!!!
+					if (!user)
+						a.btn.btn-default(href="/login") Login
+						a.btn.btn-success(href="/register") Register
+					if (user)
+						p You are currently logged in as #{user.username}
+						a(href="/logout") Logout
+
+	script $("#menu-toggle").click(function(e) { e.preventDefault(); $("#wrapper").toggleClass("active"); });
