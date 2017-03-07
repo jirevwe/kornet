@@ -5,7 +5,7 @@ block content
 		h1 Register Page
 		p.lead Say something worthwhile here.
 		br
-		form(role='form', action="/register",method="post", enctype='multipart/form-data', style='max-width: 300px;')
+		form(role='form', action="/register",method="post", style='max-width: auto;')
 			.form-group
 				input.form-control(type='text', name="username", placeholder='Enter Username')
 			.form-group
@@ -17,10 +17,26 @@ block content
 			.form-group
 				input.form-control(type='text', name="first_name", placeholder='First Name')
 			.form-group
-				input.form-control(type='text', name="last_name", placeholder='Last Name')
+				input.form-control(type="text", name="last_name", placeholder='Last Name')
 			.form-group
-				input.form-control(type='text', name="first_name", placeholder='First Name')
-			
+				.input-group
+					span.input-group-addon
+						label
+							| Male
+							input(type='radio', name='gender')
+					span.input-group-addon
+						label
+							| Female
+							input(type='radio', name='gender')
+			.form-group
+				select.selectpicker(name="question" show-tick, data-style="btn-primary", data-width="fit")
+					option(value="1") What is the first name of the person you kissed
+					option(value="2") In what city or town does your nearest sibling work
+					option(value="3") What is the name of your primary school
+					option(value="4") Where did you write your first Jamb examination
+					option(value="5") In what city does your closest family member live
+			.form-group
+				input.form-control(type="text", name="answer", placeholder="Security Answer")
 			button.btn.btn-default(type='submit') Submit &nbsp;
 			a(href='/')
 				button.btn.btn-primary(type="button") Cancel

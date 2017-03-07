@@ -10,7 +10,7 @@ var User = new Schema({
   last_name: Schema.Types.String,
   phone_number: Schema.Types.String,
   email:Schema.Types.String,
-  date_of_birth: Schema.Types.Date,
+  date_of_birth: {type: Schema.Types.Date, default: Date.now},
   profile_image: Schema.Types.String,
   security_question: Schema.Types.Number,
   security_answer: Schema.Types.String,
