@@ -1,0 +1,15 @@
+extends layout
+
+block content
+	.container
+		h1 Send Mail
+		form(role="form" action="/users/send", method="post")
+			.form-group
+				input.form-control(type='text', value="#{user.email}" name="sender")
+			.form-group
+				input.form-control(type='text', name="recipient", placeholder='Recipient')
+			.form-group
+				input.form-control(type='text', name="subject" placeholder='Subject')
+			.form-group
+				textarea.form-control(rows='5', cols='40', name="content", placeholder='Content')
+			button.btn.btn-default(type="submit" name="send", value="Send") Submit &nbsp;

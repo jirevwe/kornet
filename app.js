@@ -14,8 +14,8 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 
 // mongo config
-var MONGOLAB_URI= "add_your_mongolab_uri_here"
-var mongo = process.env.MONGOLAB_URI || 'mongodb://localhost/node-local-test'
+var MONGOLAB_URI= "add_your_mongolab_uri_here";
+var mongo = process.env.MONGOLAB_URI || 'mongodb://localhost/haraka_db_store';
 mongoose.connect(mongo);
 
 // mongo model
@@ -43,7 +43,7 @@ app.use(session({
   secret: 'my serete',
   resave: false,
   saveUninitialized: false
-}))
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
