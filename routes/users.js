@@ -21,7 +21,7 @@ router.post('/send', function(req, res, next) {
     html: "<p>" + content + "</p> " // html body
   }
 
-let smtpConfig = {
+var smtpConfig = {
     host: 'localhost',
     port: 2525,
     secure: false, // upgrade later with STARTTLS
