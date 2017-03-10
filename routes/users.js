@@ -12,10 +12,11 @@ router.post('/send', function(req, res, next) {
   var subject = req.body.subject;
   var recipient = req.body.recipient;
   var content = req.body.content;
+  var sender = req.body.sender;
 
   var mailOptions = {
-    from: req.user.email, // sender address
-    to: "raymond@test.com", // list of receivers
+    from: sender, // sender address
+    to: recipient, // list of receivers
     subject: subject, // Subject line
     text: content, // plaintext body
     html: "<p>" + content + "</p> " // html body
