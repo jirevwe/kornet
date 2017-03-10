@@ -15,7 +15,7 @@ var users = require('./routes/users');
 
 // mongo config
 var MONGOLAB_URI= "mongodb://root:root@ds123080.mlab.com:23080/haraka_db_store";
-var mongo = process.env.MONGOLAB_URI;
+var mongo = MONGOLAB_URI;
 mongoose.connect(mongo);
 
 // mongo model
