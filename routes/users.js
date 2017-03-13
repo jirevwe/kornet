@@ -23,8 +23,8 @@ router.post('/send', function(req, res, next) {
   }
 
 var smtpConfig = {
-    host: 'localhost',
-    port: 2525,
+    host: 'https://demo.kornet-test.com',
+    port: 25,
     secure: false, // upgrade later with STARTTLS
     logger: true
 };
