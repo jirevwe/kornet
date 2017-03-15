@@ -21,6 +21,9 @@
     "serve-favicon": "~2.3.2",
     "nodemailer":"3.1.4",
     "nodemailer-smtp-transport":"2.7.2",
-    "imap":"0.8.19"
+    "imap":"0.8.19",
+    "mailparser":"2.0.2",
+    "mailcomposer":"4.0.1",
+    "async":"2.1.5"
   }
 }

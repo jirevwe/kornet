@@ -7,10 +7,11 @@ block content
 				a#menu-toggle.btn.btn-default(href='#')
 					i.fa.fa-bars
 				.col-md-12
-					h1 Hi, You are a dumbass
-					p.lead LOL!!!
+					h1 Hi
+					p.lead Login To Continue
 					if (!user)
 						a.btn.btn-default(href="/login") Login
+						br
 						a.btn.btn-success(href="/register") Register
 					if (user)
 						p You are currently logged in as #{user.username}

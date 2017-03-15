@@ -5,8 +5,9 @@ var User = require('../models/user');
 var SecurityQuestion = require('../models/security_question');
 
 router.get('/', function(req, res, next) {
-	if(req.isAuthenticated()) res.redirect('/users');
-	res.render('index');
+	if(req.isAuthenticated())
+		return res.redirect('/users');
+	return res.render('index');
 });
 
 router.get('/ping', function(req, res){
@@ -15,7 +16,7 @@ router.get('/ping', function(req, res){
 
 router.get('/register', function(req, res, next) {
 	if(req.isAuthenticated()){
-		res.redirect('/')
+		return res.redirect('/');
 	}
 
 	var questions = [
@@ -26,7 +27,7 @@ router.get('/register', function(req, res, next) {
 					"In what city does your closest family member live"
 					];
 
-	res.render('register', {"questions": questions});
+	return res.render('register', {"questions": questions});
 });
 
 router.post('/register', function(req, res) {
@@ -48,16 +49,16 @@ router.post('/register', function(req, res) {
 			return res.render("register", {info: "Sorry. That username already exists. Try again."});
 		}
 		passport.authenticate('local')(req, res, function () {
-			res.redirect('/');
+			return res.redirect('/');
 		});
 	});
 });
 
 router.get('/login', function(req, res) {
 	if(req.isAuthenticated()){
-		res.redirect('/')
+		return res.redirect('/');
 	}
-	res.render('login');
+	return res.render('login');
 });
 
 router.post('/login', passport.authenticate('local', { successRedirect: "/", failureRedirect: "/login" }), function(req, res){
@@ -68,7 +69,7 @@ router.post('/login', passport.authenticate('local', { successRedirect: "/", fai
 
 router.get('/logout', function(req, res) {
 		req.logout();
-		res.redirect('/');
+		return res.redirect('/');
 });
 
 module.exports = router;
