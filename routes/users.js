@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mailer = require("nodemailer");
+var smtpTransport = require('nodemailer-smtp-transport');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -23,17 +24,21 @@ router.post('/send', function(req, res, next) {
   }
 
 var smtpConfig = {
-    host: 'https://demo.kornet-test.com',
-    port: 25,
-    secure: false, // upgrade later with STARTTLS
-    logger: true
+    host: 'mail.kornet-test.com',
+    port: 587,
+    secure:false,
+    logger: true,
+    auth: {
+        user: "ray@demo.kornet-test.com",
+        pass: "raymond1"
+    }
 };
 
-var sender = mailer.createTransport(smtpConfig);
+var sendmailer = mailer.createTransport(smtpTransport(smtpConfig));
 
-sender.sendMail(mailOptions,  function(err, res){
+sendmailer.sendMail(mailOptions,  function(err, res){
   if(err) throw  err;
-  else console.log("Message sent: " + response.message);
+  else console.log("Message sent: \n" + res);
 });
 
   res.redirect('/');
