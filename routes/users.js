@@ -15,11 +15,10 @@ router.get('/', function(req, res, next) {
 	return res.render('sendmail', {user: req.user});
 });
 
-router.get('/inbox', function(req, res, next){
-	if(!req.isAuthenticated())
-		return res.redirect('/');
+router.get('/sent', function(req, res, next){
 
 	var mails = [];
+	var messages = [];
 	
 	var imap = new Imap({
 		user: 'ray@demo.kornet-test.com',
@@ -32,33 +31,74 @@ router.get('/inbox', function(req, res, next){
 	imap.once('ready', function() {
 		imap.openBox('Sent', true, (function(err, box) {
 			if (err) throw err;
-			var fetch = imap.seq.fetch('1:4', { bodies: '' });
+			var fetch = imap.seq.fetch('1:' + box.messages.total, { bodies: ['HEADER.FIELDS (FROM SUBJECT TO)','TEXT'] });
 			fetch.on('message', function(msg, seqno) {
-				console.log(' #%d', seqno);
-				var prefix = '(#' + seqno + ')';
 				msg.on('body', function(stream, info) {
-					
+					mails.push(stream);
+					simpleParser(stream, function(err, mail){
+						if (err) throw err;
+						if(mail.subject != undefined){
+							// console.log("Subject: " + mail.subject + " from: " + mail.to.text);
+							messages.push({ subject: mail.subject, from: mail.from.text });
+						}
+					});
 				});
 			});
 			fetch.once('error', function(err) {
 				throw err;
 			});
 			fetch.once('end', function(err) {
-				console.log('Done fetching all messages!');
-				console.log('Number of mails in inbox ' + mails.length);
-				return res.render('inbox');
+				// console.log('-----------Done fetching all messages!');
+				// console.log('-----------Number of mails in inbox ' + mails.length);
 				imap.end();
+				res.render('mailbox', { messages: messages });
 			});
 		}));
 	});
+	imap.connect();
+});
 
-	simpleParser(stream, function(err, mail){
-		if(err) throw err;
-		mails.push(mail.subject);
+router.get('/inbox', function(req, res, next){
+
+	var mails = [];
+	var messages = [];
+	
+	var imap = new Imap({
+		user: 'ray@demo.kornet-test.com',
+		password: 'raymond1',
+		host: 'mail.kornet-test.com',
+		port: 993,
+		tls: true
 	});
 
+	imap.once('ready', function() {
+		imap.openBox('Inbox', true, (function(err, box) {
+			if (err) throw err;
+			var fetch = imap.seq.fetch('1:' + box.messages.total, { bodies: ['HEADER.FIELDS (FROM SUBJECT TO)','TEXT'] });
+			fetch.on('message', function(msg, seqno) {
+				msg.on('body', function(stream, info) {
+					mails.push(stream);
+					simpleParser(stream, function(err, mail){
+						if (err) throw err;
+						if(mail.subject != undefined){
+							// console.log("Subject: " + mail.subject + " from: " + mail.to.text);
+							messages.push({ subject: mail.subject, from: mail.from.text });
+						}
+					});
+				});
+			});
+			fetch.once('error', function(err) {
+				throw err;
+			});
+			fetch.once('end', function(err) {
+				// console.log('-----------Done fetching all messages!');
+				// console.log('-----------Number of mails in inbox ' + mails.length);
+				imap.end();
+				res.render('mailbox', { messages: messages });
+			});
+		}));
+	});
 	imap.connect();
-	res.render('inbox');
 });
 
 router.post('/send', function(req, res, next) {

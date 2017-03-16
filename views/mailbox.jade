@@ -1,0 +1,8 @@
+extends layout
+
+block content
+    .container
+    ul.list-group
+    each message in messages
+        li.list-group-item #{message.subject} from #{message.from}
+        
