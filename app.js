@@ -19,17 +19,13 @@ var MONGOLAB_URI= "mongodb://localhost:27017/haraka_db_store";
 var mongo = MONGOLAB_URI;
 mongoose.connect(mongo);
 
-// mongo model
-var User = require('./models/user');
-var Mail = require('./models/mail');
-var Questions = require('./models/security_question');
-
 var app = express();
 app.set('port', process.env.PORT || 3000);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.set('view options', { pretty: false });
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -50,6 +46,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // passport config
+// mongo model
+var User = require('./models/user');
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());

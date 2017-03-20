@@ -20,7 +20,10 @@ html(lang='en')
 			#sidebar-wrapper
 				ul.sidebar-nav
 					li.sidebar-brand
-						a(href='#') Start Bootstrap
+					if (user)
+						#{user.username}
+					else
+						Some Web Mail Client
 					li
 						a(href='/') Home
 					if (user || messages)
@@ -28,5 +31,6 @@ html(lang='en')
 							a(href='/users/inbox') Inbox
 						li
 							a(href='/users/sent') Sent
+						block side
 			.container
 				block content

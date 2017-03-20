@@ -3,21 +3,26 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Mail = new Schema({
-  from: Schema.Types.String,
-  to: Schema.Types.Array,
-  body: Schema.Types.String,
-  attachments: Schema.Types.Buffer,
+  user:Schema.Types.String,
+  attachments: Schema.Types.Array,
+  headers: Schema.Types.Mixed,
+  html:Schema.Types.Mixed,
+  text:Schema.Types.String,
+  textAsHtml:Schema.Types.String,
+  cc:Schema.Types.Mixed,
+  bcc:Schema.Types.Mixed,
+  mailbox:Schema.Types.String,
+  messageId: Schema.Types.String,
+  from: Schema.Types.Mixed,
+  to: Schema.Types.Mixed,
   subject: Schema.Types.String,
   flags: {
-      location: Schema.Types.Number,
-      status: Schema.Types.Number,
-      archive: Schema.Types.Boolean,
-      important:Schema.Types.Boolean
+      status: Schema.Types.String
   },
-  linked_mail: Schema.Types.ObjectId,
-  created_at: {type: Schema.Types.Date, default: Date.now},
-  sent_at: {type: Schema.Types.Date, default: Date.now},
-  recieved_at : {type: Schema.Types.Date, default: Date.now}
+  references: Schema.Types.String,
+  "reply-to": Schema.Types.String,
+  inReplyTo: Schema.Types.String,
+  date: Schema.Types.Date
 });
 
 module.exports = mongoose.model('Mail', Mail);

@@ -1,8 +1,21 @@
 extends layout
 
+block side
+    if (user || messages)
+        li
+            a(href='/users/refresh/inbox') Refresh Inbox
+        li
+            a(href='/users/refresh/sent') Refresh Sent
+
 block content
     .container
-    ul.list-group
-    each message in messages
-        li.list-group-item #{message.subject} from #{message.from}
-        
+        .list-group
+        each message in messages
+            a.list-group-item(href="/users/#{message._id}")
+                h4.list-group-item-heading #{message.subject}
+                if (mailbox == 'inbox')
+                    p.list-group-item-text From: #{message.from.text}
+                else
+                    p.list-group-item-text To: #{message.to.text}
+                p.list-group-item-text Date: #{message.date}
+    

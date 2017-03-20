@@ -3,15 +3,27 @@ extends layout
 block content
 	.container
 		h1 Send Mail
-		form(role="form" action="/users/send", method="post")
+		form(role="form" action="/users/send/0", method="post")
 			.form-group
+				label(label-for="sender")
+					| Sender
 				input.form-control(type='text', value="#{user.email}" name="sender")
 			.form-group
+				label(label-for="recipient")
+					| Recipient
 				input.form-control(type='text', name="recipient", placeholder='Recipient')
 			.form-group
+				label(label-for="cc")
+					| Cc
+				input.form-control(type='text', name="cc", placeholder='cc')
+			.form-group
+				label(label-for="bcc")
+					| Bcc
+				input.form-control(type='text', name="bcc", placeholder='bcc')
+			.form-group
+				label(label-for="subject")
+					| Subject
 				input.form-control(type='text', name="subject" placeholder='Subject')
 			.form-group
 				textarea.form-control(rows='5', cols='40', name="content", placeholder='Content')
 			button.btn.btn-default(type="submit" name="send", value="Send") Submit &nbsp;
-	.container
-		a.btn.btn-success(href="/users/inbox") Inbox

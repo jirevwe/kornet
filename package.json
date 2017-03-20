@@ -16,7 +16,6 @@
     "morgan": "~1.7.0",
     "passport": "0.3.2",
     "passport-local": "1.0.0",
-    "passport-local-mongoose": "4.0.0",
     "jade": "1.11.0",
     "serve-favicon": "~2.3.2",
     "nodemailer":"3.1.4",
@@ -24,6 +23,7 @@
     "imap":"0.8.19",
     "mailparser":"2.0.2",
     "mailcomposer":"4.0.1",
+    "passport-local-mongoose":"4.0.0",
     "async":"2.1.5"
   }
 }

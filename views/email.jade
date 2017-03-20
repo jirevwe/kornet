@@ -1,0 +1,19 @@
+extends layout
+
+block content
+	.container
+		a.btn.btn-default(href="/users/reply/#{message._id}") Reply
+		a.btn.btn-default(href="/users/trash/#{message._id}") Move to Trash
+		.list-group
+			.list-group-item(href="/users/#{message._id}")
+				h4.list-group-item-heading #{message.subject}
+				if (message.mailbox == 'Inbox')
+					p.list-group-item-text From: #{message.from.text}
+				else
+					p.list-group-item-text To: #{message.to.text}
+				p.list-group-item-text Date: #{message.date}
+				br
+				if (message.html)
+					.container !{message.html}
+				else
+					.container #{message.text}
