@@ -15,6 +15,11 @@ html(lang='en')
 		link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css')
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js')
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/i18n/defaults-*.min.js')
+		script(src="/javascripts/tinymce/tinymce.min.js")
+		script(type='text/javascript').
+			tinymce.init({
+				selector: 'textarea'
+			});
 	body
 		#wrapper
 			#sidebar-wrapper
@@ -31,6 +36,17 @@ html(lang='en')
 							a(href='/users/inbox') Inbox
 						li
 							a(href='/users/sent') Sent
-						block side
+						li
+							a(href='/users/drafts') Drafts
+						li
+							a(href='/users/trash') Trash
+						li
+							a(href='/users/refresh/inbox') Refresh Inbox
+						li
+							a(href='/users/refresh/sent') Refresh Sent
+						li
+							a(href='/users/refresh/drafts') Refresh Drafts
+						li
+							a(href='/users/refresh/trash') Refresh Trash
 			.container
 				block content

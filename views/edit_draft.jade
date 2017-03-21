@@ -1,0 +1,51 @@
+extends layout
+
+block content
+	.container
+		h1 Draft
+		form(role="form", enctype="multipart/form-data", method="post")
+			.form-group
+				label(label-for="sender")
+					| Sender
+				if (messages.mailbox == 'Inbox')
+					input.form-control(type='text', placeholder='Sender', value="#{messages.to.text}" name="sender")
+				else
+					input.form-control(type='text', placeholder='Sender', value="#{messages.from.text}" name="sender")
+			.form-group
+				label(label-for="recipient")
+					| Recipient
+				if (messages.mailbox == 'Inbox')
+					input.form-control(type='text', name="recipient", placeholder='Recipient', value="#{messages.from.text}")
+				else
+					input.form-control(type='text', name="recipient", placeholder='Recipient', value="#{messages.to.text}")
+			.form-group
+				label(label-for="subject")
+					| Subject
+				if (messages.subject)
+					input.form-control(type='text', name="subject", placeholder='Subject', value="#{messages.subject}")
+				else
+					input.form-control(type='text', name="subject", placeholder='Subject')
+			.form-group
+				label(label-for="cc")
+					| Cc
+				if (messages.cc)
+					input.form-control(type='text', name="cc", placeholder='cc', value="#{messages.cc.text}")
+				else
+					input.form-control(type='text', name="cc", placeholder='cc')
+			.form-group
+				label(label-for="bcc")
+					| Bcc
+				if (messages.bcc)
+					input.form-control(type='text', name="bcc", placeholder='bcc', value="#{messages.bcc.text}")
+				else
+					input.form-control(type='text', name="bcc", placeholder='bcc')
+			.form-group
+				if (messages.html)
+					textarea.form-control(rows='20', cols='40', name="content") !{messages.html}
+				else
+					textarea.form-control(rows='20', cols='40', name="content") #{messages.text}
+			.form-group
+				input.form-control(type="file", name="attachment", value="attachment")
+			.container-fluid
+				button.btn.btn-success(type="submit" name="send", formaction="/users/send/0") Send Mail &nbsp;
+				button.btn.btn-default(type="submit" name="save", formaction="/users/save/0") Save Draft &nbsp;

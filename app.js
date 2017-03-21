@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var session = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
+var multer = require('multer');
 
 //define the routes 
 var index = require('./routes/index');
@@ -15,7 +16,7 @@ var users = require('./routes/users');
 
 // mongo config
 // var MONGOLAB_URI= "mongodb://root:root@ds123080.mlab.com:23080/haraka_db_store";
-var MONGOLAB_URI= "mongodb://localhost:27017/haraka_db_store";
+var MONGOLAB_URI = "mongodb://localhost:27017/haraka_db_store";
 var mongo = MONGOLAB_URI;
 mongoose.connect(mongo);
 
@@ -37,9 +38,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //Handle Express Sessions
 app.use(session({
-  secret: 'my serete',
-  resave: false,
-  saveUninitialized: false
+    secret: 'my serete',
+    resave: false,
+    saveUninitialized: false
 }));
 
 app.use(passport.initialize());
@@ -58,20 +59,20 @@ app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 
 module.exports = app;
