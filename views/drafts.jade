@@ -8,3 +8,12 @@ block content
 				h4.list-group-item-heading #{message.subject}
 				p.list-group-item-text To: #{message.to.text}
 				p.list-group-item-text Date: #{message.date}
+//- # cd iRedMail-0.9.6/tools/
+//- # bash create_mail_user_SQL.sh user1@example.com plain_password
+
+//- INSERT INTO mailbox (username, password, name, storagebasedirectory, storagenode, maildir, quota, domain, active, local_part, created)
+//- VALUES ('user1@example.com', '{SSHA512}83cCKm9vhR19LBUsZQ7sGGwTE7GHisBlYlzPbp5fvzo2JmuAxGKyH/pfVhnc/ENddZx7bs8oU8kDyS9UhI8vvcWQE+xWgs3l', 'user1',
+//-                      '/var/vmail','vmail1', 'example.com/u/s/e/user1-2017.03.24.15.56.10/',
+//-                      '1024', 'example.com', '1','user1', NOW());
+//- INSERT INTO alias (address, goto, domain, created, active)
+//-            VALUES ('user1@example.com', 'user1@example.com','example.com', NOW(), 1);

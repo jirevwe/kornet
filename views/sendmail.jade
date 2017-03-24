@@ -3,7 +3,7 @@ extends layout
 block content
 	.container
 		h1 Send Mail
-		form(role="form", enctype="multipart/form-data", method="post")
+		form#sendmail(role="form", enctype="multipart/form-data", method="post")
 			.form-group
 				label(label-for="sender")
 					| Sender
@@ -28,6 +28,7 @@ block content
 				textarea.form-control(rows='5', cols='40', name="content", placeholder='Content')
 			.form-group
 				input.form-control(type="file", name="attachment", value="attachment")
+			span#status.form-group
 			.container-fluid
 				button.btn.btn-success(type="submit" name="send", formaction="/users/send/0") Send Mail &nbsp;
 				button.btn.btn-default(type="submit" name="save", formaction="/users/save/0") Save Draft &nbsp;

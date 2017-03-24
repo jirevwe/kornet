@@ -19,6 +19,7 @@ var Mail = new Schema({
   flags: {
       status: Schema.Types.String
   },
+  seqNo: Schema.Types.Number,
   references: Schema.Types.String,
   "reply-to": Schema.Types.String,
   inReplyTo: Schema.Types.String,

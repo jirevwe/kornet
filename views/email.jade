@@ -17,3 +17,8 @@ block content
 					.container !{message.html}
 				else
 					.container #{message.text}
+				if (attachments)
+					.container
+						.list-group
+							each stuff in attachments
+								a#attachments.list-group-item-text(href='#{stuff}') link
