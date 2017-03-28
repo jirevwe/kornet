@@ -1,0 +1,92 @@
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <h1>Sign Up</h1>
+        {{# if hasErrors}}
+            <div class="alert alert-danger">
+                {{# each messages}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        <form id="signup-form" action="/signup" method="post">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" placeholder="Enter Username" class="form-control" required/>
+                    <input type="hidden" name="email" class="form-control"/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1">+234</span>
+                        <input type="text" name="phone" class="form-control" placeholder="Phone Number" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">
+                      <label>Male
+                        <input type="radio" value="M" name="gender"/>
+                      </label>
+                    </span>
+                    <span class="input-group-addon">
+                      <label>Female
+                        <input type="radio" value="F" name="gender"/>
+                      </label>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <select name="question" show-tick="show-tick" data-style="btn-primary" data-width="fit" class="selectpicker">
+                    <option value="1">What is the first name of the person you kissed</option>
+                    <option value="2">In what city or town does your nearest sibling work</option>
+                    <option value="3">What is the name of your primary school</option>
+                    <option value="4">Where did you write your first Jamb examination</option>
+                    <option value="5">In what city does your closest family member live</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="text" name="answer" placeholder="Security Answer" class="form-control"/>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password " class="form-control">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="password2">Confirm Password</label>
+                    <input type="password" name="password2" id="password2" class="form-control">
+                </div>
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </form>
+
+    </div>
+</div>
+
+<script type="application/javascript">
+    $('#signup-form').submit(function () {
+
+        // Get the Login Name value and trim it
+        var name = $('[name="username"]').val();
+        var phone = "+234"+$('[name="phone"]').val();
+        var email = name+"@kornet.com";
+
+        $('[name="phone"]').val(phone);
+        $('[name="email"]').val(email);
+
+        console.log(email);
+        console.log(phone);
+
+        // Check if empty of not
+        if (name === '') {
+            return false;
+        }
+    });
+</script>

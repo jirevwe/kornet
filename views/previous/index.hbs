@@ -1,0 +1,19 @@
+<div id="page-content-wrapper">
+    <div class="page-content inset">
+        <div class="row"><a id="menu-toggle" href="#" class="btn btn-default"><i class="fa fa-bars"></i></a>
+            <div class="col-md-12">
+                <h1>Hi</h1>
+                {{# if user }}
+                    <p>You are currently logged in as {{user}} <a href="/logout">Logout</a></p>
+                {{else}}
+                    <p class="lead">Login To Continue</p>
+
+                    <a href="/login" class="btn btn-default">Login</a>
+                    <br/>
+                    <a href="/register" class="btn btn-success">Register</a>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+<script>$("#menu-toggle").click(function(e) { e.preventDefault(); $("#wrapper").toggleClass("active"); });</script>

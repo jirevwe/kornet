@@ -1,0 +1,35 @@
+<div class="container">
+    <h1>Send Mail</h1>
+    <form id="sendmail" role="form" enctype="multipart/form-data" method="post">
+        <div class="form-group">
+            <label label-for="sender">Sender</label>
+            <input type="text" name="sender" value="{{user.email}}" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label label-for="recipient">Recipients</label>
+            <input type="text" name="recipient" placeholder="foobar@zee.com, &quot;Ray Tuk&quot; &lt;see@saw.com&gt;" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label label-for="cc">Cc</label>
+            <input type="text" name="cc" placeholder="foo@bar.com, &quot;Jude Dike&quot; &lt;mon@day.com&gt;" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label label-for="bcc">Bcc</label>
+            <input type="text" name="bcc" placeholder="wa@wu.com, &quot;Ismail Shomala&quot; &lt;public@holiday.com&gt;" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label label-for="subject">Subject</label>
+            <input type="text" name="subject" placeholder="Subject" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <textarea rows="5" cols="40" name="content" placeholder="Content" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+            <input type="file" name="attachment" value="attachment" class="form-control"/>
+        </div><span id="status" class="form-group"></span>
+        <div class="container-fluid">
+            <button type="submit" name="send" formaction="/mail/send/0" class="btn btn-success">Send Mail &nbsp;</button>
+            <button type="submit" name="save" formaction="/mail/save/0" class="btn btn-default">Save Draft &nbsp;</button>
+        </div>
+    </form>
+</div>

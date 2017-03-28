@@ -7,27 +7,45 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var passport = require('passport');
+var expressHbs = require('express-handlebars');
 var LocalStrategy = require('passport-local');
+var flash = require('connect-flash');
+var validator = require('express-validator');
 var multer = require('multer');
+var MongoStore = require('connect-mongo')(session);
 
 //define the routes 
-var index = require('./routes/index');
-var users = require('./routes/users');
+var marketRoutes = require('./routes/market');
+var mailRoutes = require('./routes/mail');
+var homeRoutes = require('./routes/index');
+var chatRoutes = require('./routes/chat');
 
 // mongo config
 // var MONGOLAB_URI= "mongodb://root:root@ds123080.mlab.com:23080/haraka_db_store";
-var MONGOLAB_URI = "mongodb://localhost:27017/haraka_db_store";
+var MONGOLAB_URI = "mongodb://localhost:27017/kornet";
 var mongo = MONGOLAB_URI;
 mongoose.connect(mongo);
+
+require('./config/passport');
 
 var app = express();
 app.set('port', process.env.PORT || 3000);
 
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-app.set('view options', { pretty: false });
+app.engine('.hbs', expressHbs({
+    defaultLayout: 'layout',
+    extname: '.hbs',
+    helpers: {
+        if_eq: function (a, b, opts) {
+            if (a == b) // Or === depending on your needs
+                return opts.fn(this);
+            else
+                return opts.inverse(this);
+        }
+    }
+}));
+app.set('view engine', '.hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -35,28 +53,32 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-//Handle Express Sessions
+app.use(validator());
 app.use(session({
-    secret: 'my serete',
+    secret: 'mysupersecret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: new MongoStore({ mongooseConnection: mongoose.connection }),
+    cookie: {maxAge: 180 * 60 * 1000}
 }));
-
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'node_modules')));
 
-// passport config
-// mongo model
-var User = require('./models/user');
-passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
-//add routes to the app
-app.use('/', index);
-app.use('/users', users);
+app.use(function (req, res, next) {
+    res.locals.login = req.isAuthenticated();
+    res.locals.session = req.session;
+    next();
+});
+
+app.use('/market', marketRoutes);
+app.use('/chat', chatRoutes);
+app.use('/mail', mailRoutes);
+app.use('/', homeRoutes);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

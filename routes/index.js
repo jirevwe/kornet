@@ -1,154 +1,138 @@
 var express = require('express');
 var router = express.Router();
+var csrf = require('csurf');
 var passport = require('passport');
+var Order = require('../models/order');
+var Cart = require('../models/cart');
 var User = require('../models/user');
-var SecurityQuestion = require('../models/security_question');
 
-router.get('/', function(req, res, next) {
-	if(req.isAuthenticated())
-		return res.redirect('/users');
-	return res.render('index');
+var csrfProtection = csrf();
+
+router.use(csrfProtection);
+
+
+router.use('/', function (req, res, next) {
+    next();
 });
 
-router.get('/ping', function(req, res){
-	res.send('pong!');
+router.get('/', function (req, res, next) {
+    if(req.user)
+        res.render('index', {layout: false, user: req.user});
+    else
+        res.render('index', {layout: false});
+
 });
 
-router.get('/register', function(req, res, next) {
-	if(req.isAuthenticated()){
-		return res.redirect('/');
-	}
-
-	var mysql      = require('mysql');
-	var connection = mysql.createConnection({
-		host     : 'mail.kornet-test.com',
-		user     : 'root2',
-		password : '00000',
-		database : 'vmail',
-		debug    : false
-	});
-
-	connection.connect();
-
-	// connection.query('SELECT * FROM mailbox', function(err, results, fields) {
-	// 	if (err) console.log('Error while performing Query. \n' + err);
-	// 	if(results.length > 0){
-	// 		for(row in results){
-	// 			for(data in results[row])
-	// 			console.log(data + ": " + results[row][data]);
-	// 		}
-	// 	}
-	// });
-
-	connection.end();
-
-	var questions = [
-					"What is the first name of the person you kissed",
-					"In what city or town does your nearest sibling live",
-					"What is the name of your primary school",
-					"Wherce did you write your first Jamb examination",
-					"In what city does your closest family member live"
-					];
-
-	return res.render('register', {"questions": questions});
+router.get('/activate', function (req, res, next) {
+    var messages = req.flash('error');
+    res.render('user/activate', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/register', function(req, res) {
-	var user = new User({
-		username: req.body.username,
-		password: req.body.password,
-		first_name: req.body.first_name,
-		last_name: req.body.last_name,
-		email: req.body.email,
-		security_question: req.body.question,
-		gender: req.body.gender,
-		phone_number: req.body.question,
-		security_answer: req.body.answer
-	});
+router.post('/activate',  function (req, res, next) {
 
-	var mysql      = require('mysql');
-	var connection = mysql.createConnection({
-		host     : 'mail.kornet-test.com',
-		user     : 'root2',
-		password : '00000',
-		database : 'vmail',
-		debug    : false
-	});
+    User.findOne({'email':req.user.email}, function (err, user) {
+        if(err){
+            return done(user);
+        }
+        if(!user){
+            req.flash('error', 'User does not exist');
+            return res.redirect('/user/activate');
+        }
+        if(!user.validateToken(req.body.token)){
+            req.flash('error', 'Wrong Token');
+            return res.redirect('/user/activate');
+        }
+        user.is_activated = 1;
+        user.save(function(err) {
+            if (err)
+                console.log('error');
+            else
+                console.log('success');
+        });
+        return res.redirect('/');
+    });
 
-	connection.connect();
-
-	let values = [	user.username  + '@demo.kornet-test.com',
-					ssha512(user.password),
-					user.first_name + " " +user.last_name,
-					'/var/vmail',
-					'vmail1', 
-					'demo.kornet-test.com/' + maildirFolder(user.username),
-					1024,
-					'demo.kornet-test.com',
-					1,
-					user.username,
-					new Date(Date.now())
-				];
-
-	connection.query('INSERT INTO mailbox (username, password, name, storagebasedirectory, storagenode, maildir, quota, domain, active, local_part, created) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-	 	values, function(err, results) {
-		if (err) console.log(err);
-		console.log(results);
-	});
-
-	let values2 = [ user.username + '@demo.kornet-test.com',
-					user.username + '@demo.kornet-test.com',
-					'demo.kornet-test.com',
-					new Date(Date.now()),
-					1];
-
-	connection.query('INSERT INTO alias (address, goto, domain, created, active) VALUES (?,?,?,?,?)', values2, function(err, results) {
-		if (err) console.log(err);
-		console.log(results);
-	});
-
-	connection.end();
-
-	// User.register(user, user.password, function(err, account) {
-	// 	if (err) {
-	// 		throw err;
-	// 		return res.render("register", {info: "Sorry. That username already exists. Try again."});
-	// 	}
-	// 	passport.authenticate('local')(req, res, function () {
-	// 		return res.redirect('/');
-	// 	});
-	// });
-	return res.redirect('/');
 });
 
-router.get('/login', function(req, res) {
-	if(req.isAuthenticated()){
-		return res.redirect('/');
-	}
-	return res.render('login');
+router.get('/signup', function (req, res, next) {
+    var messages = req.flash('error');
+    res.render('user/signup', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/login', passport.authenticate('local', { successRedirect: "/", failureRedirect: "/login" }), function(req, res){
-	if (!req.isAuthenticated()) {
-		return res.render("login", {info: "Sorry. invalid credentials. Try again."});
-	}
+router.post('/signup', passport.authenticate('local.signup', {
+    failureRedirect: '/user/signup',
+    failureFlash: true
+}), function (req, res, next) {
+    if(req.session.oldUrl){
+        var oldUrl = req.session.oldUrl;
+        req.session.oldUrl = null;
+        res.redirect(oldUrl);
+    }
+    else{
+        res.redirect('/activate');
+    }
+
 });
 
-router.get('/logout', function(req, res) {
-		req.logout();
-		return res.redirect('/');
+router.get('/signin', function (req, res, next) {
+    var messages = req.flash('error');
+    res.render('user/signin', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-function maildirFolder(username) {
-	let temp = username.substr(0,3);
-	let res = temp[0] + '/' + temp[1] + '/' + temp[2] + '/' + username + '/';
-	return res;
-}
+router.post('/signin', passport.authenticate('local.signin', {
+    failureRedirect: '/user/signin',
+    failureFlash: true
+}), function (req, res, next) {
+    if(req.session.oldUrl){
+        var oldUrl = req.session.oldUrl;
+        req.session.oldUrl = null;
+        res.redirect(oldUrl);
+    }
+    else{
+        res.redirect('/profile');
+    }
+    
+});
 
-function ssha512(cleartext) {
-	let passwordhasher = require('password-hasher');
-	let hash = passwordhasher.createHash('ssha512', cleartext, new Buffer('83d88386463f0625', 'hex'));
-	return passwordhasher.formatRFC2307(hash);
-}
+router.get('/profile', function (req, res, next) {
+    Order.find({user: req.user}, function (err, orders) {
+        if(err){
+            return res.write('Error!!');
+        }
+        var cart;
+        orders.forEach(function (order) {
+            cart = new Cart(order.cart);
+            order.items = cart.generateArray();
+        });
+        res.render('user/profile', {orders: orders});
+    });
+
+});
+
+router.get('/logout', function (req, res, next) {
+    req.logout();
+    res.redirect('/');
+});
 
 module.exports = router;
+
+function isLoggedIn(req, res, next){
+    if(req.isAuthenticated())
+        return next();
+    req.session.oldUrl = req.url;
+    res.redirect('/');
+}
+
+function isActivated(req, res, next){
+    if(req.user.is_activated == 1)
+        return next();
+    req.session.oldUrl = req.url;
+    req.flash('error', "This account is not activated");
+    res.redirect('/user/activate');
+}
+
+function notLoggedIn(req, res, next){
+    if(!req.isAuthenticated())
+        return next();
+    res.redirect('/');
+}

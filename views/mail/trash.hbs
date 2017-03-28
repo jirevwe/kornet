@@ -1,0 +1,11 @@
+
+<div class="container">
+    <div class="list-group">
+        {{# each message }}
+            <a href="/mail/trash/{{message._id}}" class="list-group-item"></a>
+            <h4 class="list-group-item-heading">{{message.subject}}</h4>
+            <p class="list-group-item-text">{{message.to.text}}</p> To: #{}
+            p.list-group-item-text Date: #{message.date}
+        {{/each}}
+    </div>
+</div>

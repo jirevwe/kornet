@@ -1,0 +1,16 @@
+<div class="container">
+    <div class="list-group">
+        {{# each messages }}
+            <a href="/mail/{{this._id}}" class="list-group-item">
+                <h4 class="list-group-item-heading">{{this.subject}}</h4>
+                {{# if_eq mailbox  'inbox' }}
+                    <p class="list-group-item-text">From: {{this.from.text}}</p>
+                {{else}}
+                    <p class="list-group-item-text">To: {{this.to.text}}</p>
+                {{/if_eq}}
+                <p class="list-group-item-text">Date: {{this.date}}</p>
+            </a>
+        {{/each}}
+    </div>
+</div>
+

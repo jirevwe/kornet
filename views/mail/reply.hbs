@@ -1,0 +1,77 @@
+<div class="container">
+    <h1>Reply Mail</h1>
+    <form role="form" method="post">
+        <div class="form-group">
+            <label label-for="sender">Sender</label>
+            {{# if_eq messages.mailbox  'Inbox'}}
+                <input type="text" placeholder="Sender" value="{{messages.to.text}}" name="sender" class="form-control"/>
+            {{else}}
+                <input type="text" placeholder="Sender" value="{{messages.from.text}}" name="sender" class="form-control"/>
+            {{/if_eq}}
+        </div>
+        <div class="form-group">
+            <label label-for="recipient">Recipient</label>
+            {{# if_eq messages.mailbox 'Inbox'}}
+                <input type="text" placeholder="Recipient" value="{{messages.from.text}}" name="recipient" class="form-control"/>
+            {{else}}
+                <input type="text" placeholder="Recipient" value="{{messages.to.text}}" name="recipient" class="form-control"/>
+            {{/if_eq}}
+        </div>
+        <div class="form-group">
+            <label label-for="subject">Subject</label>
+            {{# if messages.subject}}
+                <input type="text" placeholder="Subject" value="{{messages.subject}}" name="subject" class="form-control"/>
+            {{else}}
+                <input type="text" placeholder="Subject" name="subject" class="form-control"/>
+            {{/if}}
+        </div>
+        <div class="form-group">
+            <label label-for="cc">Cc</label>
+            {{# if messages.cc}}
+                <input type="text" placeholder="cc" value="{{messages.cc.text}}" name="cc" class="form-control"/>
+            {{else}}
+                <input type="text" placeholder="cc" name="cc" class="form-control"/>
+            {{/if}}
+        </div>
+        <div class="form-group">
+            <label label-for="bcc">Bcc</label>
+            {{# if messages.bcc}}
+                <input type="text" placeholder="bcc" value="{{messages.bcc.text}}" name="bcc" class="form-control"/>
+            {{else}}
+                <input type="text" placeholder="bcc" name="bcc" class="form-control"/>
+            {{/if}}
+        </div>
+        <div class="form-group">
+            {{# if messages.html}}
+                <textarea rows="20" cols="40" name="content" class="form-control">
+                  &nbsp;
+                  &nbsp;
+                  &nbsp;
+                  ------------------------------------------------------------------------------
+                    {{{messages.html}}}
+                </textarea>
+            {{else}}
+                <textarea rows="20" cols="40" name="content" class="form-control">
+                  &nbsp;
+                  &nbsp;
+                  &nbsp;
+                  ------------------------------------------------------------------------------
+                    {{messages.text}}
+                </textarea>
+            {{/if}}
+            {{# if attachments}}
+                <div class="container">
+                    <div class="list-group">
+                    {{# each attachments}}
+                        <a href="{{this}}" id="attachments" class="list-group-item-text">link</a>
+                    {{/each}}
+                    </div>
+                </div>
+            {{/if}}
+        </div>
+        <div class="container-fluid">
+            <button type="submit" name="send" formaction="/mail/send/0" class="btn btn-success">Send Mail &nbsp;</button>
+            <button type="submit" name="save" formaction="/mail/save/0" class="btn btn-default">Save Draft &nbsp;</button>
+        </div>
+    </form>
+</div>

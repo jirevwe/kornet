@@ -14,7 +14,7 @@ html(lang='en')
 		link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css')
 		
 		script(src='/javascripts/bootstrap.min.js')
-		script(src='/javascripts/main.js')
+		script(src='/javascripts/mail.js')
 		
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js')
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/i18n/defaults-*.min.js')
@@ -36,7 +36,7 @@ html(lang='en')
 					if (user)
 						#{user.username}
 					else
-						Some Web Mail Client
+						p Some Web Mail Client
 					li
 						a(href='/') Home
 					if (user || messages)
