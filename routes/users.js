@@ -20,7 +20,7 @@ var storage = multer.memoryStorage();
 var upload = multer({
 	dest: './uploads/',
 	limits: {
-		fileSize: 10240000 //10mb
+		fileSize: 10240000
 	},
 	storage: storage
 }).single('attachment');

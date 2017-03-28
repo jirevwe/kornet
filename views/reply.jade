@@ -53,8 +53,3 @@ block content
 			.container-fluid
 				button.btn.btn-success(type="submit" name="send", formaction="/users/send/0") Send Mail &nbsp;
 				button.btn.btn-default(type="submit" name="save", formaction="/users/save/0") Save Draft &nbsp;
-	script(type='text/javascript').
-				var socket = io();
-				socket.on('update', function( data ) {
-					attachments = data;
-				});
