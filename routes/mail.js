@@ -28,7 +28,6 @@ let upload = multer({
 router.get('/', function(req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
-
 	return res.render('mail/sendmail', { user: req.user, layout: 'mail_layout' });
 });
 
@@ -39,6 +38,7 @@ router.get('/sent', function(req, res, next) {
 	}
 	let query = Mail.find({ mailbox: "Sent" });
 	query.exec(function(err, docs) {
+		if (err) console.log(err);
 		res.render('mail/mailbox', { messages: docs, mailbox: 'sent', layout: 'mail_layout' });
 	});
 });
@@ -49,6 +49,7 @@ router.get('/inbox', function(req, res, next) {
 	}
 	let query = Mail.find({ mailbox: "Inbox" });
 	query.exec(function(err, docs) {
+		if (err) console.log(err);
 		res.render('mail/mailbox', { messages: docs, mailbox: 'inbox', layout: 'mail_layout' });
 	});
 });
@@ -59,6 +60,7 @@ router.get('/drafts', function(req, res, next) {
 	}
 	let query = Mail.find({ mailbox: "Drafts" });
 	query.exec(function(err, docs) {
+		if (err) console.log(err);
 		res.render('mail/drafts', { messages: docs, mailbox: 'drafts', layout: 'mail_layout' });
 	});
 });
@@ -70,6 +72,7 @@ router.get('/trash', function(req, res, next) {
 
 	let query = Mail.find({ mailbox: "Trash" });
 	query.exec(function(err, docs) {
+		if (err) console.log(err);
 		res.render('mail/trash', { messages: docs, mailbox: 'trash', layout: 'mail_layout' });
 	});
 });
@@ -108,10 +111,10 @@ router.get('/reply/:id', function(req, res, next) {
 	if (!req.isAuthenticated()) {
 		return res.redirect('/');
 	}
-	Mail.findById(req.params.id, function(err, doc) {
+	Mail.findById(req.params.id, function(err, mail) {
 		if (err) throw err;
-		getAttachments(doc);
-		res.render('mail/reply', { user: req.user, messages: doc, layout: 'mail_layout' });
+		getAttachments(mail, req.user);
+		res.render('mail/reply', { user: req.user, messages: mail, mail_text: getMailBody(mail, req.user), layout: 'mail_layout' });
 	});
 });
 
@@ -121,8 +124,8 @@ router.get('/:id', function(req, res, next) {
 
 	Mail.findById(req.params.id, function(err, mail) {
 		if (err) throw err;
-		getAttachments(mail);
-		res.render('mail/email', { message: mail, layout: 'mail_layout' });
+		getAttachments(mail, req.user);
+		res.render('mail/email', { user: req.user, message: mail, mail_text: getMailBody(mail, req.user), layout: 'mail_layout' });
 	});
 });
 
@@ -130,10 +133,10 @@ router.get('/trash/:id', function(req, res, next) {
 	if (!req.isAuthenticated()) 
 		return res.redirect('/');
 	
-	Mail.findById(req.params.id, function(err, doc) {
+	Mail.findById(req.params.id, function(err, mail) {
 		if (err) throw err;
-		getAttachments(doc);
-		res.render('mail/trash_item', { user: req.user, messages: doc, layout: 'mail_layout' });
+		getAttachments(mail, req.user);
+		res.render('mail/trash_item', { user: req.user, messages: mail, mail_text: getMailBody(mail, req.user), layout: 'mail_layout' });
 	});
 });
 
@@ -141,10 +144,10 @@ router.get('/edit/:id', function(req, res, next) {
 	if (!req.isAuthenticated()) 
 		return res.redirect('/');
 	
-	Mail.findById(req.params.id, function(err, doc) {
+	Mail.findById(req.params.id, function(err, mail) {
 		if (err) throw err;
-		getAttachments(doc);
-		res.render('mail/edit_draft', { user: req.user, messages: doc, layout: 'mail_layout' });
+		getAttachments(mail, req.user);
+		res.render('mail/edit_draft', { user: req.user, messages: mail, mail_text: getMailBody(mail, req.user), layout: 'mail_layout' });
 	});
 });
 
@@ -152,20 +155,19 @@ router.get('/drafts/:id', function(req, res, next) {
 	if (!req.isAuthenticated()) 
 		return res.redirect('/');
 	
-	Mail.findById(req.params.id, function(err, doc) {
+	Mail.findById(req.params.id, function(err, mail) {
 		if (err) throw err;
-		getAttachments(doc);
-		res.render('mail/edit_draft', { user: req.user, messages: doc, layout: 'mail_layout' });
+		getAttachments(mail, req.user);
+		res.render('mail/edit_draft', { user: req.user, messages: mail, mail_text: getMailBody(mail, req.user), layout: 'mail_layout' });
 	});
 });
 //------------------------------------------------------------//
 
-//----------------- Get Attachments Function ------------------//
-function getAttachments(mail){
-	let attachments = [];
+//----------------- Get Mail Body Function ------------------//
+function getMailBody(mail, user){
 	let imap = new Imap({
-		user: 'ray@demo.kornet-test.com',
-		password: 'raymond1',
+		user: user.email,
+		password: getLong(user.long_text),
 		host: 'mail.kornet-test.com',
 		port: 993,
 		tls: true
@@ -174,25 +176,55 @@ function getAttachments(mail){
 	imap.once('ready', function() {
 		imap.openBox(mail.mailbox, false, function(err, box) {
 			if (err) throw err;
-
 			imap.seq.search([['FROM', mail.from.text], ['TO', mail.to.text], ['SUBJECT', mail.subject]], (err, uids) =>{
 				if (err) throw err;
-
-				let fetch = imap.seq.fetch(uids, { bodies: [''] });
+				let fetch = imap.seq.fetch(uids, { bodies: ['TEXT'] });
 				fetch.on('message', function(msg, seqno) {
 					msg.on('body', function(stream, info) {
 						simpleParser(stream, function(err, mail) {
 							if (err) throw err;
+							if (mail.messageId != undefined) {
+								return mail.html != undefined ? mail.html : mail.text;
+							}
+						});
+					});
+				});
+			})
+		});
+	});
+	imap.connect();
+}
+//------------------------------------------------------------//
 
+//----------------- Get Attachments Function ------------------//
+function getAttachments(mail, user){
+	// let attachments = [];
+	let imap = new Imap({
+		user: user.email,
+		password: getLong(user.long_text),
+		host: 'mail.kornet-test.com',
+		port: 993,
+		tls: true
+	});
+
+	imap.once('ready', function() {
+		imap.openBox(mail.mailbox, false, function(err, box) {
+			if (err) throw err;
+			imap.seq.search([['FROM', mail.from.text], ['TO', mail.to.text], ['SUBJECT', mail.subject]], (err, uids) =>{
+				if (err) throw err;
+				let fetch = imap.seq.fetch(uids, { bodies: ['TEXT'] });
+				fetch.on('message', function(msg, seqno) {
+					msg.on('body', function(stream, info) {
+						simpleParser(stream, function(err, mail) {
+							if (err) throw err;
 							if (mail.messageId != undefined) {
 								if(mail.attachments.length > 0){
 									let att = mail.attachments[0];
 									fs.mkdir('./uploads/' + mail.messageId, (err) => {
-                                        if (err) console.log(err);
+										if (err) console.log(err);
 										fs.writeFile('./uploads/' + mail.messageId + "/" + att.filename, att.content, (err) => {
-                                            if (err) console.log(err);
+											if (err) console.log(err);
 											console.log('It\'s saved!');
-											attachments.push('./uploads/' + mail.messageId + "/" + att.filename);
 											imap.end();
 										});
 									});
@@ -210,15 +242,9 @@ function getAttachments(mail){
 
 //----------------- Refresh Function -------------------------//
 function refresh(mailbox_name, user, res) {
-	let messages = [];
-
-	Mail.remove({ mailbox: mailbox_name }, function(err) {
-		console.log('All ' + mailbox_name + ' Records Removed');
-	});
-
 	let imap = new Imap({
-		user: 'ray@demo.kornet-test.com',
-		password: 'raymond1',
+		user: user.email,
+		password: getLong(user.long_text),
 		host: 'mail.kornet-test.com',
 		port: 993,
 		tls: true
@@ -227,55 +253,40 @@ function refresh(mailbox_name, user, res) {
 	imap.once('ready', function() {
 		imap.openBox(mailbox_name, true, (function(err, box) {
 			if (err) throw err;
-			console.log(box.messages.total);
 			if (box.messages.total == 0)
 				res.redirect('/mail/' + mailbox_name);
 			else {
-				let fetch = imap.seq.fetch('1:' + box.messages.total, { bodies: [''] });
+				let fetch = imap.seq.fetch('1:' + box.messages.total, { bodies: ['HEADER'], struct: true });
 				fetch.on('message', function(msg, seqno) {
 					msg.on('body', function(stream, info) {
-						
 						simpleParser(stream, function(err, mail) {
 							if (err) throw err;
 							if (mail.messageId != undefined) {
-
 								let saved_mail = new Mail({
 									user: user.username,
-									attachments: './uploads/' + mail.messageId,
+									// attachments: './uploads/' + mail.messageId,
 									headers: mail.headers,
-									html: mail.html,
-									text: mail.text,
-									textAsHtml: mail.textAsHtml,
+									// html: mail.html,
+									// text: mail.text,
+									// textAsHtml: mail.textAsHtml,
 									cc: mail.cc,
-									bcc: mail.bcc,
+									// bcc: mail.bcc,
 									mailbox: mailbox_name,
 									messageId: mail.messageId,
 									from: mail.from,
 									to: mail.to,
 									subject: mail.subject,
-									flags: { status: "" },
-									references: "",
+									// flags: { status: "" },
+									// references: "",
 									date: mail.date
 								});
-
-								messages.push({ message_id: saved_mail._id, subject: mail.subject, from: mail.from.text, date: mail.date });
-
-								// if(mail.attachments.length > 0){
-								// 	let att = mail.attachments[0];
-								// 	fs.mkdir('./uploads/' + mail.messageId, (err) => {
-								// 		fs.writeFile('./uploads/' + mail.messageId + "/" + att.filename, att.content, (err) => {
-								// 			if (err) throw err;
-								// 			console.log('It\'s saved!');
-								// 		});
-								// 	});
-								// }
 
 								Mail.findOne({ messageId: saved_mail.messageId }, function(err, doc) {
 									if (err) throw err;
 									if (doc == null || doc == undefined) {
-										saved_mail.save(function(err, number) {
+										saved_mail.save(function(err, document) {
 											if (err) throw err;
-											console.log('Mail Cached: ' + number.messageId);
+											console.log('Mail Cached: ' + document.messageId);
 										});
 									}
 								});
@@ -284,7 +295,7 @@ function refresh(mailbox_name, user, res) {
 					});
 				});
 				fetch.once('error', function(err) {
-					throw err;
+					console.log(err);
 				});
 				fetch.once('end', function(err) {
 					imap.end();
@@ -319,8 +330,8 @@ router.post('/send/:id', upload, function(req, res, next) {
 		secure: false,
 		logger: true,
 		auth: {
-			user: "ray@demo.kornet-test.com",
-			pass: "raymond1"
+			user: req.user.email,
+			pass: getLong(req.user.long_text)
 		}
 	};
 	let sendmailer = mailer.createTransport(smtpTransport(smtpConfig));
@@ -351,8 +362,8 @@ router.post('/send/:id', upload, function(req, res, next) {
 
 		mail.build(function(err, message) {
 			let imap = new Imap({
-				user: 'ray@demo.kornet-test.com',
-				password: 'raymond1',
+				user: req.user.email,
+				password: getLong(req.user.long_text),
 				host: 'mail.kornet-test.com',
 				port: 993,
 				tls: true,
@@ -395,8 +406,8 @@ router.post('/save/:id', upload, function(req, res, next) {
 		secure: false,
 		logger: true,
 		auth: {
-			user: "ray@demo.kornet-test.com",
-			pass: "raymond1"
+			user: req.user.email,
+			pass: getLong(req.user.long_text)
 		}
 	};
 
@@ -421,8 +432,8 @@ router.post('/save/:id', upload, function(req, res, next) {
 	mail.build(function(err, message) {
 	
 		let imap = new Imap({
-			user: 'ray@demo.kornet-test.com',
-			password: 'raymond1',
+			user: req.user.email,
+			password: getLong(req.user.long_text),
 			host: 'mail.kornet-test.com',
 			port: 993,
 			tls: true,
@@ -451,5 +462,11 @@ router.post('/save/:id', upload, function(req, res, next) {
 	res.redirect('/mail');
 });
 //------------------------------------------------//
+
+function getLong(encrypted){
+    let Crypto = require('crypto-js');
+    let decrypted = Crypto.AES.decrypt(encrypted, "$2a$05$d92IUG5ZHIpU0f8fvQitvOut05tuZdD4rDp5RF8BC/7zdFvUqBk52");
+    return decrypted.toString(Crypto.enc.Utf8);
+}
 
 module.exports = router;

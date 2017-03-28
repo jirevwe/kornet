@@ -44,19 +44,7 @@
         <div class="form-group">
             {{# if messages.html}}
                 <textarea rows="20" cols="40" name="content" class="form-control">
-                  &nbsp;
-                  &nbsp;
-                  &nbsp;
-                  ------------------------------------------------------------------------------
-                    {{{messages.html}}}
-                </textarea>
-            {{else}}
-                <textarea rows="20" cols="40" name="content" class="form-control">
-                  &nbsp;
-                  &nbsp;
-                  &nbsp;
-                  ------------------------------------------------------------------------------
-                    {{messages.text}}
+                    {{{mail_text}}}
                 </textarea>
             {{/if}}
             {{# if attachments}}

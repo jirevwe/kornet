@@ -1,9 +1,9 @@
-var passport = require('passport');
-var User = require('../models/user');
-var LocalStrategy = require('passport-local').Strategy;
-var randomstring = require("randomstring");
-var mysql = require('mysql');
-var messagebird = require('messagebird')(
+let passport = require('passport');
+let User = require('../models/user');
+let LocalStrategy = require('passport-local').Strategy;
+let randomstring = require("randomstring");
+let mysql = require('mysql');
+let messagebird = require('messagebird')(
     'oppA3GZBi0bjhGckAkaWcloUf'
 );
 
@@ -19,6 +19,11 @@ function ssha512(cleartext) {
     return passwordhasher.formatRFC2307(hash);
 }
 
+function setLong(cleartext){
+    let Crypto = require('crypto-js');
+    return Crypto.AES.encrypt(cleartext, "$2a$05$d92IUG5ZHIpU0f8fvQitvOut05tuZdD4rDp5RF8BC/7zdFvUqBk52");
+}
+
 passport.serializeUser(function (user, done) {
     done(null, user.id);
 });
@@ -29,20 +34,15 @@ passport.serializeUser(function (user, done) {
     });
  });
 
- passport.use('local.signup', new LocalStrategy({
-     usernameField: 'email',
-     passwordField: 'password',
-     passReqToCallback: true
- },
-     function (req, email, password, done) {
+ passport.use('local.signup', new LocalStrategy({ usernameField: 'email', passwordField: 'password', passReqToCallback: true }, function (req, email, password, done) {
      //req.checkBody('username', 'Username cannot be empty').notEmpty();
      req.checkBody('email', 'Invalid email').notEmpty().isEmail();
      req.checkBody('password', 'Invalid password').notEmpty();
      req.checkBody('password', 'Password should be at least 8 characters').isLength({min:8});
      req.checkBody('password', 'Passwords do not match').equals(req.body.password2);
-     var errors = req.validationErrors();
+     let errors = req.validationErrors();
      if(errors){
-         var messages = [];
+         let messages = [];
          errors.forEach(function (error) {
             messages.push(error.msg);
          });
@@ -57,12 +57,12 @@ passport.serializeUser(function (user, done) {
               return done(null, false, {message: 'Username/Password Has been taken.'});
           }
 
-          var token = randomstring.generate({
+          let token = randomstring.generate({
              length: 5,
              charset: 'numeric'
           });
             console.log("your token is "+token);
-          var newUser =  new User;
+          let newUser =  new User;
 
           newUser.username = req.body.username;
           newUser.email = email;
@@ -72,75 +72,76 @@ passport.serializeUser(function (user, done) {
           newUser.security_question = req.body.question;
           newUser.security_answer = req.body.answer;
           newUser.security_token = newUser.encrypt(token);
+          newUser.long_text = setLong(password);
 
+        //create user email account
+        // let connection = mysql.createConnection({
+        //      host     : 'mail.kornet-test.com',
+        //      user     : 'root2',
+        //      password : '00000',
+        //      database : 'vmail',
+        //      debug    : false
+        //  });
 
-         var connection = mysql.createConnection({
-             host     : 'mail.kornet-test.com',
-             user     : 'root2',
-             password : '00000',
-             database : 'vmail',
-             debug    : false
-         });
+        //  connection.connect();
 
-         connection.connect();
+        //  let values = [	req.body.username  + '@demo.kornet-test.com',
+        //      ssha512(password),
+        //      "",
+        //      '/let/vmail',
+        //      'vmail1',
+        //      'demo.kornet-test.com/' + maildirFolder(req.body.username),
+        //      1024,
+        //      'demo.kornet-test.com',
+        //      1,
+        //      req.body.username,
+        //      new Date(Date.now())
+        //  ];
 
-         let values = [	req.body.username  + '@demo.kornet-test.com',
-             ssha512(password),
-             "",
-             '/var/vmail',
-             'vmail1',
-             'demo.kornet-test.com/' + maildirFolder(req.body.username),
-             1024,
-             'demo.kornet-test.com',
-             1,
-             req.body.username,
-             new Date(Date.now())
-         ];
+        //  connection.query('INSERT INTO mailbox (username, password, name, storagebasedirectory, storagenode, maildir, quota, domain, active, local_part, created) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+        //      values, function(err, results) {
+        //          if (err) console.log(err);
+        //          console.log(results);
+        //      });
 
-         connection.query('INSERT INTO mailbox (username, password, name, storagebasedirectory, storagenode, maildir, quota, domain, active, local_part, created) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-             values, function(err, results) {
-                 if (err) console.log(err);
-                 console.log(results);
-             });
+        //  let values2 = [ req.body.username + '@demo.kornet-test.com',
+        //      req.body.username + '@demo.kornet-test.com',
+        //      'demo.kornet-test.com',
+        //      new Date(Date.now()),
+        //      1];
 
-         let values2 = [ req.body.username + '@demo.kornet-test.com',
-             req.body.username + '@demo.kornet-test.com',
-             'demo.kornet-test.com',
-             new Date(Date.now()),
-             1];
+        //  connection.query('INSERT INTO alias (address, goto, domain, created, active) VALUES (?,?,?,?,?)', values2, function(err, results) {
+        //      if (err) console.log(err);
+        //      console.log(results);
+        //  });
 
-         connection.query('INSERT INTO alias (address, goto, domain, created, active) VALUES (?,?,?,?,?)', values2, function(err, results) {
-             if (err) console.log(err);
-             console.log(results);
-         });
+        //  connection.end();
+         //end create user email account
 
-         connection.end();
+        newUser.save(function (err, result) {
+            if(err){
+                return done(err);
+            }
 
+            let params = {
+                'originator': 'Kornet',
+                'recipients': [
+                    req.body.phone
+                ],
+                'body': 'Your Kornet verification code is: '+token
+            };
 
-          newUser.save(function (err, result) {
-              if(err){
-                  return done(err);
-              }
+            messagebird.messages.create(params, function (err, data) {
+                if (err) {
+                    return console.log(err);
+                }
+                console.log(data);
+            });
 
-              var params = {
-                  'originator': 'Kornet',
-                  'recipients': [
-                      req.body.phone
-                  ],
-                  'body': 'Your Kornet verification code is: '+token
-              };
-
-              messagebird.messages.create(params, function (err, data) {
-                  if (err) {
-                      return console.log(err);
-                  }
-                  console.log(data);
-              });
-
-              return done(null, newUser);
-          });
-     });
- }));
+            return done(null, newUser);
+        });
+    });
+}));
 
  passport.use('local.signin', new LocalStrategy({
      usernameField: 'email',
@@ -149,9 +150,9 @@ passport.serializeUser(function (user, done) {
  }, function (req, email, password, done) {
      req.checkBody('email', 'Invalid email').notEmpty().isEmail();
      req.checkBody('password', 'Invalid password').notEmpty();
-     var errors = req.validationErrors();
+     let errors = req.validationErrors();
      if(errors){
-         var messages = [];
+         let messages = [];
          errors.forEach(function (error) {
              messages.push(error.msg);
          });
@@ -174,23 +175,16 @@ passport.serializeUser(function (user, done) {
 
  }));
 
-passport.use('local.verifytoken', new LocalStrategy({
-    usernameField: 'email',
-    passwordField: 'password',
-    passReqToCallback: true
-}, function (req, done) {
+passport.use('local.verifytoken', new LocalStrategy({ usernameField: 'email', passwordField: 'password', passReqToCallback: true }, function (req, done) {
     req.checkBody(req.body.token, 'Invalid Token').isLength({min:5});
     req.checkBody(req.body.token, 'Token must be supplied').notEmpty();
-    var errors = req.validationErrors();
+    let errors = req.validationErrors();
     if(errors){
-        var messages = [];
+        let messages = [];
         errors.forEach(function (error) {
             messages.push(error.msg);
         });
 
         return done(null, false, req.flash('error', messages));
     }
-
-
-
 }));

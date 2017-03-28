@@ -72,11 +72,10 @@
 
 <script type="application/javascript">
     $('#signup-form').submit(function () {
-
         // Get the Login Name value and trim it
         var name = $('[name="username"]').val();
         var phone = "+234"+$('[name="phone"]').val();
-        var email = name+"@kornet.com";
+        var email = name+"@{{ domain }}";
 
         $('[name="phone"]').val(phone);
         $('[name="email"]').val(email);

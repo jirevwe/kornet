@@ -1,7 +1,7 @@
 var Product =  require('../models/product');
 var mongoose = require('mongoose');
 
-mongoose.connect('MacBook.local:27017/kornet');
+mongoose.connect('localhost:27017/kornet');
 
 var products = [
     new Product({

@@ -11,12 +11,7 @@
             {{/if_eq}}
             <p class="list-group-item-text">Date: {{message.date}}</p>
             <br>
-            {{# if message.html}}
-                    <div class="container">{{{message.html}}}</div>
-            {{else}}
-            <div class="container">{{message.text}}</div>
-            {{/if}}
-
+            <div class="container">{{{mail_text}}}</div>
             {{#if attachments}}
                 <div class="container">
                     <div class="list-group">
