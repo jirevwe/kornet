@@ -24,3 +24,19 @@
         </div>
     </div>
 </div>
+<script>
+    $( document ).ready(function() {
+        var id = "{{message._id}}";
+        $.ajax({
+            url: "http://localhost:3000/mail/mail-body/"+id,
+            type: "GET",
+            async: true,
+            success: function(response){
+                console.log(response);
+            },
+            error: function(response){
+                console.log("error res");
+            }        
+        });
+    });
+</script>
