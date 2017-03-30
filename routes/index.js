@@ -59,7 +59,7 @@ router.get('/signup', function (req, res, next) {
     res.render('user/signup', {csrfToken: req.csrfToken(), domain:'demo.kornet-test.com' ,messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/signup', passport.authenticate('local.signup', { failureRedirect: '/user/signup', failureFlash: true }), function (req, res, next) {
+router.post('/signup', passport.authenticate('local.signup', { failureRedirect: '/signup', failureFlash: true }), function (req, res, next) {
     if(req.session.oldUrl){
         var oldUrl = req.session.oldUrl;
         req.session.oldUrl = null;
@@ -75,7 +75,7 @@ router.get('/signin', function (req, res, next) {
     res.render('user/signin', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/signin', passport.authenticate('local.signin', { failureRedirect: '/user/signin', failureFlash: true }), function (req, res, next) {
+router.post('/signin', passport.authenticate('local.signin', { failureRedirect: '/signin', failureFlash: true }), function (req, res, next) {
     if(req.session.oldUrl){
         var oldUrl = req.session.oldUrl;
         req.session.oldUrl = null;

@@ -6,4 +6,4 @@ var SecurityQuestion = new Schema({
     question:Schema.Types.String
 });
 
-module.exports = SecurityQuestion;
+module.exports = mongoose.model('SecQuestion', SecurityQuestion);

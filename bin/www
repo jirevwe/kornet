@@ -5,6 +5,8 @@
  */
 
 var debug = require('debug')('install:server');
+var LocalStorage = require('node-localstorage').LocalStorage;
+localStorage = new LocalStorage('./scratch');
 var http = require('http');
 var app = require('../app');
     socketio = require("socket.io"),
@@ -112,23 +114,29 @@ function Room (name, creator, id, priv, password, isDM) {
     this.name = name;
     this.creator = creator;
     this.id = id;
-    this.members = {};
+    this.members = [];
     this.isDM = isDM;
 
     this.isPrivate = priv;
     this.password = password;
 
-    this.addMember = function(member) {
-        this.members[member.id] = member;
+    this.addMember = function(memberID) {
+        var index = this.members.indexOf(memberID);
+        if (index == -1) {
+            this.members.push(memberID);
+        }
     };
 
-    this.removeMember = function(member) {
-        delete(this.members[member]);
+    this.removeMember = function(memberID) {
+        var index = this.members.indexOf(memberID);
+        if (index > -1) {
+            this.members.splice(index, 1);
+        }
     };
 
-    this.isMember = function(memberName) {
+    this.isMember = function(memberID) {
         for(m in this.members) {
-            if (m == memberName) {
+            if (m == memberID) {
                 return true;
             }
         }
@@ -147,12 +155,12 @@ function Person (name, id, roomOwn, roomIn) {
 
 // Do the Socket.IO magic:
 var io = socketio.listen(server);
+localStorage.setItem('socketio', io);
+
 var rooms = {};
-var dm = {};
 var users = {};
 var sockets = [];
 var chatHistory = {};
-var dmChatHistory = {};
 
 
 io.sockets.on("connection", function(socket){
@@ -160,7 +168,7 @@ io.sockets.on("connection", function(socket){
 
     socket.on("new_user_to_server", function(data){
         var person = data;
-        person.id = socket.id;
+        //person.id = socket.id;
         count = 0;
         _.each(users, function(user){
             if(user.name == person.name){
@@ -168,12 +176,16 @@ io.sockets.on("connection", function(socket){
             }
         });
         if (count > 0) {
-            //io.sockets.emit("history", chatHistory[users[data.id].inRoom]);
-            socket.emit("user_exists_to_client", person);
+            users[person.id] = person;
+            sockets[person.id] = socket;
+            socket.emit("new_user_to_client", person);
+            if (Object.keys(rooms).length != 0) {
+                socket.emit("room_list", rooms);
+            }
         }
         else{
-            users[socket.id] = person;
-            sockets[socket.id] = socket;
+            users[person.id] = person;
+            sockets[person.id] = socket;
             socket.emit("new_user_to_client", person);
             if (Object.keys(rooms).length != 0) {
                 socket.emit("room_list", rooms);
@@ -200,9 +212,9 @@ io.sockets.on("connection", function(socket){
 
         chatHistory[roomId] = [];
 
-        room.addMember(users[userId]);
+        room.addMember(users[userId].id);
         if(toMem != null){
-            room.addMember(toMem);
+            room.addMember(toMem.id);
         }
         io.sockets.emit('create_room_to_client', {room:room, toMem:toMem, fromMem:fromMem});
     });
@@ -211,7 +223,7 @@ io.sockets.on("connection", function(socket){
         var roomId = data.inRoom;
         users[data.id].inRoom = roomId;
         socket.join(data.inRoom);
-        rooms[roomId].addMember(users[data.id]);
+        rooms[roomId].addMember(users[data.id].id);
         var room = rooms[roomId];
         var userdata = users[data.id];
         io.sockets.in(data.inRoom).emit("enter_room_to_client", {user:data, room:room});
@@ -229,7 +241,7 @@ io.sockets.on("connection", function(socket){
         users[user.id].inRoom = newRoom;
         //socket.leave(oldRoom);
         io.sockets.in(oldRoom).emit("leave_room_to_client", {room:oldRoom, userdata:user.name + " has left!"});
-        rooms[oldRoom].removeMember(users[user.id]);
+        rooms[oldRoom].removeMember(users[user.id].id);
     });
 
     socket.on("list_mems_to_server", function(data) {
@@ -276,12 +288,20 @@ io.sockets.on("connection", function(socket){
         sockets[toMem.id].leave(room);
         io.sockets.in(room).emit("ban_mem_to_client", toMem.name + " has been banned!");
         io.sockets.to(toMem.id).emit("banned_mem_to_client", {room:room, message:"You have been banned!"});
-        rooms[room].removeMember(users[toMem.id]);
+        rooms[room].removeMember(users[toMem.id].id);
         console.log(room);
     });
 
+<<<<<<< HEAD
     socket.on("imap_end_message_to_server", function(data) {
         console.log("data text "+data['text']);
         socket.emit("imap_end_message_to_server", data['text']);
     });
 });
+=======
+});
+
+module.exports = function(){
+    return server.io;
+};
+>>>>>>> 4cb5dcbfb325e80c537cf68a6b51baeb4411e3b9

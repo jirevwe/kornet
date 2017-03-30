@@ -210,6 +210,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
+
         $(document).ready(function() {
             $("#contacts").select2();
         });
@@ -223,23 +224,26 @@
             this.name = name;
             this.creator = creator;
             this.id = id;
-            this.members = {};
+            this.members = [];
             this.isDM = isDM;
 
             this.isPrivate = priv;
             this.password = password;
 
-            this.addMember = function(member) {
-                this.members[member.id] = member;
+            this.addMember = function(memberID) {
+                this.members.push(memberID);
             };
 
-            this.removeMember = function(member) {
-                delete this.members[member.name];
+            this.removeMember = function(memberID) {
+                var index = this.members.indexOf(memberID);
+                if (index > -1) {
+                    this.members.splice(index, 1);
+                }
             };
 
-            this.isMember = function(memberName) {
+            this.isMember = function(memberID) {
                 for(m in this.members) {
-                    if (m == memberName) {
+                    if (m == memberID) {
                         return true;
                     }
                 }
@@ -316,6 +320,20 @@
             console.log("room is dm: "+room.isDM);
             roomChatCount[room.id] = 0;
 
+            console.log(room);
+
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
+
+            $.ajax({
+                method: "POST",
+                url: "http://localhost:3000/chat/add-room",
+                data: room
+            }).done(function( msg ) {
+                        alert( "Data Saved: " + msg );
+                    });
+
             if(room.isDM == true){
                 $('#numMembers').hide();
                 if(user.name == toMem.name){
@@ -342,9 +360,21 @@
 
 
         socketio.on("enter_room_to_client", function(data) {
-
+            var room = data['room'];
             console.log("user is "+user.name);
             console.log("sender is "+data['user'].name);
+
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
+
+            $.ajax({
+                method: "POST",
+                url: "http://localhost:3000/chat/add-user-to-room",
+                data: room
+            }).done(function( msg ) {
+                alert( "Data Saved: " + msg );
+            });
 
             if(data['room'].isDM){
                 $('#numMembers').hide();
@@ -371,16 +401,37 @@
 
         socketio.on("list_mems_to_client", function(data) {
             users = data;
-            for (m in data) {
-                var member = data[m];
-                if(member.name == user.name) {
-                    $("#memsList").append('<li id="' + member.id + '" class="active"> You </li>');
-                }else{
-                    $("#memsList").append('<li id="' + member.id + '" class="active">' + member.name + '</li>');
+
+//            for (m in data) {
+//                var member = data[m];
+//
+//                if(member.name == user.name) {
+//                    $("#memsList").append('<li id="' + member.id + '" class="active"> You </li>');
+//                }else{
+//                    $("#memsList").append('<li id="' + member.id + '" class="active">' + member.name + '</li>');
+//                }
+//                $('#memHeader').empty();
+//                $('#actionList').empty();
+//            }
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
+            console.log("users client");
+            console.log(users);
+            $.ajax({
+                method: "POST",
+                url: "http://localhost:3000/chat/get-room-members",
+                data: {users:users},
+                success: function (response) {
+                    response.forEach(function (resp) {
+                        console.log(resp);
+                    });
+                },
+                error: function () {
+                    console.log("error happened");
                 }
-                $('#memHeader').empty();
-                $('#actionList').empty();
-            }
+            });
+
         });
 
         socketio.on("message_to_client", function(data) {
@@ -631,11 +682,6 @@
         };
 
         $(document).ready(function() {
-            $("#loginSubmit").click(function(){
-                tempUser = new Person ($('#user').val(), null, null, null);
-                socketio.emit("new_user_to_server", tempUser);
-            });
-
             // show password box for private chats
             $('input[type="radio"]').click(function() {
                 if($(this).attr('id') == 'private') {
@@ -748,11 +794,8 @@
 
         // login modal function
         $(window).load(function(){
-            $('#loginModal').modal({
-                backdrop: 'static',
-                keyboard: false
-            });
-            $('#loginModal').modal('show');
+            tempUser = new Person ('{{user.username}}', '{{user._id}}', null, null);
+            socketio.emit("new_user_to_server", tempUser);
         });
 
     </script>
