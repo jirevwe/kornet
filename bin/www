@@ -5,8 +5,6 @@
  */
 
 var debug = require('debug')('install:server');
-var LocalStorage = require('node-localstorage').LocalStorage;
-localStorage = new LocalStorage('./scratch');
 var http = require('http');
 var app = require('../app');
     socketio = require("socket.io"),
@@ -155,8 +153,6 @@ function Person (name, id, roomOwn, roomIn) {
 
 // Do the Socket.IO magic:
 var io = socketio.listen(server);
-localStorage.setItem('socketio', io);
-
 var rooms = {};
 var users = {};
 var sockets = [];
@@ -292,16 +288,9 @@ io.sockets.on("connection", function(socket){
         console.log(room);
     });
 
-<<<<<<< HEAD
     socket.on("imap_end_message_to_server", function(data) {
         console.log("data text "+data['text']);
         socket.emit("imap_end_message_to_server", data['text']);
     });
 });
-=======
-});
 
-module.exports = function(){
-    return server.io;
-};
->>>>>>> 4cb5dcbfb325e80c537cf68a6b51baeb4411e3b9

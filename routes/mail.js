@@ -206,9 +206,7 @@ function getMailBody(mail, user) {
 		console.log(err);
 	});
 	imap.once('end', function (err) {
-		io.sockets.on("connection", function(socket){
-			socket.emit("imap_end_message_to_server", {text:text});
-		});
+		console.log(text);
 		return text;
 	});
 	imap.connect();

@@ -29,9 +29,6 @@ mongoose.connect(mongo);
 
 require('./config/passport');
 
-var server = localStorage.getItem('socketio');
-console.log("new server "+server);
-
 var app = express();
 app.set('port', process.env.PORT || 3000);
 
