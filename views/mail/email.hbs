@@ -24,7 +24,13 @@
         </div>
     </div>
 </div>
+<script src="/socket.io/socket.io.js"></script>
 <script>
+    var socketio = io.connect();
+    socketio.on("imap_end_message_to_client", function(data) {
+        console.log(data);
+    });
+
     $( document ).ready(function() {
         var id = "{{message._id}}";
         $.ajax({

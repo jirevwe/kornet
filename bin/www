@@ -280,4 +280,8 @@ io.sockets.on("connection", function(socket){
         console.log(room);
     });
 
+    socket.on("imap_end_message_to_server", function(data) {
+        console.log("data text "+data['text']);
+        socket.emit("imap_end_message_to_server", data['text']);
+    });
 });

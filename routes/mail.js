@@ -15,6 +15,8 @@ let multerS3 = require('multer-s3')
 let aws = require('aws-sdk');
 aws.config.loadFromPath('./config.json');
 let s3 = new aws.S3({});
+let www = require('../bin/www');
+//let socketio = io.connect();
 
 let storage = multer.memoryStorage();
 let upload = multer({
@@ -204,7 +206,9 @@ function getMailBody(mail, user) {
 		console.log(err);
 	});
 	imap.once('end', function (err) {
-		console.log(text);
+		io.sockets.on("connection", function(socket){
+			socket.emit("imap_end_message_to_server", {text:text});
+		});
 		return text;
 	});
 	imap.connect();
