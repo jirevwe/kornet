@@ -14,6 +14,7 @@ var validator = require('express-validator');
 var multer = require('multer');
 var MongoStore = require('connect-mongo')(session);
 
+
 //define the routes 
 var marketRoutes = require('./routes/market');
 var mailRoutes = require('./routes/mail');
@@ -27,6 +28,9 @@ var mongo = MONGOLAB_URI;
 mongoose.connect(mongo);
 
 require('./config/passport');
+
+var server = localStorage.getItem('socketio');
+console.log("new server "+server);
 
 var app = express();
 app.set('port', process.env.PORT || 3000);

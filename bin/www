@@ -5,6 +5,8 @@
  */
 
 var debug = require('debug')('install:server');
+var LocalStorage = require('node-localstorage').LocalStorage;
+localStorage = new LocalStorage('./scratch');
 var http = require('http');
 var app = require('../app');
     socketio = require("socket.io"),
@@ -153,6 +155,8 @@ function Person (name, id, roomOwn, roomIn) {
 
 // Do the Socket.IO magic:
 var io = socketio.listen(server);
+localStorage.setItem('socketio', io);
+
 var rooms = {};
 var users = {};
 var sockets = [];
@@ -289,3 +293,7 @@ io.sockets.on("connection", function(socket){
     });
 
 });
+
+module.exports = function(){
+    return server.io;
+};
