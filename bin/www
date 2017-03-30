@@ -290,7 +290,8 @@ io.sockets.on("connection", function(socket){
 
     socket.on("imap_end_message_to_server", function(data) {
         console.log("data text "+data['text']);
-        socket.emit("imap_end_message_to_server", data['text']);
+        socket.emit("imap_end_message_to_client", data['text']);
     });
 });
 
+module.exports.io = io;

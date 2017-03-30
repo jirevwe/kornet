@@ -167,9 +167,7 @@ router.get('/drafts/:id', function (req, res, next) {
 router.get('/mail-body/:id', function (req, res, next) {
 	console.log(req.params.id);
 	Mail.findById(req.params.id, function (err, mail) {
-		var _mail = getMailBody(mail, req.user);
-		console.log("logged "+getMailBody(mail, req.user));
-		console.log("mail+ "+_mail);
+		getMailBody(mail, req.user);
 	});
 });
 //------------------------------------------------------------//
@@ -206,8 +204,11 @@ function getMailBody(mail, user) {
 		console.log(err);
 	});
 	imap.once('end', function (err) {
-		console.log(text);
-		return text;
+		www.io.sockets.on('connection', function(sockets){
+			console.log("SOCKET WORKS");
+			console.log(text);
+			sockets.emit('imap_end_message_to_server', { text: text });
+		});
 	});
 	imap.connect();
 }
