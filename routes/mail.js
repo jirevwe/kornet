@@ -16,7 +16,11 @@ let aws = require('aws-sdk');
 aws.config.loadFromPath('./config.json');
 let s3 = new aws.S3({});
 let www = require('../bin/www');
-//let socketio = io.connect();
+var rp = require('request-promise');
+var csrf = require('csurf');
+
+var csrfProtection = csrf();
+router.use(csrfProtection);
 
 let storage = multer.memoryStorage();
 let upload = multer({
@@ -165,18 +169,22 @@ router.get('/drafts/:id', function (req, res, next) {
 });
 
 router.get('/mail-body/:id', function (req, res, next) {
-	console.log(req.params.id);
 	Mail.findById(req.params.id, function (err, mail) {
-		getMailBody(mail, req.user);
+		let text = getMailBody(mail, req, res);
 	});
+});
+
+router.post('/get-mail-body/', function (req, res, next) {
+	console.log(req.body);
+	
 });
 //------------------------------------------------------------//
 
 //----------------- Get Mail Body Function ------------------//
-function getMailBody(mail, user) {
+function getMailBody(mail, req, res) {
 	let imap = new Imap({
-		user: user.email,
-		password: getLong(user.long_text),
+		user: req.user.email,
+		password: getLong(req.user.long_text),
 		host: 'mail.kornet-test.com',
 		port: 993,
 		tls: true
@@ -190,9 +198,10 @@ function getMailBody(mail, user) {
 				let fetch = imap.seq.fetch(uids, { bodies: ['TEXT'] });
 				fetch.on('message', function (msg, seqno) {
 					msg.on('body', function (stream, info) {
-						simpleParser(stream, function (err, res) {
+						simpleParser(stream, function (err, body) {
 							if (err) throw err;
-							text = res.text;
+							text = body.text;
+							showtext(text);
 							imap.end();
 						});
 					});
@@ -203,16 +212,20 @@ function getMailBody(mail, user) {
 	imap.once('error', function (err) {
 		console.log(err);
 	});
-	imap.once('end', function (err) {
-		www.io.sockets.on('connection', function(sockets){
-			console.log("SOCKET WORKS");
-			console.log(text);
-			sockets.emit('imap_end_message_to_server', { text: text });
-		});
-	});
 	imap.connect();
+	
+	return text;
 }
 //------------------------------------------------------------//
+
+function showtext(text){
+	www.io.sockets.on('connection', function(socket){
+		console.log("SOCKET WORKS");
+		socket.off('testComplete', () => {});
+		socket.emit('imap_end_message', { text: text });
+		return false;
+	});
+}
 
 //----------------- Get Attachments Function ------------------//
 function getAttachments(mail, user) {
