@@ -167,7 +167,8 @@ router.get('/drafts/:id', function (req, res, next) {
 router.get('/mail-body/:id', function (req, res, next) {
 	console.log(req.params.id);
 	Mail.findById(req.params.id, function (err, mail) {
-		getMailBody(mail, req.user);
+		let text = getMailBody(mail, req.user);
+		console.log("THIS TEXT "+text);
 	});
 });
 //------------------------------------------------------------//
@@ -202,12 +203,14 @@ function getMailBody(mail, user) {
 	});
 	imap.once('error', function (err) {
 		console.log(err);
+        return text;
 	});
 	imap.once('end', function (err) {
 		www.io.sockets.on('connection', function(sockets){
 			console.log("SOCKET WORKS");
 			console.log(text);
 			sockets.emit('imap_end_message_to_server', { text: text });
+            return text;
 		});
 	});
 	imap.connect();
