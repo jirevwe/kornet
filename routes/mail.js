@@ -11,16 +11,7 @@ let Mail = require('../models/mail');
 let path = require('path');
 const fs = require('fs');
 let multer = require('multer');
-let multerS3 = require('multer-s3')
-let aws = require('aws-sdk');
-aws.config.loadFromPath('./config.json');
-let s3 = new aws.S3({});
 let www = require('../bin/www');
-var rp = require('request-promise');
-var csrf = require('csurf');
-
-var csrfProtection = csrf();
-router.use(csrfProtection);
 
 let storage = multer.memoryStorage();
 let upload = multer({
@@ -201,7 +192,10 @@ function getMailBody(mail, req, res) {
 						simpleParser(stream, function (err, body) {
 							if (err) throw err;
 							text = body.text;
-							showtext(text);
+							www.io.sockets.on('connection', function(socket){
+								console.log("SOCKET WORKS");
+								socket.emit('imap_end_message', { text: text });
+							});
 							imap.end();
 						});
 					});
@@ -212,24 +206,18 @@ function getMailBody(mail, req, res) {
 	imap.once('error', function (err) {
 		console.log(err);
 	});
+	// imap.once('end', function (err) {
+	// 	www.io.sockets.on('connection', function(socket){
+	// 		console.log("SOCKET WORKS");
+	// 		socket.emit('imap_end_message', { text: text });
+	// 	});
+	// });
 	imap.connect();
-	
-	return text;
 }
 //------------------------------------------------------------//
 
-function showtext(text){
-	www.io.sockets.on('connection', function(socket){
-		console.log("SOCKET WORKS");
-		socket.off('testComplete', () => {});
-		socket.emit('imap_end_message', { text: text });
-		return false;
-	});
-}
-
 //----------------- Get Attachments Function ------------------//
 function getAttachments(mail, user) {
-	// let attachments = [];
 	let imap = new Imap({
 		user: user.email,
 		password: getLong(user.long_text),
@@ -295,20 +283,13 @@ function refresh(mailbox_name, user, res) {
 							if (mail.messageId != undefined) {
 								let saved_mail = new Mail({
 									user: user.username,
-									// attachments: './uploads/' + mail.messageId,
 									headers: mail.headers,
-									// html: mail.html,
-									// text: mail.text,
-									// textAsHtml: mail.textAsHtml,
 									cc: mail.cc,
-									// bcc: mail.bcc,
 									mailbox: mailbox_name,
 									messageId: mail.messageId,
 									from: mail.from,
 									to: mail.to,
 									subject: mail.subject,
-									// flags: { status: "" },
-									// references: "",
 									date: mail.date
 								});
 
