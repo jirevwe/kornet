@@ -4,26 +4,27 @@
  * Module dependencies.
  */
 
-var debug = require('debug')('install:server');
-var http = require('http');
-var app = require('../app');
-    socketio = require("socket.io"),
-    fs = require("fs"),
-    _ = require('underscore')._,
-    uuid = require("uuid");
+let debug = require('debug')('install:server');
+let http = require('http');
+let app = require('../app');
+let socketio = require("socket.io");
+let fs = require("fs");
+let _ = require('underscore')._;
+let uuid = require("uuid");
+let middleware = require('socketio-wildcard')();
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+let port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+let server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -38,7 +39,7 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  let port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -62,7 +63,7 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
+  let bind = typeof port === 'string'
     ? 'Pipe ' + port
     : 'Port ' + port;
 
@@ -86,15 +87,15 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
+  let addr = server.address();
+  let bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
 
 function zeroPad(num, size) {
-    var s = num + "";
+    let s = num + "";
     while (s.length < size)
         s = "0" + s;
     return s;
@@ -102,7 +103,7 @@ function zeroPad(num, size) {
 
 // Format the time specified in ms from 1970 into local HH:MM:SS
 function timeFormat(msTime) {
-    var d = new Date(msTime);
+    let d = new Date(msTime);
     return zeroPad(d.getHours(), 2) + ":" +
         zeroPad(d.getMinutes(), 2) + ":" +
         zeroPad(d.getSeconds(), 2) + " ";
@@ -119,14 +120,14 @@ function Room (name, creator, id, priv, password, isDM) {
     this.password = password;
 
     this.addMember = function(memberID) {
-        var index = this.members.indexOf(memberID);
+        let index = this.members.indexOf(memberID);
         if (index == -1) {
             this.members.push(memberID);
         }
     };
 
     this.removeMember = function(memberID) {
-        var index = this.members.indexOf(memberID);
+        let index = this.members.indexOf(memberID);
         if (index > -1) {
             this.members.splice(index, 1);
         }
@@ -152,18 +153,17 @@ function Person (name, id, roomOwn, roomIn) {
 
 
 // Do the Socket.IO magic:
-var io = socketio.listen(server);
-var rooms = {};
-var users = {};
-var sockets = [];
-var chatHistory = {};
-
+let io = socketio.listen(server);
+io.use(middleware);
+let rooms = {};
+let users = {};
+let sockets = [];
+let chatHistory = {};
 
 io.sockets.on("connection", function(socket){
-    // This callback runs when a new Socket.IO connection is established.
 
     socket.on("new_user_to_server", function(data){
-        var person = data;
+        let person = data;
         //person.id = socket.id;
         count = 0;
         _.each(users, function(user){
@@ -190,12 +190,12 @@ io.sockets.on("connection", function(socket){
     });
 
     socket.on("create_room_to_server", function(data) {
-        var roomId = uuid.v4();
-        var activeRoom = data['activeRoom'];
-        var toMem = data['toMem'];
-        var userId = activeRoom['creator'];
-        var fromMem = users[userId];
-        var room = new Room(activeRoom['name'], userId, roomId, activeRoom['isPrivate'], activeRoom['password'], activeRoom['isDM']);
+        let roomId = uuid.v4();
+        let activeRoom = data['activeRoom'];
+        let toMem = data['toMem'];
+        let userId = activeRoom['creator'];
+        let fromMem = users[userId];
+        let room = new Room(activeRoom['name'], userId, roomId, activeRoom['isPrivate'], activeRoom['password'], activeRoom['isDM']);
 
 
         rooms[roomId] = room;
@@ -216,24 +216,24 @@ io.sockets.on("connection", function(socket){
     });
 
     socket.on("enter_room_to_server", function(data) {
-        var roomId = data.inRoom;
+        let roomId = data.inRoom;
         users[data.id].inRoom = roomId;
         socket.join(data.inRoom);
         rooms[roomId].addMember(users[data.id].id);
-        var room = rooms[roomId];
-        var userdata = users[data.id];
+        let room = rooms[roomId];
+        let userdata = users[data.id];
         io.sockets.in(data.inRoom).emit("enter_room_to_client", {user:data, room:room});
 
-        var keys = _.keys(chatHistory);
+        let keys = _.keys(chatHistory);
         if (_.contains(keys, users[data.id].inRoom)) {
             io.sockets.emit("history", {chathistory: chatHistory[users[data.id].inRoom], userdata:userdata});
         }
     });
 
     socket.on("leave_room_to_server", function(data) {
-        var user = data['user'];
-        var newRoom = data['id'];
-        var oldRoom = user.inRoom;
+        let user = data['user'];
+        let newRoom = data['id'];
+        let oldRoom = user.inRoom;
         users[user.id].inRoom = newRoom;
         //socket.leave(oldRoom);
         io.sockets.in(oldRoom).emit("leave_room_to_client", {room:oldRoom, userdata:user.name + " has left!"});
@@ -246,8 +246,8 @@ io.sockets.on("connection", function(socket){
 
     socket.on('message_to_server', function(data) {
         // This callback runs when the server receives a new message from the client.
-        var user = data['user'];
-        var room = rooms[user.inRoom];
+        let user = data['user'];
+        let room = rooms[user.inRoom];
         //console.log("user in room "+user.inRoom);
         console.log(user.name + ": " + data["message"]); // log it to the Node.JS output
 
@@ -258,16 +258,16 @@ io.sockets.on("connection", function(socket){
 
     socket.on('send_pic_to_server', function(data) {
         // This callback runs when the server receives a new message from the client.
-        var user = data['user'];
+        let user = data['user'];
         io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, pic:data["pic"]}) // broadcast the message to other users
     });
 
 
     socket.on('kick_mem_to_server', function(data) {
         // This callback runs when the server receives a new message from the client.
-        var fromMem = data['fromMem'];
-        var toMem = data['toMem'];
-        var room = fromMem.inRoom;
+        let fromMem = data['fromMem'];
+        let toMem = data['toMem'];
+        let room = fromMem.inRoom;
         users[toMem.id].inRoom = null;
         sockets[toMem.id].leave(room);
         io.sockets.in(room).emit("kick_mem_to_client", toMem.name + " has been kicked out!");
@@ -277,9 +277,9 @@ io.sockets.on("connection", function(socket){
     });
 
     socket.on('ban_mem_to_server', function(data) {
-        var fromMem = data['fromMem'];
-        var toMem = data['toMem'];
-        var room = fromMem.inRoom;
+        let fromMem = data['fromMem'];
+        let toMem = data['toMem'];
+        let room = fromMem.inRoom;
         users[toMem.id].inRoom = null;
         sockets[toMem.id].leave(room);
         io.sockets.in(room).emit("ban_mem_to_client", toMem.name + " has been banned!");
@@ -288,10 +288,7 @@ io.sockets.on("connection", function(socket){
         console.log(room);
     });
 
-    socket.on("imap_end_message_to_server", function(data) {
-        console.log("data text "+data['text']);
-        socket.emit("imap_end_message_to_client", data['text']);
-    });
+    
 });
 
 module.exports.io = io;

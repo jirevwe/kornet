@@ -41,8 +41,11 @@
     "passport-local-mongoose": "4.0.0",
     "password-hasher": "^1.0.1",
     "randomstring": "^1.1.5",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.0",
     "serve-favicon": "~2.3.2",
     "socket.io": "^1.7.3",
+    "socketio-wildcard": "^0.4.0",
     "stripe": "^4.16.0",
     "uuid": "^3.0.1"
   }

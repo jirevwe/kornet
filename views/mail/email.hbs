@@ -11,7 +11,7 @@
             {{/if_eq}}
             <p class="list-group-item-text">Date: {{message.date}}</p>
             <br>
-            <div class="container">{{{mail_text}}}</div>
+            <div id="text" class="container"></div>
             {{#if attachments}}
                 <div class="container">
                     <div class="list-group">
@@ -27,22 +27,24 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
     var socketio = io.connect();
-    socketio.on("imap_end_message_to_client", function(data) {
+    socketio.on("imap_end_message", function(data) {
         console.log(data);
+        $('#text').text(data['text']);
     });
 
-    $( document ).ready(function() {
-        var id = "{{message._id}}";
-        $.ajax({
-            url: "http://localhost:3000/mail/mail-body/"+id,
+    $(document).ready(function() {
+        let get = $.ajax({
+            url: "http://localhost:3000/mail/mail-body/{{message._id}}",
             type: "GET",
             async: true,
             success: function(response){
                 console.log(response);
+                get.abort();
             },
             error: function(response){
-                console.log("error res");
-            }        
+                console.log("Error: " + response);
+            }
         });
+        console.log(get);
     });
 </script>

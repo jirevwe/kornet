@@ -11,12 +11,7 @@ let Mail = require('../models/mail');
 let path = require('path');
 const fs = require('fs');
 let multer = require('multer');
-let multerS3 = require('multer-s3')
-let aws = require('aws-sdk');
-aws.config.loadFromPath('./config.json');
-let s3 = new aws.S3({});
 let www = require('../bin/www');
-//let socketio = io.connect();
 
 let storage = multer.memoryStorage();
 let upload = multer({
@@ -165,19 +160,23 @@ router.get('/drafts/:id', function (req, res, next) {
 });
 
 router.get('/mail-body/:id', function (req, res, next) {
-	console.log(req.params.id);
 	Mail.findById(req.params.id, function (err, mail) {
 		let text = getMailBody(mail, req.user);
 		console.log("THIS TEXT "+text);
 	});
 });
+
+router.post('/get-mail-body/', function (req, res, next) {
+	console.log(req.body);
+	
+});
 //------------------------------------------------------------//
 
 //----------------- Get Mail Body Function ------------------//
-function getMailBody(mail, user) {
+function getMailBody(mail, req, res) {
 	let imap = new Imap({
-		user: user.email,
-		password: getLong(user.long_text),
+		user: req.user.email,
+		password: getLong(req.user.long_text),
 		host: 'mail.kornet-test.com',
 		port: 993,
 		tls: true
@@ -191,9 +190,13 @@ function getMailBody(mail, user) {
 				let fetch = imap.seq.fetch(uids, { bodies: ['TEXT'] });
 				fetch.on('message', function (msg, seqno) {
 					msg.on('body', function (stream, info) {
-						simpleParser(stream, function (err, res) {
+						simpleParser(stream, function (err, body) {
 							if (err) throw err;
-							text = res.text;
+							text = body.text;
+							www.io.sockets.on('connection', function(socket){
+								console.log("SOCKET WORKS");
+								socket.emit('imap_end_message', { text: text });
+							});
 							imap.end();
 						});
 					});
@@ -206,12 +209,7 @@ function getMailBody(mail, user) {
         return text;
 	});
 	imap.once('end', function (err) {
-		www.io.sockets.on('connection', function(sockets){
-			console.log("SOCKET WORKS");
-			console.log(text);
-			sockets.emit('imap_end_message_to_server', { text: text });
-            return text;
-		});
+
 	});
 	imap.connect();
 }
@@ -219,7 +217,6 @@ function getMailBody(mail, user) {
 
 //----------------- Get Attachments Function ------------------//
 function getAttachments(mail, user) {
-	// let attachments = [];
 	let imap = new Imap({
 		user: user.email,
 		password: getLong(user.long_text),
@@ -285,20 +282,13 @@ function refresh(mailbox_name, user, res) {
 							if (mail.messageId != undefined) {
 								let saved_mail = new Mail({
 									user: user.username,
-									// attachments: './uploads/' + mail.messageId,
 									headers: mail.headers,
-									// html: mail.html,
-									// text: mail.text,
-									// textAsHtml: mail.textAsHtml,
 									cc: mail.cc,
-									// bcc: mail.bcc,
 									mailbox: mailbox_name,
 									messageId: mail.messageId,
 									from: mail.from,
 									to: mail.to,
 									subject: mail.subject,
-									// flags: { status: "" },
-									// references: "",
 									date: mail.date
 								});
 

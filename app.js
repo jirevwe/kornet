@@ -11,9 +11,7 @@ var expressHbs = require('express-handlebars');
 var LocalStrategy = require('passport-local');
 var flash = require('connect-flash');
 var validator = require('express-validator');
-var multer = require('multer');
 var MongoStore = require('connect-mongo')(session);
-
 
 //define the routes 
 var marketRoutes = require('./routes/market');
