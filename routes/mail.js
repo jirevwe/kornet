@@ -110,7 +110,7 @@ router.get('/reply/:id', function (req, res, next) {
 	}
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) throw err;
-		getAttachments(mail, req.user);
+		// getAttachments(mail, req.user);
 		res.render('mail/reply', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
@@ -121,7 +121,7 @@ router.get('/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) throw err;
-		getAttachments(mail, req.user);
+		// getAttachments(mail, req.user);
 		res.render('mail/email', { user: req.user, message: mail, layout: 'mail_layout' });
 	});
 });
@@ -132,7 +132,7 @@ router.get('/trash/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) throw err;
-		getAttachments(mail, req.user);
+		// getAttachments(mail, req.user);
 		res.render('mail/trash_item', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
@@ -143,7 +143,7 @@ router.get('/edit/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) throw err;
-		getAttachments(mail, req.user);
+		// getAttachments(mail, req.user);
 		res.render('mail/edit_draft', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
@@ -154,26 +154,20 @@ router.get('/drafts/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) throw err;
-		getAttachments(mail, req.user);
+		// getAttachments(mail, req.user);
 		res.render('mail/edit_draft', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
 
 router.get('/mail-body/:id', function (req, res, next) {
 	Mail.findById(req.params.id, function (err, mail) {
-		let text = getMailBody(mail, req.user);
-		console.log("THIS TEXT "+text);
+		getMailBody(mail, req);
 	});
-});
-
-router.post('/get-mail-body/', function (req, res, next) {
-	console.log(req.body);
-	
 });
 //------------------------------------------------------------//
 
 //----------------- Get Mail Body Function ------------------//
-function getMailBody(mail, req, res) {
+function getMailBody(mail, req) {
 	let imap = new Imap({
 		user: req.user.email,
 		password: getLong(req.user.long_text),
@@ -187,17 +181,30 @@ function getMailBody(mail, req, res) {
 			if (err) throw err;
 			imap.seq.search([['FROM', mail.from.text], ['TO', mail.to.text], ['SUBJECT', mail.subject]], (err, uids) => {
 				if (err) throw err;
-				let fetch = imap.seq.fetch(uids, { bodies: ['TEXT'] });
+				let fetch = imap.seq.fetch(uids, { bodies: '' });
 				fetch.on('message', function (msg, seqno) {
 					msg.on('body', function (stream, info) {
 						simpleParser(stream, function (err, body) {
 							if (err) throw err;
-							text = body.text;
-							www.io.sockets.on('connection', function(socket){
-								console.log("SOCKET WORKS");
-								socket.emit('imap_end_message', { text: text });
-							});
-							imap.end();
+							text = body.html != false ? body.html : body.text;
+							www.io.emit('imap_end_message', { text: text });
+
+							console.log(mail.attachments.length);
+							if (mail.attachments.length > 0) {
+								let att = mail.attachments[0];
+								fs.mkdir('./uploads/' + mail.messageId, (err) => {
+									if (err) console.log(err);
+									fs.writeFile('./uploads/' + mail.messageId + "/" + att.filename, att.content, (err) => {
+										if (err) console.log(err);
+										console.log('It\'s saved!');
+										// attachments.push({link:'./uploads/' + mail.messageId + "/" + att.filename, name: att.filename});
+
+										// console.log("......");
+										// www.io.emit('imap_end_attachment', { content: attachments[0] });
+										imap.end();
+									});
+								});
+							}
 						});
 					});
 				});
@@ -208,54 +215,15 @@ function getMailBody(mail, req, res) {
 		console.log(err);
         return text;
 	});
-	imap.once('end', function (err) {
-
+	imap.once('end', (err) => {
+		
 	});
 	imap.connect();
 }
 //------------------------------------------------------------//
 
 //----------------- Get Attachments Function ------------------//
-function getAttachments(mail, user) {
-	let imap = new Imap({
-		user: user.email,
-		password: getLong(user.long_text),
-		host: 'mail.kornet-test.com',
-		port: 993,
-		tls: true
-	});
 
-	imap.once('ready', function () {
-		imap.openBox(mail.mailbox, false, function (err, box) {
-			if (err) throw err;
-			imap.seq.search([['FROM', mail.from.text], ['TO', mail.to.text], ['SUBJECT', mail.subject]], (err, uids) => {
-				if (err) throw err;
-				let fetch = imap.seq.fetch(uids, { bodies: ['TEXT'] });
-				fetch.on('message', function (msg, seqno) {
-					msg.on('body', function (stream, info) {
-						simpleParser(stream, function (err, mail) {
-							if (err) throw err;
-							if (mail.messageId != undefined) {
-								if (mail.attachments.length > 0) {
-									let att = mail.attachments[0];
-									fs.mkdir('./uploads/' + mail.messageId, (err) => {
-										if (err) console.log(err);
-										fs.writeFile('./uploads/' + mail.messageId + "/" + att.filename, att.content, (err) => {
-											if (err) console.log(err);
-											console.log('It\'s saved!');
-											imap.end();
-										});
-									});
-								}
-							}
-						});
-					});
-				});
-			})
-		});
-	});
-	imap.connect();
-}
 //------------------------------------------------------------//
 
 //----------------- Refresh Function -------------------------//
@@ -293,7 +261,7 @@ function refresh(mailbox_name, user, res) {
 								});
 
 								Mail.findOne({ messageId: saved_mail.messageId }, function (err, doc) {
-									if (err) throw err;
+									if (err) console.log(err);
 									if (doc == null || doc == undefined) {
 										saved_mail.save(function (err, document) {
 											if (err) throw err;
@@ -368,7 +336,7 @@ router.post('/send/:id', upload, function (req, res, next) {
 	let mail = composer(mailOptions);
 
 	sendmailer.sendMail(mailOptions, function (err, res) {
-		if (err) throw err;
+		if (err) console.log(err);
 		else console.log("Message sent: " + res.messageId);
 
 		mail.build(function (err, message) {
@@ -383,7 +351,7 @@ router.post('/send/:id', upload, function (req, res, next) {
 
 			imap.once('ready', function () {
 				imap.openBox('Sent', false, function (err, box) {
-					if (err) throw err;
+					if (err) console.log(err);
 					imap.append(message, { mailbox: 'Sent', flags: ['Seen'], date: new Date(Date.now()) }, function (err) {
 						if (err) throw err;
 						console.log('Saved in Mailbox (Sent)');
@@ -453,10 +421,10 @@ router.post('/save/:id', upload, function (req, res, next) {
 
 		imap.once('ready', function () {
 			imap.openBox('Drafts', false, function (err, box) {
-				if (err) throw (err);
+				if (err) console.log(err);
 
 				imap.append(message, { mailbox: 'Drafts', date: new Date(Date.now()) }, function (err) {
-					if (err) throw (err);
+					if (err) console.log(err);
 					console.log('Saved in Drafts');
 					imap.end();
 				});

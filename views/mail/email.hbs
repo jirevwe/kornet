@@ -12,24 +12,29 @@
             <p class="list-group-item-text">Date: {{message.date}}</p>
             <br>
             <div id="text" class="container"></div>
-            {{#if attachments}}
                 <div class="container">
-                    <div class="list-group">
-                        {{# each attachments}}
-                            <a href='{{this}}' id="attachments" class="list-group-item-text">link</a>
-                        {{/each}}
+                    <div id="attachments" class="list-group">
                     </div>
                 </div>
-            {{/if}}
-        </div>
+]        </div>
     </div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+    let loaded, attachments = false;
     var socketio = io.connect();
+
     socketio.on("imap_end_message", function(data) {
-        console.log(data);
-        $('#text').text(data['text']);
+        if(!loaded){
+            console.log(data);
+            $('#text').html(data['text']);
+            loaded = true;
+        }
+    });
+
+     socketio.on("imap_end_attachment", function(data) {
+            console.log(data);
+            $('#attachments').html('<a href="' + data['content']['link'] +'">' + data['content']['name'] + '</a>');
     });
 
     $(document).ready(function() {
@@ -39,10 +44,9 @@
             async: true,
             success: function(response){
                 console.log(response);
-                get.abort();
             },
             error: function(response){
-                console.log("Error: " + response);
+                console.log("Error: " + JSON.stringify(response));
             }
         });
         console.log(get);
