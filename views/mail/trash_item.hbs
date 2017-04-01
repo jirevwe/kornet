@@ -50,3 +50,31 @@
         </div>
     </form>
 </div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let loaded = false;
+    var socketio = io.connect();
+    socketio.on("imap_end_message", function(data) {
+        if(!loaded){
+            console.log(data['text']);
+            tinymce.activeEditor.execCommand('mceInsertContent', false, data['text']);
+            loaded = true;
+        }
+    });
+
+    $(document).ready(function() {
+        let get = $.ajax({
+            url: "http://localhost:3000/mail/mail-body/{{message._id}}",
+            type: "GET",
+            async: true,
+            success: function(response){
+                console.log(response);
+                get.abort();
+            },
+            error: function(response){
+                console.log("Error: " + response);
+            }
+        });
+        console.log(get);
+    });
+</script>
