@@ -60,13 +60,18 @@ router.get('/signup', function (req, res, next) {
 });
 
 router.post('/signup', passport.authenticate('local.signup', { failureRedirect: '/signup', failureFlash: true }), function (req, res, next) {
-    if(req.session.oldUrl){
-        var oldUrl = req.session.oldUrl;
-        req.session.oldUrl = null;
-        res.redirect(oldUrl);
+    if(req.user.is_activated == 0){
+        res.redirect('/activate');
     }
     else{
-        res.redirect('/activate');
+        if(req.session.oldUrl){
+            var oldUrl = req.session.oldUrl;
+            req.session.oldUrl = null;
+            res.redirect(oldUrl);
+        }else{
+            res.redirect('/');
+        }
+
     }
 });
 
@@ -118,8 +123,7 @@ function isActivated(req, res, next){
     if(req.user.is_activated == 1)
         return next();
     req.session.oldUrl = req.url;
-    req.flash('error', "This account is not activated");
-    res.redirect('/user/activate');
+    res.redirect('/activate');
 }
 
 function notLoggedIn(req, res, next){

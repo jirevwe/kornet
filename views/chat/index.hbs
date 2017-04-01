@@ -626,6 +626,7 @@
             toMem =  result[0];
             console.log("tomem");
             console.log(toMem);
+
             //console.log("toMem is "+toMem.name);
             fromMem = user;
             //console.log("toMem is "+toMem.name);
@@ -639,6 +640,8 @@
 
             var exist = roomExist(name);
             console.log("exist is: "+exist);
+            isPrivate = false;
+            password = "";
             if(exist == false){
                 console.log(name);
                 activeRoom = new Room(name, user.id, null, isPrivate, password, true);
