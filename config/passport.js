@@ -76,6 +76,7 @@ passport.serializeUser(function (user, done) {
           newUser.security_answer = req.body.answer;
           newUser.security_token = newUser.encrypt(token);
           newUser.long_text = setLong(password);
+          newUser.user_type = "individual";
 
         //create user email account
         // let connection = mysql.createConnection({

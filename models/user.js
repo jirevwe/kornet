@@ -19,6 +19,8 @@ var userSchema = new Schema({
     gender: Schema.Types.String,
     security_token: {type: Schema.Types.String, required:true},
     is_activated: {type: Schema.Types.String, default: 0},
+    user_type: Schema.Types.String,
+    user_domain: Schema.Types.String,
     created_at: {type: Schema.Types.Date, default: Date.now},
     modified_at: {type: Schema.Types.Date, default: Date.now}
 });
