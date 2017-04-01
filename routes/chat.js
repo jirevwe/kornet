@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var csrf = require('csurf');
 var Room = require('../models/room');
+let _ = require('underscore')._;
 
 var csrfProtection = csrf();
 
@@ -15,64 +16,88 @@ router.get('/',isLoggedIn, function(req, res, next) {
 
 router.post('/add-room', function(req, res, next) {
     var room = req.body;
-    console.log(room);
-    var newRoom =  new Room({
-        name: room.name,
-        room_id: room.id,
-        creator: room.creator,
-        //members: room['members[]'],
-        isDM: room.isDM,
-        isPrivate: room.isPrivate,
-        password: newRoom.encrypt(room.password)
-    });
+    console.log("room sent: "+room.id);
 
-    //console.error(err.stack);
 
-    console.log(room);
+    if(room.password == ''){
+        var newRoom =  new Room({
+            name: room.name,
+            room_id: room.id,
+            creator: room.creator,
+            members: room['members[]'],
+            isDM: room.isDM,
+            isPrivate: room.isPrivate
+        });
+        newRoom.save(function (err, result) {
+            if(err){
+                console.log(err);
+            }
 
-    // newRoom.save(function (err, result) {
-    //     if(err){
-    //         console.log(err);
-    //     }
-    //
-    //     console.log(result);
-    // });
+            console.log("room saved: "+newRoom.room_id);
+        });
 
-    return newRoom;
-    //console.log(room['members[]']);
+        //return newRoom;
+    }
+    else {
+        var ARoom =  new Room({});
+        var newRoom2 =  new Room({
+            name: room.name,
+            room_id: room.id,
+            creator: room.creator,
+            members: room['members[]'],
+            isDM: room.isDM,
+            isPrivate: room.isPrivate,
+            password: ARoom.encrypt(room.password)
+        });
+        newRoom2.save(function (err, result) {
+            if(err){
+                console.log(err);
+            }
+
+            console.log("room password saved: "+newRoom.room_id);
+        });
+
+        //return newRoom2;
+    }
+
 });
 
-router.post('/add-user-to-room', function(req, res, next) {
+router.post('/update-room', function(req, res, next) {
 
     var newroom = req.body;
+    console.log("update room: "+newroom.id);
 
-    Room.findOne({'room_id':room.id}, function (err, room) {
-        console.log(room);
-        if(err){
-            console.log(err);
+
+    if(newroom.creator != req.user.id){
+        console.log("not equal");
+        var members = newroom['members[]'];
+        //console.log(members);
+        var isArray = _.isArray(members);
+        console.log(isArray);
+        if(isArray) {
+            Room.update({room_id: newroom.id}, {$addToSet: {members: {$each: members}}}, function (err, result) {
+                if (err)
+                    console.log(err);
+                else
+                    console.log(result);
+            });
         }
-        if(!room){
-            console.log("room no dey");
-        }
-        room.members = newroom['members[]'];
-        room.save(function(err, result) {
-            if (err)
-                console.log(err);
-            else
-                console.log(result);
-        });
-        return res.redirect('/');
-    });
+    }
 
 });
 
-router.post('/get-room-members', function(req, res, next) {
-    var users = req.body['users[]'];
-    Room.find({'members': {'$in': users} },(err,result)=>{
+
+router.get('/room-members/:id', function(req, res, next) {
+    var room_id = req.params.id;
+
+    Room.find({'room_id': room_id }).populate("members").exec(function(err,results){
         if(err){
             console.log(err);
         }
-       // console.log("members "+result);
+        let room = results[0];
+        let members = room.members;
+        console.log(members);
+        res.json(members);
     });
 
 });

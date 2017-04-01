@@ -197,7 +197,6 @@ io.sockets.on("connection", function(socket){
         let fromMem = users[userId];
         let room = new Room(activeRoom['name'], userId, roomId, activeRoom['isPrivate'], activeRoom['password'], activeRoom['isDM']);
 
-
         rooms[roomId] = room;
         //add room to socket, and auto join the creator of the room
         socket.join(roomId);
@@ -241,7 +240,7 @@ io.sockets.on("connection", function(socket){
     });
 
     socket.on("list_mems_to_server", function(data) {
-        socket.emit("list_mems_to_client", rooms[data].members);
+        socket.emit("list_mems_to_client", rooms[data]);
     });
 
     socket.on('message_to_server', function(data) {

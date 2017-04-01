@@ -49,7 +49,7 @@ passport.serializeUser(function (user, done) {
 
          return done(null, false, req.flash('error', messages));
      }
-     User.findOne({ $or: [ {'username':req.body.username}, {'phone_number':req.body.phone} ] }, function (err, user) {
+     User.findOne({ $or: [ {'name':req.body.username}, {'phone_number':req.body.phone} ] }, function (err, user) {
           if(err){
               return done(user);
           }
@@ -64,7 +64,7 @@ passport.serializeUser(function (user, done) {
             console.log("your token is "+token);
           let newUser =  new User;
 
-          newUser.username = req.body.username;
+          newUser.name = req.body.username;
           newUser.email = email;
           newUser.phone_number = req.body.phone;
           newUser.gender = req.body.gender;

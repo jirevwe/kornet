@@ -329,10 +329,14 @@
             $.ajax({
                 method: "POST",
                 url: "http://localhost:3000/chat/add-room",
-                data: room
-            }).done(function( msg ) {
-                        alert( "Data Saved: " + msg );
-                    });
+                data: room,
+                success: function(data) {
+                    return data;
+                },
+                error: function(err) {
+                    return err;
+                }
+            });
 
             if(room.isDM == true){
                 $('#numMembers').hide();
@@ -361,8 +365,9 @@
 
         socketio.on("enter_room_to_client", function(data) {
             var room = data['room'];
-            console.log("user is "+user.name);
             console.log("sender is "+data['user'].name);
+            console.log(room);
+
 
             $.ajaxSetup({
                 headers: {"X-CSRF-Token": "{{csrfToken}}" }
@@ -370,10 +375,14 @@
 
             $.ajax({
                 method: "POST",
-                url: "http://localhost:3000/chat/add-user-to-room",
-                data: room
-            }).done(function( msg ) {
-                alert( "Data Saved: " + msg );
+                url: "http://localhost:3000/chat/update-room",
+                data: room,
+                success: function(data) {
+                    return data;
+                },
+                error: function(err) {
+                    return err;
+                }
             });
 
             if(data['room'].isDM){
@@ -400,38 +409,30 @@
         });
 
         socketio.on("list_mems_to_client", function(data) {
-            users = data;
+            room = data;
 
 //            for (m in data) {
-//                var member = data[m];
 //
-//                if(member.name == user.name) {
-//                    $("#memsList").append('<li id="' + member.id + '" class="active"> You </li>');
-//                }else{
-//                    $("#memsList").append('<li id="' + member.id + '" class="active">' + member.name + '</li>');
-//                }
-//                $('#memHeader').empty();
-//                $('#actionList').empty();
 //            }
             $.ajaxSetup({
-                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+                cache:false
             });
-            console.log("users client");
-            console.log(users);
             $.ajax({
-                method: "POST",
-                url: "http://localhost:3000/chat/get-room-members",
-                data: {users:users},
-                success: function (response) {
-                    response.forEach(function (resp) {
-                        console.log(resp);
-                    });
-                },
-                error: function () {
-                    console.log("error happened");
+                url: "http://localhost:3000/chat/room-members/"+room.id,
+                type: "GET"
+            }).success(function (data) {
+                users = data;
+                for (m in data) {
+                    var member = data[m];
+                    if(member.name == user.name) {
+                        $("#memsList").append('<li id="' + member._id + '" class="active"> You </li>');
+                    }else{
+                        $("#memsList").append('<li id="' + member._id + '" class="active">' + member.name + '</li>');
+                    }
+                    $('#memHeader').empty();
+                    $('#actionList').empty();
                 }
             });
-
         });
 
         socketio.on("message_to_client", function(data) {
@@ -621,7 +622,10 @@
 
         function directMsg() {
             var id = $("#dmButton").attr("class");
-            toMem = users[id];
+            var result = $.grep(users, function(e){ return e._id == id; });
+            toMem =  result[0];
+            console.log("tomem");
+            console.log(toMem);
             //console.log("toMem is "+toMem.name);
             fromMem = user;
             //console.log("toMem is "+toMem.name);
@@ -634,8 +638,9 @@
             }
 
             var exist = roomExist(name);
-            console.log("exist is: "+exist.id);
+            console.log("exist is: "+exist);
             if(exist == false){
+                console.log(name);
                 activeRoom = new Room(name, user.id, null, isPrivate, password, true);
 
                 rooms[rooms.length] = activeRoom;
@@ -758,6 +763,8 @@
             mems.onclick = function(event) {
                 var target = getEventTarget(event);
                 var id = $(target).attr('id');
+                console.log("user ID "+user.id);
+                console.log("ID "+id);
                 if (id != user.id) {
                     memActions(id);
                 }
@@ -766,9 +773,13 @@
 
 
             function memActions(id) {
-                var mem = (users[id]);
+                var result = $.grep(users, function(e){ return e._id == id; });
+                var mem = result[0];
 
-                $('#memHeader').append("<h4>" + mem['name'] + "</h4>");
+                console.log("mems");
+                console.log(mem);
+
+                $('#memHeader').append("<h4>" + mem.name + "</h4>");
                 $('#actionList').append('<button id="dmButton" class="' + id + '"onclick="directMsg()">Direct Message</button>    ');
 
                 if (user.id == activeRoom.creator) {
@@ -794,7 +805,7 @@
 
         // login modal function
         $(window).load(function(){
-            tempUser = new Person ('{{user.username}}', '{{user._id}}', null, null);
+            tempUser = new Person ('{{user.name}}', '{{user._id}}', null, null);
             socketio.emit("new_user_to_server", tempUser);
         });
 

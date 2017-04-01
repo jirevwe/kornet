@@ -1,15 +1,16 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var bcrypt = require('bcrypt-nodejs');
 
 var roomSchema = new Schema({
-    name: Schema.Types.String,
-    room_id: Schema.Types.String,
-    creator: Schema.Types.String,
-    members: Schema.Types.Array,
+    name: { type:String, required: true},
+    room_id: { type:String, required: true, index: { unique: true }},
+    creator: { type: Schema.Types.ObjectId, ref:'User'},
+    members: [{ type: Schema.Types.ObjectId, ref:'User'}],
     history: Schema.Types.Mixed,
-    isDM: Schema.Types.String,
-    isPrivate: Schema.Types.String,
-    password: Schema.Types.String,
+    isDM: { type:String, required: true},
+    isPrivate: { type:String, required: true},
+    password: { type:String},
     created_at: {type: Schema.Types.Date, default: Date.now},
     modified_at: {type: Schema.Types.Date, default: Date.now}
 });
