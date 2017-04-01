@@ -53,11 +53,13 @@ passport.serializeUser(function (user, done) {
           if(err){
               return done(user);
           }
-          if(user.phone_number == req.body.phone){
-              return done(null, false, {message: 'Phone Number is already registered.'});
-          }
-          if(user.name == req.body.username){
-              return done(null, false, {message: 'Username Has been taken.'});
+          if(user){
+              if(user.phone_number == req.body.phone){
+                  return done(null, false, {message: 'Phone Number is already registered.'});
+              }
+              if(user.name == req.body.username){
+                  return done(null, false, {message: 'Username Has been taken.'});
+              }
           }
 
           let token = randomstring.generate({
