@@ -91,10 +91,11 @@ passport.serializeUser(function (user, done) {
 
         //  connection.connect();
 
-        //  let values = [	req.body.username  + '@demo.kornet-test.com',
+        //  let values = [	
+        //      req.body.username  + '@demo.kornet-test.com',
         //      ssha512(password),
         //      "",
-        //      '/let/vmail',
+        //      '/var/vmail',
         //      'vmail1',
         //      'demo.kornet-test.com/' + maildirFolder(req.body.username),
         //      1024,
@@ -110,11 +111,13 @@ passport.serializeUser(function (user, done) {
         //          console.log(results);
         //      });
 
-        //  let values2 = [ req.body.username + '@demo.kornet-test.com',
+        //  let values2 = [ 
+        //      req.body.username + '@demo.kornet-test.com',
         //      req.body.username + '@demo.kornet-test.com',
         //      'demo.kornet-test.com',
         //      new Date(Date.now()),
-        //      1];
+        //      1
+        // ];
 
         //  connection.query('INSERT INTO alias (address, goto, domain, created, active) VALUES (?,?,?,?,?)', values2, function(err, results) {
         //      if (err) console.log(err);

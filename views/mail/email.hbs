@@ -11,17 +11,23 @@
             {{/if_eq}}
             <p class="list-group-item-text">Date: {{message.date}}</p>
             <br>
-            <div id="text" class="container"></div>
+            <div class="list-group-item-text container" id="text">
+                {{# if message.html }}
+                    <p>{{{message.html}}}</p>
+                {{else}}
+                    <p>{{message.text}}</p>
+                {{/if}}
+            </div>
                 <div class="container">
                     <div id="attachments" class="list-group">
                     </div>
                 </div>
-]        </div>
+        </div>
     </div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    let loaded, attachments = false;
+    let loaded = false;
     var socketio = io.connect();
 
     socketio.on("imap_end_message", function(data) {
@@ -36,19 +42,21 @@
             console.log(data);
             $('#attachments').html('<a href="' + data['content']['link'] +'">' + data['content']['name'] + '</a>');
     });
-
-    $(document).ready(function() {
-        let get = $.ajax({
-            url: "http://localhost:3000/mail/mail-body/{{message._id}}",
-            type: "GET",
-            async: true,
-            success: function(response){
-                console.log(response);
-            },
-            error: function(response){
-                console.log("Error: " + JSON.stringify(response));
-            }
+    if(!loaded){
+        $(document).ready(function() {
+            let get = $.ajax({
+                url: "http://localhost:3000/mail/mail-body/{{message._id}}",
+                type: "GET",
+                async: true,
+                success: function(response){
+                    console.log(response);
+                    loaded = true;
+                },
+                error: function(response){
+                    console.log("Error: " + JSON.stringify(response));
+                }
+            });
+            console.log(get);
         });
-        console.log(get);
-    });
+    }
 </script>

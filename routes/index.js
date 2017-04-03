@@ -23,6 +23,12 @@ router.get('/', function (req, res, next) {
 
 });
 
+router.get('/download/:filename', function (req, res, next) {
+	res.download('./tmp/' + req.params.filename, req.params.filename, function(err){
+		if (err) console.log(err);
+	});
+});
+
 router.get('/activate', function (req, res, next) {
     var messages = req.flash('error');
     res.render('user/activate', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
