@@ -42,7 +42,7 @@ router.post('/profile', upload, function (req, res, next) {
         user.first_name = req.body.first_name;
         user.last_name = req.body.last_name;
         user.address = req.body.address;
-        user.date_of_birth = new Date(req.body.date_of_birth);
+        user.date_of_birth = req.body.date_of_birth;
         user.network_provider = req.body.network_provider;
         user.country = req.body.country;
         user.state = req.body.state;

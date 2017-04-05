@@ -45,7 +45,8 @@ app.engine('.hbs', expressHbs({
                 return opts.inverse(this);
         },
         formatDate: function (date, format) {
-            return moment(date).format(format);
+            // moment(date, "YYYY-MM-DD");
+            return moment(date).format("YYYY-MM-DD");
         }
     }
 }));

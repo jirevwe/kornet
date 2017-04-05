@@ -36,7 +36,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth</label>
-                        <input type="date" name="date_of_birth" placeholder="Date of Birth" value="{{user.date_of_birth }}" class="form-control" required/>
+                        <input type="date" name="date_of_birth" id="date_of_birth" placeholder="Date of Birth" value="{{formatDate user.date_of_birth }}" class="form-control" required/>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -88,3 +88,12 @@
         </form>
     </div>
 </div>
+
+<script>
+//    $(document).ready(function() {
+//
+//        console.log(date);
+//        $('#date_of_birth').val(date);
+//    });
+
+</script>
