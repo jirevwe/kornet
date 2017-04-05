@@ -12,6 +12,7 @@ var LocalStrategy = require('passport-local');
 var flash = require('connect-flash');
 var validator = require('express-validator');
 var MongoStore = require('connect-mongo')(session);
+var moment = require('moment');
 
 //define the routes 
 var marketRoutes = require('./routes/market');
@@ -30,6 +31,7 @@ require('./config/passport');
 var app = express();
 app.set('port', process.env.PORT || 3000);
 
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.engine('.hbs', expressHbs({
@@ -41,6 +43,9 @@ app.engine('.hbs', expressHbs({
                 return opts.fn(this);
             else
                 return opts.inverse(this);
+        },
+        formatDate: function (date, format) {
+            return moment(date).format(format);
         }
     }
 }));

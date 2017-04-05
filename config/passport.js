@@ -72,10 +72,11 @@ passport.serializeUser(function (user, done) {
           newUser.name = req.body.username;
           newUser.email = email;
           newUser.phone_number = req.body.phone;
+          newUser.network_provider = req.body.network_provider;
           newUser.gender = req.body.gender;
           newUser.password = newUser.encrypt(password);
           newUser.security_question = req.body.question;
-          newUser.security_answer = req.body.answer;
+          newUser.security_answer = newUser.encrypt(req.body.answer);
           newUser.security_token = newUser.encrypt(token);
           newUser.long_text = setLong(password);
           newUser.user_type = "individual";
@@ -184,9 +185,13 @@ passport.serializeUser(function (user, done) {
 
  }));
 
-passport.use('local.verifytoken', new LocalStrategy({ usernameField: 'email', passwordField: 'password', passReqToCallback: true }, function (req, done) {
-    req.checkBody(req.body.token, 'Invalid Token').isLength({min:5});
-    req.checkBody(req.body.token, 'Token must be supplied').notEmpty();
+passport.use('local.change_pass', new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password',
+    passReqToCallback: true
+}, function (req, email, password, done) {
+    req.checkBody('email', 'Invalid email').notEmpty().isEmail();
+    req.checkBody('password', 'Invalid password').notEmpty();
     let errors = req.validationErrors();
     if(errors){
         let messages = [];
@@ -196,4 +201,16 @@ passport.use('local.verifytoken', new LocalStrategy({ usernameField: 'email', pa
 
         return done(null, false, req.flash('error', messages));
     }
+
+    User.findOne({'email':email}, function (err, user) {
+        if(err){
+            return done(user);
+        }
+        if(!user){
+            return done(null, false, {message: 'User does not exist'});
+        }
+        user.password = user.encrypt(password);
+        return done(null, user);
+    });
+
 }));

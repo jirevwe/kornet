@@ -1,0 +1,231 @@
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <h1 class="text-center">Recover Passsword</h1>
+        {{# if hasErrors}}
+            <div class="alert alert-danger">
+                {{# each messages}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        <div id="error" class="alert alert-danger" hidden></div>
+        <div id="forgot-pane">
+            <form id="forgot_pass">
+                <div class="col-md-12">
+                    <div id="user_id_field" class="form-group ">
+                        <label for="user_id">Kornet Email or Phone Number</label>
+                        <input type="text" name="user_id" id="user_id" placeholder="Kornet Email or Phone Number" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" onclick="forgot_password('sec_recovery')" name="sec_question" class="btn btn-primary btn-block">Use Security Questions</button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" onclick="forgot_password('token_recovery')" name="token" class="btn btn-primary btn-block">Send Security token</button>
+                </div>
+            </form>
+
+            <form id="answer_question" method="post" hidden>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <p id="sec_question"></p>
+                    </div>
+
+                    <div id="reply_id_field" class="form-group">
+                        <input type="text" name="sec_reply_id" id="sec_reply_id" placeholder="Answer" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <button type="button" onclick="verify('verify_sec_answer')" name="verify_sec_answer"  class="btn btn-primary btn-block">Answer</button>
+                    </div>
+                </div>
+            </form>
+
+            <form id="send_token" method="post" hidden>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <p>Please enter token sent to your phone.</p>
+                    </div>
+                    <div id="reply_id_field" class="form-group">
+                        <input type="text" name="token_reply_id" id="token_reply_id" placeholder="Token" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-8">
+                        <button type="button" onclick="verify('verify_token')" name="verify_token" class="btn btn-primary btn-block">Enter Token</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" onclick="forgot_password('token_recovery')" name="token" class="btn btn-primary btn-block">Resend Security token</button>
+                    </div>
+
+                </div>
+            </form>
+
+            <form id="change_password" method="post" hidden>
+                <div class="col-md-12">
+                    <p>PLEASE CHOOSE A NEW PASSWORD</p>
+                    <div id="password_field" class="form-group">
+                        <input type="password" name="password_id" id="password_id" placeholder="New Password" class="form-control">
+                    </div>
+                    <div id="confirm_password_field" class="form-group">
+                        <input type="password" name="confirm_password_id" id="confirm_password_id" placeholder="Confirm Password" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <button type="button" onclick="change_password_()" name="password" class="btn btn-primary btn-block">Change Password</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="col-md-6 col-md-offset-3" id="reset-link" hidden>
+                <a href="/forgot" class="btn btn-default btn-block">Restart Process</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let id_field =  $('#user_id_field');
+    let reply_id_field =  $('#reply_id_field');
+    let error_div =  $('#error');
+    let forgot_pass_form =  $('#forgot_pass');
+    let send_token_form =  $('#send_token');
+    let answer_question_form =  $('#answer_question');
+    let sec_question_field = $('#sec_question');
+    let reset_link =  $('#reset-link');
+    let change_password = $('#change_password');
+
+    let user = "";
+
+    reset_link.hide();
+    function forgot_password(choice) {
+        reset_link.hide();
+
+        let user_id = $('#user_id').val();
+        let url = "http://localhost:3000/"+choice;
+        console.log(url);
+
+        id_field.removeClass('has-error');
+        error_div.hide();
+
+        if(user_id == ''){
+            id_field.addClass('has-error');
+        }else{
+            if (user_id.match("^0")) {
+                user_id = user_id.replace("0","+234");
+                console.log(user_id);
+            }
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
+            $.ajax({
+                method: "POST",
+                url: url,
+                data: {user_id: user_id},
+                success: function(data) {
+                    console.log(data);
+                    if(data.result == 'error'){
+                        //console.log("yh error");
+                        error_div.html(data.message);
+                        error_div.show();
+                    }else{
+                        forgot_pass_form.hide();
+                        user = data.user;
+
+                        if(data.question){
+                            answer_question_form.show();
+                            sec_question_field.html(data.question);
+                        }else{
+                            send_token_form.show();
+                        }
+                    }
+                },
+                error: function(err) {
+                    return err;
+                }
+            });
+        }
+    }
+
+    function change_password_() {
+        reset_link.hide();
+
+        let password_id = $('#password_id').val();
+        let confirm_password_id = $('#confirm_password_id').val();
+        error_div.hide();
+
+        if(password_id == '' || confirm_password_id == ''){
+            error_div.html("Passwords fields cannot be empty");
+            error_div.show();
+        }
+        else if(password_id != confirm_password_id){
+            error_div.html("Passwords fields do not match");
+            error_div.show();
+        }
+        else{
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
+            $.ajax({
+                method: "POST",
+                url: "http://localhost:3000/change_pass",
+                data: {password: password_id, email:user},
+                success: function(data) {
+                    window.location.href = "http://localhost:3000/";
+                },
+                error: function(err) {
+                    return err;
+                }
+            });
+        }
+    }
+
+    function verify(choice) {
+        reset_link.hide();
+
+        let reply_id = '';
+        let form = '';
+
+        if(choice == 'verify_token'){
+            reply_id = $('#token_reply_id').val();
+            form = $('#send_token');
+        }else{
+            reply_id = $('#sec_reply_id').val();
+            form = $('#answer_question');
+        }
+
+        id_field.removeClass('has-error');
+        error_div.hide();
+
+        if(reply_id == ''){
+            reply_id_field.addClass('has-error');
+        }else{
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
+            $.ajax({
+                method: "POST",
+                url: "http://localhost:3000/"+choice,
+                data: {reply_id: reply_id, user_id:user},
+                success: function(data) {
+                    if(data.result == 'error'){
+                        error_div.html(data.message);
+                        error_div.show();
+                        reset_link.show();
+                    }else{
+                        user = data.user;
+                        form.hide();
+                        forgot_pass_form.hide();
+                        change_password.show();
+                    }
+                },
+                error: function(err) {
+                    return err;
+                }
+            });
+        }
+    }
+</script>

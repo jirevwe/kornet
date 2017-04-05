@@ -1,22 +1,90 @@
 <div class="row">
-    <div class="col-md-8 col-md-offset-2">
-        <h1>User Profiles</h1>
-        <hr>
-        <h2>My Orders</h2>
-        {{# each orders}}
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <ul class="list-group">
-                        {{# each this.items}}
-                        <li class="list-group-item">
-                            <span class="badge">${{this.price}}</span>
-                            {{this.item.title}} | {{this.qty}} Units
-                        </li>
-                        {{/each}}
-                    </ul>
+    <div class="col-md-12 ">
+        <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
+            {{successMsg}}
+        </div>
+        <h1>My Profile</h1>
+        <form id="profile-form" action="/profile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <div class="col-md-3">
+                <p>
+                    <img style="margin: 0 auto; display: block;" class="img-circle img-responsive " src="{{#if user.profile_image }}/uploads/user/{{user.profile_image}} {{else}} /uploads/user/avatar.png{{/if}} " alt="">
+                </p>
+                <div class="form-group">
+                    <input type="file" name="userPhoto" class="form-control" accept="image/*" />
                 </div>
-                <div class="panel-footer"><strong>Total: </strong>$ {{this.cart.totalPrice}}</div>
             </div>
-        {{/each}}
+            <div class="col-md-9">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" value="{{user.name}}" class="form-control" required readonly/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" name="first_name" placeholder="First Name" value="{{user.first_name}}" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" name="last_name" placeholder="Last Name" value="{{user.last_name}}" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" name="date_of_birth" placeholder="Date of Birth" value="{{user.date_of_birth }}" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="network_provider">Network Provider</label>
+                        <select name="network_provider" class="form-control" required>
+                            <option {{#if_eq user.network_provider 'MTN' }} selected {{/if_eq}} value="MTN">MTN</option>
+                            <option {{#if_eq user.network_provider 'Airtel' }} selected {{/if_eq}} value="Airtel">Airtel</option>
+                            <option {{#if_eq user.network_provider 'Glo' }} selected {{/if_eq}}value="Glo">Glo</option>
+                            <option {{#if_eq user.network_provider 'Etisalat' }} selected {{/if_eq}} value="Etisalat">Etisalat</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input type="text" name="country" placeholder="Country" value="{{user.country}}" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" name="state" placeholder="State" value="{{user.state}}" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="dob">Address</label>
+                        <textarea type="text" name="address" placeholder="Your Address" class="form-control" required>{{user.address}}</textarea>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="next_of_kin_number">Next of Kin</label>
+                        <input type="text" name="next_of_kin" placeholder="Kin Name" value="{{user.next_of_kin}}" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="next_of_kin_number">Kin Phone Number</label>
+                        <input type="text" name="next_of_kin_number" placeholder="Kin Phone Number" value="{{user.next_of_kin_number}}" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </div>
+            </div>
+
+        </form>
     </div>
 </div>
