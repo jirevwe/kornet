@@ -20,8 +20,6 @@ var mailRoutes = require('./routes/mail');
 var homeRoutes = require('./routes/index');
 var chatRoutes = require('./routes/chat');
 
-// mongo config
-// var MONGOLAB_URI= "mongodb://root:root@ds123080.mlab.com:23080/haraka_db_store";
 var MONGOLAB_URI = "mongodb://localhost:27017/kornet";
 var mongo = MONGOLAB_URI;
 mongoose.connect(mongo);
@@ -56,7 +54,7 @@ app.set('view engine', '.hbs');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(validator());
 app.use(session({

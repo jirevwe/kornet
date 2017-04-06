@@ -82,50 +82,50 @@ passport.serializeUser(function (user, done) {
           newUser.user_type = "individual";
 
         //create user email account
-        // let connection = mysql.createConnection({
-        //      host     : 'mail.kornet-test.com',
-        //      user     : 'root2',
-        //      password : '00000',
-        //      database : 'vmail',
-        //      debug    : false
-        //  });
+        let connection = mysql.createConnection({
+             host     : 'mail.kornet-test.com',
+             user     : 'root2',
+             password : '00000',
+             database : 'vmail',
+             debug    : false
+         });
 
-        //  connection.connect();
+         connection.connect();
 
-        //  let values = [	
-        //      req.body.username  + '@demo.kornet-test.com',
-        //      ssha512(password),
-        //      "",
-        //      '/var/vmail',
-        //      'vmail1',
-        //      'demo.kornet-test.com/' + maildirFolder(req.body.username),
-        //      1024,
-        //      'demo.kornet-test.com',
-        //      1,
-        //      req.body.username,
-        //      new Date(Date.now())
-        //  ];
+         let values = [	
+             req.body.username  + '@demo.kornet-test.com',
+             ssha512(password),
+             "",
+             '/var/vmail',
+             'vmail1',
+             'demo.kornet-test.com/' + maildirFolder(req.body.username),
+             1024,
+             'demo.kornet-test.com',
+             1,
+             req.body.username,
+             new Date(Date.now())
+         ];
 
-        //  connection.query('INSERT INTO mailbox (username, password, name, storagebasedirectory, storagenode, maildir, quota, domain, active, local_part, created) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-        //      values, function(err, results) {
-        //          if (err) console.log(err);
-        //          console.log(results);
-        //      });
+         connection.query('INSERT INTO mailbox (username, password, name, storagebasedirectory, storagenode, maildir, quota, domain, active, local_part, created) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+             values, function(err, results) {
+                 if (err) console.log(err);
+                 console.log(results);
+             });
 
-        //  let values2 = [ 
-        //      req.body.username + '@demo.kornet-test.com',
-        //      req.body.username + '@demo.kornet-test.com',
-        //      'demo.kornet-test.com',
-        //      new Date(Date.now()),
-        //      1
-        // ];
+         let values2 = [ 
+             req.body.username + '@demo.kornet-test.com',
+             req.body.username + '@demo.kornet-test.com',
+             'demo.kornet-test.com',
+             new Date(Date.now()),
+             1
+        ];
 
-        //  connection.query('INSERT INTO alias (address, goto, domain, created, active) VALUES (?,?,?,?,?)', values2, function(err, results) {
-        //      if (err) console.log(err);
-        //      console.log(results);
-        //  });
+         connection.query('INSERT INTO alias (address, goto, domain, created, active) VALUES (?,?,?,?,?)', values2, function(err, results) {
+             if (err) console.log(err);
+             console.log(results);
+         });
 
-        //  connection.end();
+         connection.end();
          //end create user email account
 
         newUser.save(function (err, result) {
