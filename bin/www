@@ -250,7 +250,7 @@ io.sockets.on("connection", function(socket){
         //console.log("user in room "+user.inRoom);
         console.log(user.name + ": " + data["message"]); // log it to the Node.JS output
 
-        chatHistory[user.inRoom].push("<strong>" + user.name + "</strong>: " + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div>");
+        chatHistory[user.inRoom].push("<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> " + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>");
 
         io.sockets.in(user.inRoom).emit("save_message_to_client", {user: user.name, message:data["message"], room:room});
         io.sockets.in(user.inRoom).emit("message_to_client", {user: user.name, message:data["message"], room:room}); // broadcast the message to other users

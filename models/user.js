@@ -8,12 +8,17 @@ var userSchema = new Schema({
     first_name: Schema.Types.String,
     last_name: Schema.Types.String,
     phone_number: {type: Schema.Types.String, required: true},
+    network_provider: {type: Schema.Types.String, required: true},
     email: {type: Schema.Types.String, required: true},
     address: Schema.Types.String,
+    next_of_kin: Schema.Types.String,
+    next_of_kin_number: Schema.Types.String,
+    country: Schema.Types.String,
+    state: Schema.Types.String,
     date_of_birth: {type: Schema.Types.Date, default: Date.now},
     long_text:{type: Schema.Types.String, required:true},
     profile_image: Schema.Types.String,
-    security_question: Schema.Types.Number,
+    security_question: Schema.Types.String,
     security_answer: Schema.Types.String,
     contacts: [{ type : Schema.Types.ObjectId, ref: 'User' }],
     gender: Schema.Types.String,
@@ -35,5 +40,9 @@ userSchema.methods.validatePassword = function (password) {
 
 userSchema.methods.validateToken = function (token) {
     return bcrypt.compareSync(token, this.security_token);
+};
+
+userSchema.methods.validateSecAnswer = function (answer) {
+    return bcrypt.compareSync(answer, this.security_answer);
 };
 module.exports = mongoose.model('User', userSchema);
