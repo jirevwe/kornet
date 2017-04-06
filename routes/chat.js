@@ -18,7 +18,6 @@ router.post('/add-room', function(req, res, next) {
     var room = req.body;
     console.log("room sent: "+room.id);
 
-
     if(room.password == ''){
         var newRoom =  new Room({
             name: room.name,

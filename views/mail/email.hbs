@@ -18,32 +18,23 @@
                     <p>{{message.text}}</p>
                 {{/if}}
             </div>
-                <div class="container">
-                    <div id="attachments" class="list-group">
-                    </div>
-                </div>
+            <div class="container">
+                <div id="attachments" class="list-group"></div>
+            </div>
         </div>
     </div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    let loaded = false;
-    var socketio = io.connect();
+    $(() => {
+        let loaded = false;
+        var socketio = io.connect();
 
-    socketio.on("imap_end_message", function(data) {
-        if(!loaded){
-            console.log(data);
-            $('#text').html(data['text']);
-            loaded = true;
-        }
-    });
-
-     socketio.on("imap_end_attachment", function(data) {
-            console.log(data);
+        socketio.on("imap_end_attachment", function(data) {
             $('#attachments').html('<a href="' + data['content']['link'] +'">' + data['content']['name'] + '</a>');
-    });
-    if(!loaded){
-        $(document).ready(function() {
+        });
+
+        if(!loaded){
             let get = $.ajax({
                 url: "http://localhost:3000/mail/mail-body/{{message._id}}",
                 type: "GET",
@@ -57,6 +48,6 @@
                 }
             });
             console.log(get);
-        });
-    }
+        }
+    });
 </script>

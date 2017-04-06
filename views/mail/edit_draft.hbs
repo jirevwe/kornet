@@ -42,7 +42,13 @@
             {{/if}}
         </div>
         <div class="form-group">
-            <textarea rows="20" cols="40" name="content" id="content" class="form-control"></textarea>
+            <textarea rows="20" cols="40" name="content" id="content" class="form-control">
+                {{# if messages.html }}
+                    {{{messages.html}}}
+                {{else}}
+                    {{messages.text}}
+                {{/if}}
+            </textarea>
         </div>
         <div class="form-group">
             <input type="file" name="attachment" value="attachment" class="form-control"/>
@@ -53,19 +59,20 @@
         </div>
     </form>
 </div>
-<script src="/socket.io/socket.io.js"></script>
-<script>
+{{!--<script src="/socket.io/socket.io.js"></script>--}}
+{{!--<script>
     let loaded = false;
     var socketio = io.connect();
     socketio.on("imap_end_message", function(data) {
         if(!loaded){
             console.log(data['text']);
-            tinymce.activeEditor.execCommand('mceInsertContent', false, data['text']);
+            tinymce.activeEditor.execCommand('mceInsertContent', false, {{messages.text}});
             loaded = true;
         }
     });
 
     $(document).ready(function() {
+        tinymce.activeEditor.execCommand('mceInsertContent', false, {{messages.text}});
         let get = $.ajax({
             url: "http://localhost:3000/mail/mail-body/{{messages._id}}",
             type: "GET",
@@ -79,4 +86,4 @@
             }
         });
     });
-</script>
+</script>--}}

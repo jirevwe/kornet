@@ -44,7 +44,11 @@
         <div class="form-group">
             {{# if messages.html}}
                 <textarea rows="20" cols="40" name="content" class="form-control">
-                    {{{mail_text}}}
+                    {{# if messages.html }}
+                        {{{messages.html}}}
+                    {{else}}
+                        {{messages.text}}
+                    {{/if}}
                 </textarea>
             {{/if}}
             {{# if attachments}}
@@ -67,7 +71,8 @@
 <script>
     let loaded = false;
     var socketio = io.connect();
-    socketio.on("imap_end_message", function(data) {
+
+    /*socketio.on("imap_end_message", function(data) {
         if(!loaded){
             console.log(data);
             $('#text').html(data['text']);
@@ -80,14 +85,14 @@
             url: "http://localhost:3000/mail/mail-body/{{message._id}}",
             type: "GET",
             async: true,
-            success: function(response){
+            success: function(response) {
                 console.log(response);
                 get.abort();
             },
-            error: function(response){
+            error: function(response) {
                 console.log("Error: " + response);
             }
         });
-        console.log(get);
+        console.log(get);*/
     });
 </script>
