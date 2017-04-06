@@ -450,9 +450,9 @@
             else{
                 if(data['user'] == user.name) {
                     $( "#chatlog" ).append("<div class='row'> " +
-                            "<div style='padding: 2%;'  class='col-md-6 pull-left bg-success'><strong>"
-                            +  data['user'] + "</strong>: " + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div>" +
-                            "</div> " +
+                            "<div style='padding: 2%;'  class='col-md-6 pull-left bg-success'><pre style='background-color:transparent; border:0;'><strong>"
+                            +  data['user'] + "</strong>: <br>" + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div>" +
+                            "</pre></div> " +
                             "</div>");
 
                     document.getElementById("chatlog").appendChild(document.createElement("br"));
@@ -460,9 +460,9 @@
                     //document.getElementById("chatlog").append("<div class='half-col pull-left bg-success'>" +  data['user'] + ": " + data['message'] + "</div>");
                 }else{
                     $( "#chatlog" ).append("<div class='row'> " +
-                            "<div style='padding: 2%;' class='col-md-6 pull-right bg-warning'><strong>"
-                            +  data['user'] + "</strong>: " + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div>" +
-                            "</div> " +
+                            "<div style='padding: 2%;' class='col-md-6 pull-right bg-warning'><pre style='background-color:transparent; border:0;'><strong>"
+                            +  data['user'] + "</strong>: <br>" + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div>" +
+                            "</pre></div> " +
                             "</div>");
 
                     document.getElementById("chatlog").appendChild(document.createElement("br"));
@@ -525,6 +525,7 @@
         function sendMessage(){
             var msg = $("#message_input").val();
             $("#message_input").val("");
+            send_input.attr('rows', 1);
             socketio.emit("message_to_server", {user:user, message:msg});
         }
 
@@ -587,9 +588,10 @@
                     $("#chatlog").empty();
                     //$("#chatlog").append("<li><strong><span class='text-warning'>Last 10 messages:</li>");
                     $.each(chathistory, function (chathistory, msg) {
-                        //var str = msg;
-                        //console.log(str);
-                        var str = msg.substr(0, msg.indexOf(':'));
+                        var str = msg;
+                        newstr = str.replace("<pre style='background-color:transparent; border:0;'>", "");
+                        str = newstr.substr(0, msg.indexOf(':'));
+                        console.log(str);
                         //str = str.split(":").pop();
 
                         //console.log("str is "+str);
@@ -821,7 +823,51 @@
                 e.preventDefault();
                 $("#wrapper").toggleClass("toggled");
             });
+
+            $('#message_input').keyup(function (event) {
+                var send_input = $('#message_input');
+                var rows = send_input.attr('rows');
+                if (event.keyCode == 13 && event.shiftKey) {
+                    rows++;
+                    send_input.attr('rows', rows);
+                    send_input.val(send_input.val());
+                    console.log(send_input.val());
+                    var content = send_input.val();
+                    var caret = getCaret(send_input);
+                    send_input.val(content.substring(0,caret)+"\n"+content.substring(carent,content.length-1));
+                    event.stopPropagation();
+                }else if(event.keyCode == 13 && !event.shiftKey)
+                {
+                    if(send_input.val() != ''){
+                        sendMessage();
+                    }
+                }
+            });
+
+
+            function getCaret(el) {
+                if (el.selectionStart) {
+                    return el.selectionStart;
+                } else if (document.selection) {
+                    el.focus();
+
+                    var r = document.selection.createRange();
+                    if (r == null) {
+                        return 0;
+                    }
+
+                    var re = el.createTextRange(),
+                            rc = re.duplicate();
+                    re.moveToBookmark(r.getBookmark());
+                    rc.setEndPoint('EndToStart', re);
+
+                    return rc.text.length;
+                }
+                return 0;
+            }
         });
+
+
     </script>
 
 </head>
@@ -867,7 +913,8 @@
         <div id="footer" class="row" >
             <br>
             <div id="messageBox" class="col-sm-10">
-                <input id="message_input" type="text"/>
+                <textarea id="message_input" rows="1"></textarea>
+                <!--<input id="message_input" type="text"/>-->
             </div>
             <div id="messageSend" class="col-sm-2">
                 <button data-room="" id="sendButton" onclick="sendMessage()">send</button>
