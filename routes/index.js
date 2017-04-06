@@ -149,7 +149,7 @@ router.post('/signin', notLoggedIn, passport.authenticate('local.signin', { fail
         res.redirect(oldUrl);
     }
     else{
-        res.redirect('/profile');
+        res.redirect('/');
     }
 });
 

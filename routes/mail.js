@@ -291,7 +291,7 @@ function refresh(mailbox_name, req, res) {
 					});
 				});
 				fetch.once('error', function (err) {
-					console.log(err);
+			console.log(err);
 				});
 				fetch.once('end', function (err) {
 					imap.end();

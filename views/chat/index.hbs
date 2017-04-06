@@ -525,7 +525,6 @@
         function sendMessage(){
             var msg = $("#message_input").val();
             $("#message_input").val("");
-            send_input.attr('rows', 1);
             socketio.emit("message_to_server", {user:user, message:msg});
         }
 
@@ -592,6 +591,7 @@
                         newstr = str.replace("<pre style='background-color:transparent; border:0;'>", "");
                         str = newstr.substr(0, msg.indexOf(':'));
                         console.log(str);
+                        console.log(newstr);
                         //str = str.split(":").pop();
 
                         //console.log("str is "+str);
@@ -838,7 +838,9 @@
                     event.stopPropagation();
                 }else if(event.keyCode == 13 && !event.shiftKey)
                 {
-                    if(send_input.val() != ''){
+                    //console.log(send_input.val());
+                    if(send_input.val() != ""){
+                        send_input.attr('rows', 1);
                         sendMessage();
                     }
                 }
