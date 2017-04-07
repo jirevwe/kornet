@@ -4,15 +4,16 @@ var csrf = require('csurf');
 var Room = require('../models/room');
 let _ = require('underscore')._;
 let multer = require('multer');
+const fs = require('fs');
 
-var csrfProtection = csrf();
+let csrfProtection = csrf();
 
 router.use(csrfProtection);
 
 let storage = multer.diskStorage({
 	destination: './public/uploads/room',
 	filename: function(req, file, cb) {
-		cb( null, file.originalname);
+        cb( null, file.originalname);
 	}
 });
 
@@ -30,7 +31,25 @@ router.get('/',isLoggedIn, function(req, res, next) {
 });
 
 router.post('/upload', upload.single('attachment'), function(req, res, next){
-	return res.status(200).send(req.file);
+    return res.status(200).send(req.file);
+});
+
+router.post('/uploads/delete', function(req, res, next){
+    let file = req.body.file;
+
+    fs.exists('./public/uploads/room/'+file.originalname, (exists) => {
+        if(exists){
+            fs.unlink('./public/uploads/room/'+file.originalname, (err) => {
+                if (err) {
+                    console.log("error delete");
+                    console.log(err);
+                    return res.status(200);
+                }
+                console.log('successfully deleted');
+            });
+        }
+    });
+    return res.status(200);
 });
 
 router.post('/add-room', function(req, res, next) {

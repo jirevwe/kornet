@@ -272,6 +272,8 @@
         var password;
         var curRooms = {};
         var users = {};
+        let uploadfiles = [];
+        let uploadfiles_preview = [];
 
 
 
@@ -483,14 +485,36 @@
         });
 
         socketio.on("send_pic_to_client", function(data) {
-            if(data['user'] == user.name) {
-                $("#chatlog").append("<br><div class='half-col pull-left bg-success'>" + data['user'] + ": <img src='" + data['pic'] + "' alt='Could not send image.' height='100' width='100'></div><br>");
-                console.log(data['pic']);
+            if(activeRoom.id != data['room'].id){
+                roomChatCount[data['room'].id]++;
+                console.log("roomchatcount "+roomChatCount);
+                var message = roomChatCount[data['room'].id] > 0 ? '<span class="badge pull-right">'+roomChatCount[data['room'].id]+'</span>' : '';
+                var sidebar = $("#"+data['room'].id+"");
+                sidebar.find("span").remove();
+                sidebar.append(message);
+                //$("#sidebar-wrapper #"+data['room'].id+"").html( + message);
             }
             else{
-                $("#chatlog").append("<br><div class='half-col pull-right bg-warning'>" + data['user'] + ": <img src='" + data['pic'] + "' alt='Could not send image.' height='100' width='100'></div><br>");
-                console.log(data['pic']);
+                if(data['user'] == user.name) {
+                    $( "#chatlog" ).append("<div class='row'> " +
+                            "<div style='padding: 2%;'  class='col-md-6 pull-left bg-success'>"+data['message']+"</div> " +
+                            "</div>");
+                    document.getElementById("chatlog").appendChild(document.createElement("br"));
+                    document.getElementById("chatlog").append(document.createElement("hr"));
+                }
+                else{
+                    $( "#chatlog" ).append("<div class='row'> " +
+                            "<div style='padding: 2%;'  class='col-md-6 pull-right bg-warning'>"+data['message']+"</div> " +
+                            "</div>");
+                    document.getElementById("chatlog").appendChild(document.createElement("br"));
+                    document.getElementById("chatlog").append(document.createElement("hr"));
+                }
             }
+
+            var div = document.getElementById('chatlog');
+            //var elem = document.getElementById('data');
+            div.scrollTop = div.scrollHeight;
+            document.getElementById('bottomspan').scrollIntoView();
         });
 
         socketio.on("kick_mem_to_client", function(data) {
@@ -599,7 +623,7 @@
 
                         //console.log("str is "+str);
                         //console.log("user is "+user.name);
-                        if (str == "<strong>" + user.name + "</strong>") {
+                        if (str.indexOf("<strong>" + user.name + "</strong>") >= 0) {
                             $("#chatlog").append("<div class='row'> " +
                                     "<div style='padding: 2%;'  class='col-md-6 pull-left bg-success'>" + msg +
                                     "</div> " +
@@ -623,6 +647,10 @@
                 }
 
             }
+            var div = document.getElementById('chatlog');
+            //var elem = document.getElementById('data');
+            div.scrollTop = div.scrollHeight;
+            document.getElementById('bottomspan').scrollIntoView();
         });
 
         function directMsg() {
@@ -804,9 +832,7 @@
             });
 
             $("#uploadSubmit").click(function(){
-                var pic = $("#pic").val();
-                $("#pic").val("");
-                socketio.emit("send_pic_to_server", {user:user, pic:pic});
+                socketio.emit("send_pic_to_server", {user:user, files:uploadfiles});
             });
 
         });
@@ -899,14 +925,14 @@
             return -1
         });
 
-        let files = [];
+
         Dropzone.options.uploadzone = {
             url:'/chat/upload',
             addRemoveLinks: true,
             paramName: 'attachment',
             maxFilesize: 2,
             maxFiles: 6,
-            acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc',
+            acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc, .JPG, .JPEG, .xlsx, .csv, .CSV',
             headers: {
                 'x-csrf-token': "{{csrfToken}}"
             },
@@ -914,30 +940,27 @@
                 return activeRoom.id + '||' + name;
             },
             init: function() {
-                let myDropzone = this;
+                //let myDropzone = this;
 
                 this.on('success', function(file, resp){
-                    files.push(resp);
+                   uploadfiles.push(resp);
                 });
                 this.on('error',  function (file, error, xhr){
                     //console.log(error);
                 });
-                /*this.on('removedfile', function(file){
-                    let file_index = files.find((n) => { return n.originalname == activeRoom.id + '-' +file.name });
+                this.on('removedfile', function(file){
+                    let file_index = uploadfiles.find((n) => { return n.originalname == activeRoom.id + '-' +file.name });
                     $.ajax({
                         url: "http://localhost:3000/chat/uploads/delete",
                         type: "POST",
                         data: {file : file_index}
                     });
-                    files.splice(files.indexOf(file_index), 1);
-                });*/
+                    uploadfiles.splice(uploadfiles.indexOf(file_index), 1);
+                });
             },
             accept: function(file, done) {
                 let ext = file.name.toString().getExtension();
-                if( ext == 'pdf' || ext == 'png' || ext == 'png'||
-                        ext == 'jpeg' || ext == 'docx' || ext == 'doc' ||
-                        ext == 'xlxs'
-                ){
+                if( ext == 'pdf' || ext == 'jpg' || ext == 'png'|| ext == 'jpeg' || ext == 'docx' || ext == 'doc' || ext == 'xlsx' || ext == 'zip' || ext == 'JPG' || ext == 'JPEG' || ext == 'csv' || ext == 'CSV'){
                     done();
                 }
                 else
