@@ -203,12 +203,15 @@
         }
     </style>
 
+
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/dropzone.min.css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/javascripts/dropzone.min.js"></script>
     <script type="text/javascript">
 
         $(document).ready(function() {
@@ -869,6 +872,48 @@
             }
         });
 
+        let files = [];
+        Dropzone.options.uploadzone = {
+            url:'/chat/upload',
+            addRemoveLinks: true,
+            paramName: 'attachment',
+            maxFilesize: 2,
+            maxFiles: 6,
+            acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc',
+            renameFilename: (name) => {
+                return activeRoom.id + '||' + name;
+            },
+            init: function() {
+                let myDropzone = this;
+
+                this.on('success', function(file, resp){
+                    files.push(resp);
+                });
+                this.on('error',  function (file, error, xhr){
+                    //console.log(error);
+                });
+                this.on('removedfile', function(file){
+                    let file_index = files.find((n) => { return n.originalname == activeRoom.id + '-' +file.name });
+                    $.ajax({
+                        url: "http://localhost:3000/chat/uploads/delete",
+                        type: "POST",
+                        data: {file : file_index}
+                    });
+                    files.splice(files.indexOf(file_index), 1);
+                });
+            },
+            accept: function(file, done) {
+                let ext = file.name.toString().getExtension();
+                if( ext == 'pdf' || ext == 'png' || ext == 'png'||
+                        ext == 'jpeg' || ext == 'docx' || ext == 'doc' ||
+                        ext == 'xlxs'
+                ){
+                    done();
+                }
+                else
+                    done('Invalid file type');
+            }
+        };
 
     </script>
 
@@ -1110,14 +1155,17 @@
     <div class="modal-dialog">
         <!-- modal content-->
         <div class="modal-content">
+
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4>Enter the url of your image...</h4>
+                <h4>Choose files...</h4>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <input type="url" id="pic" style="width: 100%;">
+                <div id="uploadzone" class="form-group dropzone">
+                    <div hidden>
+                        <input type="file" id="attachment" name="attachment"/>
+                    </div>
                 </div>
             </div>
 
