@@ -225,26 +225,22 @@ function getMailBody(mail, req) {
 						simpleParser(stream, function (err, body) {
 							if (err) console.log(err);
 							if (body.attachments.length > 0) {
-								let att = body.attachments[0];
-								if (err) console.error(err);
-								fs.exists('./tmp/' + att.filename, (ex) => {
-									if(!ex){
-										fs.writeFile('./tmp/' + att.filename, att.content, (err) => {
-											if (err) console.log(err);
-											console.log(att.filename + ' saved!');
-											attachments.push({link:'/download/' + att.filename, name: att.filename});
-
-											www.io.emit('imap_end_attachment', { content: attachments[0] });
-											imap.end();
-										});
+								let files = body.attachments;
+								for(att in files){
+									if (err) console.error(err);
+									let ex = fs.existsSync('./tmp/' + files[att].filename);
+									if(ex){
+										console.log(files[att].filename + ' exists!');
+										attachments.push({link:'/download/' + files[att].filename, name: files[att].filename});
 									}else{
-										console.log(att.filename + ' exists!');
-										attachments.push({link:'/download/' + att.filename, name: att.filename});
-
-										www.io.emit('imap_end_attachment', { content: attachments[0] });
-										imap.end();
+										fs.writeFileSync('./tmp/' + files[att].filename, files[att].content);
+										if (err) console.log(err);
+										console.log(files[att].filename + ' saved!');
+										attachments.push({link:'/download/' + files[att].filename, name: files[att].filename});
 									}
-								});
+								}
+								www.io.emit('imap_end_attachment', { content: attachments });
+								imap.end();
 							}
 						});
 					});
@@ -364,7 +360,7 @@ router.post('/send/:id', function (req, res, next) {
 			}
 		}
 	}
-	
+
 	let smtpConfig = {
 		host: 'mail.kornet-test.com',
 		port: 587,
