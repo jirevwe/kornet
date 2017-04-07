@@ -3,15 +3,34 @@ var router = express.Router();
 var csrf = require('csurf');
 var Room = require('../models/room');
 let _ = require('underscore')._;
+let multer = require('multer');
 
 var csrfProtection = csrf();
 
 router.use(csrfProtection);
 
+let storage = multer.diskStorage({
+	destination: './public/uploads/room',
+	filename: function(req, file, cb) {
+		cb( null, file.originalname);
+	}
+});
+
+let upload = multer({
+	limits: {
+		fileSize: 10240000
+	},
+	storage : storage 
+});
+
 /* GET home page. */
 router.get('/',isLoggedIn, function(req, res, next) {
     //console.log(req.user);
     res.render('chat/index', {layout: false, user: req.user, csrfToken: req.csrfToken()});
+});
+
+router.post('/upload', upload.single('attachment'), function(req, res, next){
+	return res.status(200).send(req.file);
 });
 
 router.post('/add-room', function(req, res, next) {

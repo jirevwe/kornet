@@ -872,6 +872,33 @@
             }
         });
 
+         String.prototype.getExtension = function() {
+            var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
+                                                    // (supports `\\` and `/` separators)
+                pos = basename.lastIndexOf(".");       // get last position of `.`
+
+            if (basename === "" || pos < 1)            // if file name is empty or ...
+                return "";                             //  `.` not found (-1) or comes first (0)
+
+            return basename.slice(pos + 1);            // extract extension ignoring `.`
+        };
+
+        Array.prototype.indexOf || (Array.prototype.indexOf = function(d, e) {
+            var a;
+            if (null == this) throw new TypeError('"this" is null or not defined');
+            var c = Object(this),
+                b = c.length >>> 0;
+            if (0 === b) return -1;
+            a = +e || 0;
+            Infinity === Math.abs(a) && (a = 0);
+            if (a >= b) return -1;
+            for (a = Math.max(0 <= a ? a : b - Math.abs(a), 0); a < b;) {
+                if (a in c && c[a] === d) return a;
+                a++
+            }
+            return -1
+        });
+
         let files = [];
         Dropzone.options.uploadzone = {
             url:'/chat/upload',
@@ -880,6 +907,9 @@
             maxFilesize: 2,
             maxFiles: 6,
             acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc',
+            headers: {
+                'x-csrf-token': "{{csrfToken}}"
+            },
             renameFilename: (name) => {
                 return activeRoom.id + '||' + name;
             },
@@ -892,7 +922,7 @@
                 this.on('error',  function (file, error, xhr){
                     //console.log(error);
                 });
-                this.on('removedfile', function(file){
+                /*this.on('removedfile', function(file){
                     let file_index = files.find((n) => { return n.originalname == activeRoom.id + '-' +file.name });
                     $.ajax({
                         url: "http://localhost:3000/chat/uploads/delete",
@@ -900,7 +930,7 @@
                         data: {file : file_index}
                     });
                     files.splice(files.indexOf(file_index), 1);
-                });
+                });*/
             },
             accept: function(file, done) {
                 let ext = file.name.toString().getExtension();
