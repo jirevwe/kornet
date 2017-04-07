@@ -26,28 +26,39 @@
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    $(() => {
+    $(document).ready(() => {
         let loaded = false;
         var socketio = io.connect();
 
-        socketio.on("imap_end_attachment", function(data) {
-            $('#attachments').html('<a href="' + data['content']['link'] +'">' + data['content']['name'] + '</a>');
-        });
-
         if(!loaded){
-            let get = $.ajax({
+            socketio.on("imap_end_attachment", function(data) {
+                let html =  $('#attachments').html();
+                for(file in data['content']){
+                    html += '<span><a href="' + data['content'][file]['link'] +'">' + data['content'][file]['name'] + '</a></span><br>';
+                }
+                $('#attachments').html(html);
+            });
+
+
+            let xhr = $.ajax({
                 url: "http://localhost:3000/mail/mail-body/{{message._id}}",
                 type: "GET",
-                async: true,
-                success: function(response){
-                    console.log(response);
+                success: function(data, txt_stat, jq_xhr){
+                    console.log(data);
                     loaded = true;
                 },
                 error: function(response){
                     console.log("Error: " + JSON.stringify(response));
                 }
             });
-            console.log(get);
+
+            let fn = () =>
+            {
+                if(xhr != undefined && xhr.readyState != 4){
+                    xhr.abort();
+                }
+            };
+            setInterval(fn, 500);
         }
     });
 </script>
