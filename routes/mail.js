@@ -145,7 +145,7 @@ router.get('/reply/:id', function (req, res, next) {
 		return res.redirect('/');
 	}
 	Mail.findById(req.params.id, function (err, mail) {
-		if (err) throw err;
+		if (err) console.log(err);
 		res.render('mail/reply', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
@@ -155,7 +155,7 @@ router.get('/:id', function (req, res, next) {
 		return res.redirect('/');
 
 	Mail.findById(req.params.id, function (err, mail) {
-		if (err) throw err;
+		if (err) console.log(err);
 		res.render('mail/email', { user: req.user, message: mail, layout: 'mail_layout' });
 	});
 });
@@ -165,7 +165,7 @@ router.get('/trash/:id', function (req, res, next) {
 		return res.redirect('/');
 
 	Mail.findById(req.params.id, function (err, mail) {
-		if (err) throw err;
+		if (err) console.log(err);
 		res.render('mail/trash_item', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
@@ -175,7 +175,7 @@ router.get('/edit/:id', function (req, res, next) {
 		return res.redirect('/');
 
 	Mail.findById(req.params.id, function (err, mail) {
-		if (err) throw err;
+		if (err) console.log(err);
 		res.render('mail/edit_draft', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
@@ -185,7 +185,7 @@ router.get('/drafts/:id', function (req, res, next) {
 		return res.redirect('/');
 
 	Mail.findById(req.params.id, function (err, mail) {
-		if (err) throw err;
+		if (err) console.log(err);
 		res.render('mail/edit_draft', { user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
@@ -322,7 +322,7 @@ function refresh(mailbox_name, req, res) {
 					});
 				});
 				fetch.once('error', function (err) {
-			console.log(err);
+					console.log(err);
 				});
 				fetch.once('end', function (err) {
 					imap.end();
@@ -343,7 +343,7 @@ router.post('/send/:id', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
 
-	let subject = req.body.subject;
+	let subject = req.body.subject || 'No Subject';
 	let recipient = req.body.recipient;
 	let content = req.body.content;
 	let sender = req.body.sender;
@@ -413,7 +413,7 @@ router.post('/send/:id', function (req, res, next) {
 				imap.openBox('Sent', false, function (err, box) {
 					if (err) console.log(err);
 					imap.append(message, { mailbox: 'Sent', flags: ['Seen'], date: new Date(Date.now()) }, function (err) {
-						if (err) throw err;
+						if (err) console.log(err);
 						console.log('Saved in Mailbox (Sent)');
 						imap.end();
 					});

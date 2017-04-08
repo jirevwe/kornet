@@ -67,32 +67,97 @@
         </div>
     </form>
 </div>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    let loaded = false;
-    var socketio = io.connect();
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+    let socketio = io.connect();
+        let mail_id = undefined;
 
-    /*socketio.on("imap_end_message", function(data) {
-        if(!loaded){
-            console.log(data);
-            $('#text').html(data['text']);
-            loaded = true;
-        }
-    });
-
-    $(document).ready(function() {
-        let get = $.ajax({
-            url: "http://localhost:3000/mail/mail-body/{{message._id}}",
-            type: "GET",
-            async: true,
-            success: function(response) {
-                console.log(response);
-                get.abort();
-            },
-            error: function(response) {
-                console.log("Error: " + response);
-            }
+        socketio.on("hidden_mail_attr", function(data) {
+            $('#stuff').html('<input id="attr" type="text" name="attr" value="' + data['content'] +'"/>');
+            mail_id = data['content'];
         });
-        console.log(get);*/
+
+        if (mail_id == undefined){
+            mail_id = Date.now().toString();
+            $('#stuff').html('<input id="attr" type="text" name="attr" value="' + mail_id +'"/>');
+        }
+
+         String.prototype.getExtension = function() {
+            var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
+                                                    // (supports `\\` and `/` separators)
+                pos = basename.lastIndexOf(".");       // get last position of `.`
+
+            if (basename === "" || pos < 1)            // if file name is empty or ...
+                return "";                             //  `.` not found (-1) or comes first (0)
+
+            return basename.slice(pos + 1);            // extract extension ignoring `.`
+        };
+
+        Array.prototype.indexOf || (Array.prototype.indexOf = function(d, e) {
+            var a;
+            if (null == this) throw new TypeError('"this" is null or not defined');
+            var c = Object(this),
+                b = c.length >>> 0;
+            if (0 === b) return -1;
+            a = +e || 0;
+            Infinity === Math.abs(a) && (a = 0);
+            if (a >= b) return -1;
+            for (a = Math.max(0 <= a ? a : b - Math.abs(a), 0); a < b;) {
+                if (a in c && c[a] === d) return a;
+                a++
+            }
+            return -1
+        });
+
+        let files = [];
+        Dropzone.options.uploadzone = {
+            url:'/mail/upload',
+            addRemoveLinks: true,
+            paramName: 'attachment',
+            maxFilesize: 10,
+            maxFiles: 5,
+            dictDefaultMessage: 'Drag an file here to upload, or click to select',
+            acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc',
+            renameFilename: (name) => {
+                return mail_id + '-' + name;
+            },
+            init: function() {
+                let myDropzone = this;
+                let xhr = undefined;
+
+                this.on('success', function(file, resp){
+                    files.push(resp);
+                });
+                this.on('error',  function (file, error, xhr){
+                    console.log(error);
+                });
+                this.on('removedfile', function(file){
+                    let file_index = files.find((n) => { return n.originalname == mail_id + '-' +file.name });
+                    xhr = $.ajax({
+                        url: "http://localhost:3000/mail/uploads/delete",
+                        type: "POST",
+                        data: {file : file_index}
+                    });
+                    files.splice(files.indexOf(file_index), 1);
+                });
+
+                let fn = () =>
+                {
+                    if(xhr != undefined && xhr.readyState != 4)
+                        xhr.abort(); 
+                };
+                setInterval(fn, 500);
+            },
+            accept: function(file, done) {
+                let ext = file.name.toString().getExtension();
+                if( ext == 'pdf' || ext == 'png' || ext == 'jpeg'|| ext == 'jpg' ||
+                    ext == 'docx' || ext == 'doc' || ext == 'xlsx' || ext == 'xls'
+                ){
+                    done();
+                }
+                else
+                    done('Invalid file type');
+            }
+        };
     });
 </script>
