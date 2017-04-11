@@ -9,3 +9,9 @@
     {{/each}}
     </div>
 </div>
+<script>
+    $.get("http://localhost:3000/mail/refresh/drafts", function(data, status, xhr){
+        console.log(data);
+        console.log(status);
+    });
+</script>

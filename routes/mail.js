@@ -112,6 +112,12 @@ router.get('/trash', function (req, res, next) {
 //--------------------------------------------------//
 
 //--------------- Refresh Tasks -------------------//
+
+router.get('/refresh', function (req, res, next) {
+	refresh("Inbox", req, res);
+	return res.status(200);
+});
+
 router.get('/refresh/sent', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
@@ -127,7 +133,6 @@ router.get('/refresh/inbox', function (req, res, next) {
 router.get('/refresh/trash', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
-	let mailbox_name = "Trash";
 	refresh("Trash", req, res);
 });
 
@@ -213,8 +218,8 @@ function getMailBody(mail, req) {
 		});
 	}
 
-	let text = 'empty';
-	imap.once('ready', function () {
+	imap.once('ready', function (err) {
+		if (err) console.log(err);
 		imap.openBox(mail.mailbox, false, function (err, box) {
 			if (err) console.log(err);
 			imap.seq.search([['FROM', mail.from.text], ['TO', mail.to.text], ['SUBJECT', mail.subject]], (err, uids) => {
@@ -250,7 +255,6 @@ function getMailBody(mail, req) {
 	});
 	imap.once('error', function (err) {
 		console.log(err);
-        return text;
 	});
 	imap.once('end', (err) => {
 		if (err) console.log(err);
@@ -268,16 +272,16 @@ function refresh(mailbox_name, req, res) {
 			password: getLong(req.user.long_text),
 			host: 'mail.kornet-test.com',
 			port: 993,
-			tls: true
+			tls: true,
+			debug: console.log
 		});
 	}
 
-	imap.once('ready', function () {
+	imap.once('ready', function (err) {
+		if (err) console.log(err);
 		imap.openBox(mailbox_name, true, (function (err, box) {
 			if (err) console.log(err);
-			if (box.messages.total == 0)
-				res.redirect('/mail/' + mailbox_name);
-			else {
+			if (box != undefined && box.messages.total > 0) {
 				let fetch = imap.seq.fetch('1:' + box.messages.total, { bodies: [''], struct: true});
 				fetch.on('message', function (msg, seqno) {
 					msg.on('body', function (stream, info) {
@@ -308,14 +312,14 @@ function refresh(mailbox_name, req, res) {
 											console.log('Mail Cached: ' + document.messageId);
 										});
 									}
-									else{
-										doc.remove(() => {
-											saved_mail.save(function (err, document) {
-												if (err) console.log(err);
-												console.log('Mail Cached: ' + document.messageId);
-											});
-										});
-									}
+									// else{
+									// 	doc.remove(() => {
+									// 		saved_mail.save(function (err, document) {
+									// 			if (err) console.log(err);
+									// 			console.log('Mail Cached: ' + document.messageId);
+									// 		});
+									// 	});
+									// }
 								});
 							}
 						});
@@ -326,9 +330,10 @@ function refresh(mailbox_name, req, res) {
 				});
 				fetch.once('end', function (err) {
 					imap.end();
-					setTimeout((function () {
-						res.redirect('/mail/' + mailbox_name);
-					}), 3000);
+					// setTimeout((function () {
+					// 	res.redirect('/mail/' + mailbox_name);
+					// }), 3000);
+					return res.status(200);
 				});
 			}
 		}));

@@ -67,7 +67,7 @@
 
             let xhr = $.ajax({
                 url: "http://localhost:3000/mail/mail-body/{{message._id}}",
-                type: "GET",
+                method: "GET",
                 success: function(data, txt_stat, jq_xhr){
                     console.log(data);
                     loaded = true;

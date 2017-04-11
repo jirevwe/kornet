@@ -40,6 +40,11 @@
 </div>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
+        $.get("http://localhost:3000/mail/refresh/sent", function(data, status, xhr){
+            console.log(data);
+            console.log(status);
+        });
+
         let socketio = io.connect();
         let mail_id = undefined;
 
