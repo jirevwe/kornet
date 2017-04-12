@@ -151,7 +151,6 @@ function Person (name, id, roomOwn, roomIn) {
     this.inRoom = roomIn;
 }
 
-
 // Do the Socket.IO magic:
 let io = socketio.listen(server);
 io.use(middleware);

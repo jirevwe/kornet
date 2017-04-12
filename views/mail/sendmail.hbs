@@ -40,6 +40,11 @@
 </div>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
+        $.get("http://localhost:3000/mail/refresh/sent", function(data, status, xhr){
+            console.log(data);
+            console.log(status);
+        });
+
         let socketio = io.connect();
         let mail_id = undefined;
 
@@ -94,6 +99,7 @@
             },
             init: function() {
                 let myDropzone = this;
+                let xhr = undefined;
 
                 this.on('success', function(file, resp){
                     files.push(resp);
@@ -103,19 +109,25 @@
                 });
                 this.on('removedfile', function(file){
                     let file_index = files.find((n) => { return n.originalname == mail_id + '-' +file.name });
-                    $.ajax({
+                    xhr = $.ajax({
                         url: "http://localhost:3000/mail/uploads/delete",
                         type: "POST",
                         data: {file : file_index}
                     });
                     files.splice(files.indexOf(file_index), 1);
                 });
+
+                let fn = () =>
+                {
+                    if(xhr != undefined && xhr.readyState != 4)
+                        xhr.abort(); 
+                };
+                setInterval(fn, 500);
             },
             accept: function(file, done) {
                 let ext = file.name.toString().getExtension();
-                if( ext == 'pdf' || ext == 'png' || ext == 'png'|| 
-                    ext == 'jpeg' || ext == 'docx' || ext == 'doc' ||
-                    ext == 'xlxs'
+                if( ext == 'pdf' || ext == 'png' || ext == 'jpeg'|| ext == 'jpg' ||
+                    ext == 'docx' || ext == 'doc' || ext == 'xlsx' || ext == 'xls'
                 ){
                     done();
                 }
