@@ -14,7 +14,8 @@ var validator = require('express-validator');
 var MongoStore = require('connect-mongo')(session);
 var moment = require('moment');
 
-//define the routes 
+//define the routes
+var controllerRoutes = require('./routes/controller');
 var marketRoutes = require('./routes/market');
 var mailRoutes = require('./routes/mail');
 var homeRoutes = require('./routes/index');
@@ -77,6 +78,7 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use('/controller', controllerRoutes);
 app.use('/market', marketRoutes);
 app.use('/chat', chatRoutes);
 app.use('/mail', mailRoutes);

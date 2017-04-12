@@ -1,5 +1,6 @@
 let passport = require('passport');
 let User = require('../models/user');
+let Controller = require('../models/controller');
 let LocalStrategy = require('passport-local').Strategy;
 let randomstring = require("randomstring");
 let mysql = require('mysql');
@@ -184,6 +185,7 @@ passport.serializeUser(function (user, done) {
      });
 
  }));
+
 
 passport.use('local.change_pass', new LocalStrategy({
     usernameField: 'email',

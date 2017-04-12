@@ -8,6 +8,31 @@ const fs = require('fs');
 
 let csrfProtection = csrf();
 
+router.post('/room-chat', function(req, res, next) {
+    var room_id = req.body.room_id;
+    var chatHistory = req.body.chat_history;
+
+    Room.findOne({'room_id':room_id}, function (err, room) {
+        if(err){
+            return done(room);
+        }
+        if(!room){
+            req.flash('error', 'User does not exist');
+            return res.redirect('/user/activate');
+        }
+        //
+        // user.is_activated = 1;
+        // user.save(function(err) {
+        //     if (err)
+        //         console.log('error');
+        //     else
+        //         console.log('success');
+        // });
+        // return res.redirect('/');
+    });
+
+});
+
 router.use(csrfProtection);
 
 let storage = multer.diskStorage({
@@ -138,6 +163,8 @@ router.get('/room-members/:id', function(req, res, next) {
     });
 
 });
+
+
 
 module.exports = router;
 

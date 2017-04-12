@@ -251,6 +251,24 @@ io.sockets.on("connection", function(socket){
         console.log(user.name + ": " + data["message"]); // log it to the Node.JS output
 
         chatHistory[user.inRoom].push("<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> " + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>");
+        console.log(chatHistory[user.inRoom]);
+
+        var options = {
+            method: 'POST',
+            uri: 'http://api.posttestserver.com/post',
+            body: {
+                room_id: 'payload'
+            },
+            json: true // Automatically stringifies the body to JSON
+        };
+
+        rp(options)
+            .then(function (parsedBody) {
+                // POST succeeded...
+            })
+            .catch(function (err) {
+                // POST failed...
+            });
 
         io.sockets.in(user.inRoom).emit("save_message_to_client", {user: user.name, message:data["message"], room:room});
         io.sockets.in(user.inRoom).emit("message_to_client", {user: user.name, message:data["message"], room:room}); // broadcast the message to other users
@@ -318,6 +336,7 @@ io.sockets.on("connection", function(socket){
                     chatHistory[user.inRoom].push(message);
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
             }
+            console.log(chatHistory[user.inRoom]);
         });
 
     });
