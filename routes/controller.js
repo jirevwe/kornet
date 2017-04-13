@@ -56,7 +56,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
         });
         numbers = _.flatten(numbers);
         //console.log(numbers);
-
+        count = 0;
         for (i = 0; i < numbers.length; i++) {
             number = numbers[i];
             if (number.match("^0")) {
@@ -70,72 +70,77 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
             User.findOne({'phone_number': number}, function (err, user) {
                 if (err) {
                     req.flash('error', 'Error getting user.');
-                    return res.redirect('/controller/');
                 }
-                if (user) {
+                if (user){
                     req.flash('error', '"'+number + '" has already been used.');
                     console.log(number + ' has already been used.');
-                    return res.redirect('/controller/');
+                    count++;
                 }
+                else {
 
-                let newUser = new User;
+                    let newUser = new User;
 
-                newUser.email = 'none';
-                newUser.phone_number = number;
-                newUser.password = newUser.encrypt(token);
-                newUser.network_provider = network_provider;
-                newUser.user_type = 'Business';
-                newUser.user_domain = domain_name;
-                newUser.security_token = 'none';
-                newUser.long_text = 'none';
+                    newUser.email = 'none';
+                    newUser.phone_number = number;
+                    newUser.password = newUser.encrypt(token);
+                    newUser.network_provider = network_provider;
+                    newUser.user_type = 'Business';
+                    newUser.user_domain = domain_name;
+                    newUser.security_token = 'none';
+                    newUser.long_text = 'none';
 
-                newUser.save(function (err, result) {
-                    if (err) {
-                        req.flash('error', 'Error creating user');
-                        console.log(err);
-                        return res.redirect('/controller/');
-                    }
-                    console.log(newUser._id);
-                });
+                    newUser.save(function (err, result) {
+                        if (err) {
+                            req.flash('error', 'Error creating user');
+                            console.log(err);
+                        }
+                        console.log(newUser._id);
+                        users.push(newUser._id);
+                    });
+                }
             });
         }
-
+        console.log("count "+count);
         //console.log(users);
-        Business.findOne({ $or: [ {'name':business_name}, {'domain':domain_name} ] }, function (err, business) {
-            if(err){
-                req.flash('error', 'Error getting business.');
-                 res.redirect('/controller/');
-            }
-            if(business){
-                if(business.name == business_name){
-                    req.flash('error', '"'+business_name+'" Business name has been taken.');
-                    res.redirect('/controller/');
-                }
-                if(business.domain == domain_name){
-                    req.flash('error', '"'+domain_name+'" Domain name has been taken.');
-                    res.redirect('/controller/');
-                }
-            }
-
-            let newBusiness =  new Business;
-
-            newBusiness.name = business_name;
-            newBusiness.domain = domain_name;
-            newBusiness.users = users;
-            newBusiness.admin = users[0];
-            newBusiness.staff_number = staff;
-            newBusiness.created_by = created_by.name;
-
-            newBusiness.save(function (err, result) {
-                if(err){
-                    req.flash('error', 'Error creating Business');
-                    console.log(err);
-                     res.redirect('/controller/');
-                }
-
-                 res.render('controller/final', {layout: 'auth_header', user: req.session.controller, numbers:numbers, pass:token, admin:numbers[0]});
-            });
-        });
+        // Business.findOne({ $or: [ {'name':business_name}, {'domain':domain_name} ] }, function (err, business) {
+        //     if(err){
+        //         req.flash('error', 'Error getting business.');
+        //     }
+        //     if(business){
+        //         if(business.name == business_name){
+        //             req.flash('error', '"'+business_name+'" Business name has been taken.');
+        //         }
+        //         if(business.domain == domain_name){
+        //             req.flash('error', '"'+domain_name+'" Domain name has been taken.');
+        //         }
+        //     }else {
+        //
+        //         let newBusiness = new Business;
+        //
+        //         newBusiness.name = business_name;
+        //         newBusiness.domain = domain_name;
+        //         newBusiness.users = users;
+        //         newBusiness.admin = users[0];
+        //         newBusiness.staff_number = staff;
+        //         newBusiness.created_by = created_by.name;
+        //
+        //         newBusiness.save(function (err, result) {
+        //             if (err) {
+        //                 req.flash('error', 'Error creating Business');
+        //                 console.log(err);
+        //             }
+        //
+        //             res.render('controller/final', {
+        //                 layout: 'auth_header',
+        //                 user: req.session.controller,
+        //                 numbers: numbers,
+        //                 pass: token,
+        //                 admin: numbers[0]
+        //             });
+        //         });
+        //     }
+        //     res.redirect('/controller/');
+        // });
 
 });
 
