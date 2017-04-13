@@ -312,14 +312,6 @@ function refresh(mailbox_name, req, res) {
 											console.log('Mail Cached: ' + document.messageId);
 										});
 									}
-									// else{
-									// 	doc.remove(() => {
-									// 		saved_mail.save(function (err, document) {
-									// 			if (err) console.log(err);
-									// 			console.log('Mail Cached: ' + document.messageId);
-									// 		});
-									// 	});
-									// }
 								});
 							}
 						});
@@ -330,9 +322,6 @@ function refresh(mailbox_name, req, res) {
 				});
 				fetch.once('end', function (err) {
 					imap.end();
-					// setTimeout((function () {
-					// 	res.redirect('/mail/' + mailbox_name);
-					// }), 3000);
 					return res.status(200);
 				});
 			}

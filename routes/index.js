@@ -118,6 +118,27 @@ router.post('/activate', isActivated, function (req, res, next) {
 
 router.get('/signup', notLoggedIn,  function (req, res, next) {
     let messages = req.flash('error');
+
+    let mysql = require('mysql');
+    //create user email account
+    let connection = mysql.createConnection({
+            host     : 'mail.kornet-test.com',
+            user     : 'root2',
+            password : '00000',
+            database : 'vmail',
+            debug    : false
+        });
+
+        connection.connect();
+
+        connection.query('SELECT * FROM domain', function(err, results, fields) {
+            if (err) console.log(err);
+            console.log(results);
+        });
+
+        connection.end();
+        //end create user email account
+
     res.render('user/signup', {csrfToken: req.csrfToken(), domain:'demo.kornet-test.com' ,messages:messages, hasErrors:messages.length > 0});
 });
 
@@ -133,7 +154,6 @@ router.post('/signup', notLoggedIn,  passport.authenticate('local.signup', { fai
         }else{
             res.redirect('/');
         }
-
     }
 });
 
