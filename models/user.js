@@ -7,7 +7,7 @@ var userSchema = new Schema({
     password: {type: Schema.Types.String, required: true},
     first_name: Schema.Types.String,
     last_name: Schema.Types.String,
-    phone_number: {type: Schema.Types.String, required: true},
+    phone_number: {type: Schema.Types.String, required: true, index: { unique: true }},
     network_provider: {type: Schema.Types.String, required: true},
     email: {type: Schema.Types.String, required: true},
     address: Schema.Types.String,

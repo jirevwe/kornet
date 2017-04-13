@@ -2,10 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var businessSchema = new Schema({
-    name: {type: Schema.Types.String, required: true},
+    name: {type: Schema.Types.String, required: true, index: { unique: true }},
     address: {type: Schema.Types.String},
     users: [{ type : Schema.Types.ObjectId, ref: 'User' }],
-    domain: {type: Schema.Types.String, required: true},
+    domain: {type: Schema.Types.String, required: true, index: { unique: true }},
     rooms: [{ type : Schema.Types.ObjectId, ref: 'Room' }],
     admin:{ type: Schema.Types.ObjectId, ref:'User'},
     staff_number: Schema.Types.String,

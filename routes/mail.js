@@ -14,8 +14,6 @@ let multer = require('multer');
 let www = require('../bin/www');
 let mkdirp = require('mkdirp');
 
-let imap = undefined;
-
 let storage = multer.diskStorage({
 	destination: './public/uploads/mail',
 	filename: function(req, file, cb) {
@@ -33,13 +31,6 @@ let upload = multer({
 router.get('/', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
-	imap = new Imap({
-		user: req.user.email,
-		password: getLong(req.user.long_text),
-		host: 'mail.kornet-test.com',
-		port: 993,
-		tls: true
-	});
 	setTimeout(() => { www.io.emit('hidden_mail_attr', {content: Date.now().toString()}); }, 1000);
 	res.render('mail/sendmail', { user: req.user, layout: 'mail_layout' });
 });
@@ -207,16 +198,13 @@ router.get('/mail-body/:id', function (req, res, next) {
 function getMailBody(mail, req) {
 	let attachments = [];
 
-	if (imap == undefined)
-	{
-		imap = new Imap({
-			user: req.user.email,
-			password: getLong(req.user.long_text),
-			host: 'mail.kornet-test.com',
-			port: 993,
-			tls: true
-		});
-	}
+	let imap = new Imap({
+		user: req.user.email,
+		password: getLong(req.user.long_text),
+		host: 'mail.kornet-test.com',
+		port: 993,
+		tls: true
+	});
 
 	imap.once('ready', function (err) {
 		if (err) console.log(err);
@@ -265,17 +253,14 @@ function getMailBody(mail, req) {
 
 //----------------- Refresh Function -------------------------//
 function refresh(mailbox_name, req, res) {
-	if (imap == undefined)
-	{
-		imap = new Imap({
-			user: req.user.email,
-			password: getLong(req.user.long_text),
-			host: 'mail.kornet-test.com',
-			port: 993,
-			tls: true,
-			debug: console.log
-		});
-	}
+	let imap = new Imap({
+		user: req.user.email,
+		password: getLong(req.user.long_text),
+		host: 'mail.kornet-test.com',
+		port: 993,
+		tls: true,
+		debug: console.log
+	});
 
 	imap.once('ready', function (err) {
 		if (err) console.log(err);
@@ -392,16 +377,13 @@ router.post('/send/:id', function (req, res, next) {
 		else console.log("Message sent: " + res.messageId);
 
 		mail.build(function (err, message) {
-			if (imap == undefined)
-			{
-				imap = new Imap({
-					user: req.user.email,
-					password: getLong(req.user.long_text),
-					host: 'mail.kornet-test.com',
-					port: 993,
-					tls: true
-				});
-			}
+			let imap = new Imap({
+				user: req.user.email,
+				password: getLong(req.user.long_text),
+				host: 'mail.kornet-test.com',
+				port: 993,
+				tls: true
+			});
 
 			imap.once('ready', function () {
 				imap.openBox('Sent', false, function (err, box) {
@@ -463,6 +445,13 @@ router.post('/save/:id', function (req, res, next) {
 
 	let mail = composer(mailOptions);
 	mail.build(function (err, message) {
+		let imap = new Imap({
+			user: req.user.email,
+			password: getLong(req.user.long_text),
+			host: 'mail.kornet-test.com',
+			port: 993,
+			tls: true
+		});
 
 		imap.once('ready', function () {
 			imap.openBox('Drafts', false, function (err, box) {
