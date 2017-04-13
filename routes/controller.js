@@ -109,6 +109,12 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                         }else {
 
                             let newBusiness = new Business;
+                            let success = {
+                                numbers: fixed_numbers,
+                                token: token,
+                                admin: fixed_numbers[0]
+                            };
+                            req.flash('success', success);
 
                             newBusiness.name = business_name;
                             newBusiness.domain = domain_name;
@@ -121,17 +127,9 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                                 if (err) {
                                     req.flash('error', 'Error creating Business');
                                     console.log(err);
+                                }else{
+                                    console.log("success");
                                 }
-
-                                let success = {
-                                    numbers: numbers,
-                                    token: token,
-                                    admin: numbers[0]
-                                };
-                                req.flash('success', success);
-                                //res.redirect('/controller/');
-
-                                //console.log("success");
 
                             });
 
@@ -151,7 +149,8 @@ router.use(csrfProtection);
 
 router.get('/', isLoggedIn, function (req, res, next) {
     let messages = req.flash('error');
-    res.render('controller/index', {layout: 'auth_header', user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0});
+    let successMsg = req.flash('success')[0];
+    res.render('controller/index', {layout: 'auth_header', user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
 });
 
 router.get('/signin', notLoggedIn, function (req, res, next) {
