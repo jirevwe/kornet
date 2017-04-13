@@ -58,7 +58,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
         //console.log(numbers);
         count = 0;
         for (i = 0; i < numbers.length; i++) {
-            number = numbers[i];
+            let number = numbers[i];
             if (number.match("^0")) {
                 number = number.replace("0", "+234");
                 console.log(number);
