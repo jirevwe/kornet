@@ -1,4 +1,5 @@
 let express = require('express');
+let http = require("http");
 let router = express.Router();
 let Controller = require('../models/controller');
 let Business = require('../models/business');
@@ -24,6 +25,11 @@ let upload = multer({
     },
     storage : storage
 });
+let users = [];
+
+function user_add(user){
+    users.push(user);
+}
 
 router.post('/business', upload.single('staff_file'), isLoggedIn, function (req, res, next) {
     let business_name = req.body.business_name;
@@ -33,9 +39,8 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
     let network_provider = req.body.network_provider;
     let created_by = req.session.controller;
 
-    let columns = [""];
     let numbers = [];
-    let users = [];
+
 
     let token = randomstring.generate({
         length: 5,
@@ -43,37 +48,37 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
     });
     console.log("your password is "+token);
 
-    require("csv-to-array")({
-        file: './public/uploads/business/'+staff_file,
-        columns: columns
-    }, function (err, array) {
-        if(err){
-            console.log(err);
-        }
-        _.map(array, function(num, key){
+        let loader = require('csv-load-sync');
+        let csv = loader('./public/uploads/business/' + staff_file);
+        //console.log(csv);
+        _.map(csv, function (num, key) {
             numbers.push(_.toArray(num));
         });
         numbers = _.flatten(numbers);
+        //console.log(numbers);
 
-        _.find(numbers, function(number){
+        for (i = 0; i < numbers.length; i++) {
+            number = numbers[i];
             if (number.match("^0")) {
-                number = user_id.replace("0","+234");
+                number = number.replace("0", "+234");
                 console.log(number);
             }
-            User.findOne({'phone_number':number}, function (err, user) {
-                if(err){
+            if (number.match("^234")) {
+                number = number.replace("234", "+234");
+                console.log(number);
+            }
+            User.findOne({'phone_number': number}, function (err, user) {
+                if (err) {
                     req.flash('error', 'Error getting user.');
-                    throw new Error('break');
+                    return res.redirect('/controller/');
                 }
-                if(user){
-                    if(user.phone_number == number){
-                        req.flash('error', number+' has already been used.');
-                        console.log(number+' has already been used.');
-                        throw new Error('break');
-                    }
+                if (user) {
+                    req.flash('error', '"'+number + '" has already been used.');
+                    console.log(number + ' has already been used.');
+                    return res.redirect('/controller/');
                 }
 
-                let newUser =  new User;
+                let newUser = new User;
 
                 newUser.email = 'none';
                 newUser.phone_number = number;
@@ -85,29 +90,30 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                 newUser.long_text = 'none';
 
                 newUser.save(function (err, result) {
-                    if(err){
+                    if (err) {
                         req.flash('error', 'Error creating user');
                         console.log(err);
-                        throw new Error('break');
+                        return res.redirect('/controller/');
                     }
-                    users.push(newUser._id);
+                    console.log(newUser._id);
                 });
             });
-        });
-        console.log("done with users");
+        }
+
+        //console.log(users);
         Business.findOne({ $or: [ {'name':business_name}, {'domain':domain_name} ] }, function (err, business) {
             if(err){
                 req.flash('error', 'Error getting business.');
-                return res.redirect('/controller/');
+                 res.redirect('/controller/');
             }
             if(business){
                 if(business.name == business_name){
-                    req.flash('error', 'Business name has been taken.');
-                    return res.redirect('/controller/');
+                    req.flash('error', '"'+business_name+'" Business name has been taken.');
+                    res.redirect('/controller/');
                 }
                 if(business.domain == domain_name){
-                    req.flash('error', 'Domain name has been taken.');
-                    return res.redirect('/controller/');
+                    req.flash('error', '"'+domain_name+'" Domain name has been taken.');
+                    res.redirect('/controller/');
                 }
             }
 
@@ -122,23 +128,25 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
 
             newBusiness.save(function (err, result) {
                 if(err){
-                    req.flash('error', 'Error creating user');
+                    req.flash('error', 'Error creating Business');
                     console.log(err);
-                    return res.redirect('/controller/create');
+                     res.redirect('/controller/');
                 }
 
-               return res.render('controller/final', {layout: 'auth_header', user: req.session.controller, numbers:numbers, pass:token, admin:numbers[0]});
+                 res.render('controller/final', {layout: 'auth_header', user: req.session.controller, numbers:numbers, pass:token, admin:numbers[0]});
             });
         });
-    });
 
 });
+
+
 
 let csrfProtection = csrf();
 router.use(csrfProtection);
 
 router.get('/', isLoggedIn, function (req, res, next) {
-    res.render('controller/index', {layout: 'auth_header', user: req.session.controller, csrfToken: req.csrfToken()});
+    let messages = req.flash('error');
+    res.render('controller/index', {layout: 'auth_header', user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0});
 });
 
 router.get('/signin', notLoggedIn, function (req, res, next) {
