@@ -50,36 +50,44 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
     numbers = _.flatten(numbers);
     //console.log(numbers);
     let objects = [];
+    let fixed_numbers = [];
     for (i = 0; i < numbers.length; i++) {
 
         let number = numbers[i];
         if (number.match("^0")) {
             number = number.replace("0", "+234");
+            fixed_numbers.push(number);
             //console.log(number);
         }
         if (number.match("^234")) {
             number = number.replace("234", "+234");
+            fixed_numbers.push(number);
             //console.log(number);
         }
         objects.push({'email': 'none', 'phone_number': number, 'password': token, 'network_provider':network_provider,
             'user_type': 'Business', 'user_domain': domain_name, 'security_token': 'none', 'long_text': 'none'})
     }
+    console.log(fixed_numbers);
 
-    User.find({'phone_number': {$in : numbers}}, function (err, users) {
+    User.find({'phone_number': {$in : fixed_numbers}}, function (err, users) {
         let users_id = [];
         if (err) {
             req.flash('error', 'Error getting user.');
+            return res.redirect('/controller/');
         }
         if (users.length > 0){
-            for (i = 0; i < numbers.length; i++) {
-                req.flash('error', '"'+numbers[i] + '" has already been used.');
-                console.log(numbers[i] + ' has already been used.');
+            for (i = 0; i < fixed_numbers.length; i++) {
+                req.flash('error', '"'+fixed_numbers[i] + '" has already been used.');
+                console.log(fixed_numbers[i] + ' has already been used.');
             }
+            return res.redirect('/controller/');
         }
         else {
             User.insertMany(objects, function (err, result) {
                 if(err){
                     console.log(err);
+                    req.flash('error', 'Error creating users.');
+                    return res.redirect('/controller/');
                 }else{
                     for (i = 0; i < result.length; i++) {
                         users_id.push(result[i]._id)
@@ -92,9 +100,11 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                         if(business){
                             if(business.name == business_name){
                                 req.flash('error', '"'+business_name+'" Business name has been taken.');
+
                             }
                             if(business.domain == domain_name){
                                 req.flash('error', '"'+domain_name+'" Domain name has been taken.');
+
                             }
                         }else {
 
@@ -113,18 +123,21 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                                     console.log(err);
                                 }
 
-                                return res.render('controller/final', {
-                                    layout: 'auth_header',
-                                    user: req.session.controller,
+                                let success = {
                                     numbers: numbers,
-                                    pass: token,
+                                    token: token,
                                     admin: numbers[0]
-                                });
+                                };
+                                req.flash('success', success);
+                                //res.redirect('/controller/');
+
+                                //console.log("success");
+
                             });
+
                         }
                         return res.redirect('/controller/');
                     });
-
                 }
             });
         }
