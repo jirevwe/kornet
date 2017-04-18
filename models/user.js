@@ -23,9 +23,10 @@ var userSchema = new Schema({
     contacts: [{ type : Schema.Types.ObjectId, ref: 'User' }],
     gender: Schema.Types.String,
     security_token: {type: Schema.Types.String, required:true},
-    is_activated: {type: Schema.Types.String, default: 0},
+    is_activated: {type: Schema.Types.String, de1fault: 0},
     user_type: Schema.Types.String,
     user_domain: Schema.Types.String,
+    wallet: { type: Schema.Types.ObjectId, ref:'Wallet'},
     created_at: {type: Schema.Types.Date, default: Date.now},
     modified_at: {type: Schema.Types.Date, default: Date.now}
 });
