@@ -132,7 +132,6 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                                 }else{
                                     console.log("success");
                                 }
-
                             });
 
                         }
