@@ -48,7 +48,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
         numbers.push(_.toArray(num));
     });
     numbers = _.flatten(numbers);
-    //console.log(numbers);
+
     let objects = [];
     let fixed_numbers = [];
     for (i = 0; i < numbers.length; i++) {
@@ -63,10 +63,9 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
             fixed_numbers.push(number);
             //console.log(number);
         }
-        objects.push({'email': 'none', 'phone_number': number, 'password': token, 'network_provider':network_provider,
+        objects.push({'name': number, 'email': 'none', 'phone_number': number, 'password': token, 'network_provider':network_provider,
             'user_type': 'Business', 'user_domain': domain_name, 'security_token': 'none', 'long_text': 'none'})
     }
-    //console.log(fixed_numbers);
 
     User.find({'phone_number': {$in : fixed_numbers}}, function (err, users) {
         let users_id = [];
@@ -108,12 +107,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                         }else {
 
                             let newBusiness = new Business;
-                            let success = {
-                                numbers: fixed_numbers,
-                                token: token,
-                                admin: fixed_numbers[0]
-                            };
-                            req.flash('success', success);
+
 
                             newBusiness.name = business_name;
                             newBusiness.domain = domain_name;
@@ -141,6 +135,13 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
 
                             connection.end();
                             //end create user email account
+
+                            let success = {
+                                numbers: fixed_numbers,
+                                token: token,
+                                admin: fixed_numbers[0]
+                            };
+                            req.flash('success', success);
 
                             newBusiness.save(function (err, result) {
                                 if (err) {

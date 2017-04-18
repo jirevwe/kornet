@@ -35,9 +35,9 @@ passport.serializeUser(function (user, done) {
     });
  });
 
- passport.use('local.signup', new LocalStrategy({ usernameField: 'email', passwordField: 'password', passReqToCallback: true }, function (req, email, password, done) {
+ passport.use('local.signup', new LocalStrategy({ usernameField: 'username', passwordField: 'password', passReqToCallback: true }, function (req, username, password, done) {
      //req.checkBody('username', 'Username cannot be empty').notEmpty();
-     req.checkBody('email', 'Invalid email').notEmpty().isEmail();
+     req.checkBody('username', 'Username cannot be empty').notEmpty();
      req.checkBody('password', 'Invalid password').notEmpty();
      req.checkBody('password', 'Password should be at least 8 characters').isLength({min:8});
      req.checkBody('password', 'Passwords do not match').equals(req.body.password2);
@@ -50,7 +50,7 @@ passport.serializeUser(function (user, done) {
 
          return done(null, false, req.flash('error', messages));
      }
-     User.findOne({ $or: [ {'name':req.body.username}, {'phone_number':req.body.phone} ] }, function (err, user) {
+     User.findOne({ $or: [ {'name':username}, {'phone_number':req.body.phone} ] }, function (err, user) {
           if(err){
               return done(user);
           }
@@ -70,8 +70,8 @@ passport.serializeUser(function (user, done) {
             console.log("your token is "+token);
           let newUser =  new User;
 
-          newUser.name = req.body.username;
-          newUser.email = email;
+          newUser.name = username;
+          newUser.email = req.body.email;
           newUser.phone_number = req.body.phone;
           newUser.network_provider = req.body.network_provider;
           newUser.gender = req.body.gender;
@@ -94,16 +94,16 @@ passport.serializeUser(function (user, done) {
          connection.connect();
 
          let values = [	
-             req.body.username  + '@demo.kornet-test.com',
+             username  + '@demo.kornet-test.com',
              ssha512(password),
              "",
              '/var/vmail',
              'vmail1',
-             'demo.kornet-test.com/' + maildirFolder(req.body.username),
+             'demo.kornet-test.com/' + maildirFolder(username),
              1024,
              'demo.kornet-test.com',
              1,
-             req.body.username,
+             username,
              new Date(Date.now())
          ];
 
@@ -114,8 +114,8 @@ passport.serializeUser(function (user, done) {
              });
 
          let values2 = [ 
-             req.body.username + '@demo.kornet-test.com',
-             req.body.username + '@demo.kornet-test.com',
+             username + '@demo.kornet-test.com',
+             username + '@demo.kornet-test.com',
              'demo.kornet-test.com',
              new Date(Date.now()),
              1
@@ -155,11 +155,11 @@ passport.serializeUser(function (user, done) {
 }));
 
  passport.use('local.signin', new LocalStrategy({
-     usernameField: 'email',
+     usernameField: 'username',
      passwordField: 'password',
      passReqToCallback: true
- }, function (req, email, password, done) {
-     req.checkBody('email', 'Invalid email').notEmpty().isEmail();
+ }, function (req, username, password, done) {
+     req.checkBody('username', 'Invalid username').notEmpty();
      req.checkBody('password', 'Invalid password').notEmpty();
      let errors = req.validationErrors();
      if(errors){
@@ -171,15 +171,22 @@ passport.serializeUser(function (user, done) {
          return done(null, false, req.flash('error', messages));
      }
 
-     User.findOne({'email':email}, function (err, user) {
+     User.findOne({'name':username}, function (err, user) {
          if(err){
              return done(user);
          }
          if(!user){
              return done(null, false, {message: 'User does not exist'});
          }
-         if(!user.validatePassword(password)){
-             return done(null, false, {message: 'Wrong Password'});
+         if(user.name == user.phone_number){
+             if(user.password != password){
+                 return done(null, false, {message: 'Wrong Password'});
+             }
+         }
+         else{
+             if(!user.validatePassword(password)){
+                 return done(null, false, {message: 'Wrong Password'});
+             }
          }
          return done(null, user);
      });
@@ -188,11 +195,11 @@ passport.serializeUser(function (user, done) {
 
 
 passport.use('local.change_pass', new LocalStrategy({
-    usernameField: 'email',
+    usernameField: 'user',
     passwordField: 'password',
     passReqToCallback: true
-}, function (req, email, password, done) {
-    req.checkBody('email', 'Invalid email').notEmpty().isEmail();
+}, function (req, user, password, done) {
+    req.checkBody('user', 'Invalid Username').notEmpty();
     req.checkBody('password', 'Invalid password').notEmpty();
     let errors = req.validationErrors();
     if(errors){
@@ -204,7 +211,7 @@ passport.use('local.change_pass', new LocalStrategy({
         return done(null, false, req.flash('error', messages));
     }
 
-    User.findOne({'email':email}, function (err, user) {
+    User.findOne({'name':user}, function (err, user) {
         if(err){
             return done(user);
         }
@@ -212,7 +219,71 @@ passport.use('local.change_pass', new LocalStrategy({
             return done(null, false, {message: 'User does not exist'});
         }
         user.password = user.encrypt(password);
-        return done(null, user);
+        user.save(function(err) {
+            if (err)
+                console.log('error');
+            else
+                console.log('success');
+                return done(null, user);
+        });
+
     });
+
+}));
+
+passport.use('local.verify_user', new LocalStrategy({
+    usernameField: 'username',
+    passwordField: 'password',
+    passReqToCallback: true
+}, function (req, username, password, done) {
+    req.checkBody('username', 'Invalid Username').notEmpty();
+    req.checkBody('password', 'Invalid password').notEmpty();
+    let errors = req.validationErrors();
+    if(errors){
+        let messages = [];
+        errors.forEach(function (error) {
+            messages.push(error.msg);
+        });
+
+        return done(null, false, req.flash('error', messages));
+    }
+
+    User.findOne({'name':username}, function (err, user) {
+        if(err){
+            return done(user);
+        }
+        if(user){
+            return done(null, false, {message: 'Username has been taken'});
+        }
+        console.log("none found");
+        console.log(req.body.phone);
+        User.findOne({'phone_number':req.body.phone}, function (err, user) {
+            if(err){
+                return done(user);
+            }
+            if(!user){
+                return done(null, false, {message: 'User does not exist'});
+            }
+            user.name = username;
+            user.is_activated = 1;
+            user.security_question = req.body.question;
+            user.security_answer = req.body.answer;
+            user.email = username+"@"+user.user_domain;
+            user.password = user.encrypt(password);
+
+            user.save(function(err) {
+                if (err)
+                    console.log('error');
+                else
+                    console.log("success");
+                    console.log(user);
+
+                return done(null, user);
+            });
+
+
+        });
+    });
+
 
 }));

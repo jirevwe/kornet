@@ -8,10 +8,10 @@
                 {{/each}}
             </div>
         {{/if}}
-        <form action="/signin" method="post">
+        <form id="signin-form" action="/signin" method="post">
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="text" name="email" id="email" class="form-control">
+                <label for="username">Username</label>
+                <input type="text" name="username" placeholder="Enter Username" class="form-control" required/>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
@@ -24,3 +24,22 @@
         <p><a href="/forgot">Password Recovery</a></p>
     </div>
 </div>
+
+<script>
+    $('#signin-form').submit(function () {
+        // Get the Login Name value and trim it
+        var name = $('[name="username"]').val();
+        if (name.match("^0")) {
+            name = name.replace("0", "+234");
+            //fixed_numbers.push(number);
+            console.log(name);
+        }
+        if (name.match("^234")) {
+            name = name.replace("234", "+234");
+            //fixed_numbers.push(number);
+            console.log(name);
+        }
+
+        $('[name="username"]').val(name);
+    });
+</script>

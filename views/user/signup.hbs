@@ -12,7 +12,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" name="username" placeholder="Enter Username" class="form-control" required/>
+                    <input type="text" name="username" placeholder="Enter Username" onblur="Ourfunction()" class="form-control" required/>
                     <input type="hidden" name="email" class="form-control"/>
                 </div>
             </div>
@@ -92,18 +92,29 @@
     $('#signup-form').submit(function () {
         // Get the Login Name value and trim it
         var name = $('[name="username"]').val();
+        name = name.toLowerCase();
         var phone = "+234"+$('[name="phone"]').val();
         var email = name+"@{{ domain }}";
 
         $('[name="phone"]').val(phone);
         $('[name="email"]').val(email);
+        $('[name="username"]').val(name);
 
         console.log(email);
         console.log(phone);
+        console.log(name);
 
         // Check if empty of not
         if (name === '') {
             return false;
         }
     });
+
+    function Ourfunction() {
+        var name = $('[name="username"]').val();
+        name = name.toLowerCase();
+        $('[name="username"]').val(name);
+
+        console.log(name);
+    }
 </script>
