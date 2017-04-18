@@ -64,7 +64,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
             fixed_numbers.push(number);
             //console.log(number);
         }
-        objects.push({'email': 'none', 'phone_number': number, 'password': token, 'network_provider':network_provider,
+        objects.push({'name': number, 'email': 'none', 'phone_number': number, 'password': token, 'network_provider':network_provider,
             'user_type': 'Business', 'user_domain': domain_name, 'security_token': 'none', 'long_text': 'none'})
     }
     console.log(fixed_numbers);
