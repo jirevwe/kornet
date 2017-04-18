@@ -188,7 +188,7 @@ router.get('/forgot', notLoggedIn, function (req, res, next) {
     res.render('user/forgot', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.get('/choose', isLoggedIn, function (req, res, next) {
+router.get('/choose', isActivated, function (req, res, next) {
     let messages = req.flash('error');
     let phone  = req.user.phone_number;
     res.render('user/choose', {csrfToken: req.csrfToken(), phone:phone, messages:messages, hasErrors:messages.length > 0});
@@ -328,8 +328,12 @@ function isLoggedIn(req, res, next){
 }
 
 function isActivated(req, res, next){
-    if(req.user.is_activated != 1 && req.isAuthenticated())
+    let user = req.user;
+    if(req.user.is_activated != 1 && req.isAuthenticated()){
+        console.log("not activated");
+        console.log(user);
         return next();
+    }
     res.redirect('/');
 }
 

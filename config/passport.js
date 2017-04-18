@@ -219,7 +219,14 @@ passport.use('local.change_pass', new LocalStrategy({
             return done(null, false, {message: 'User does not exist'});
         }
         user.password = user.encrypt(password);
-        return done(null, user);
+        user.save(function(err) {
+            if (err)
+                console.log('error');
+            else
+                console.log('success');
+                return done(null, user);
+        });
+
     });
 
 }));
@@ -262,10 +269,16 @@ passport.use('local.verify_user', new LocalStrategy({
             user.email = username+"@"+user.user_domain;
             user.password = user.encrypt(password);
 
-            console.log("user");
-            console.log(user);
+            user.save(function(err) {
+                if (err)
+                    console.log('error');
+                else
+                    console.log("success");
+                    console.log(user);
 
-            return done(null, user);
+                return done(null, user);
+            });
+
 
         });
     });
