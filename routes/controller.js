@@ -52,7 +52,6 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
     let objects = [];
     let fixed_numbers = [];
     for (i = 0; i < numbers.length; i++) {
-
         let number = numbers[i];
         if (number.match("^0")) {
             number = number.replace("0", "+234");
@@ -67,7 +66,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
         objects.push({'email': 'none', 'phone_number': number, 'password': token, 'network_provider':network_provider,
             'user_type': 'Business', 'user_domain': domain_name, 'security_token': 'none', 'long_text': 'none'})
     }
-    console.log(fixed_numbers);
+    //console.log(fixed_numbers);
 
     User.find({'phone_number': {$in : fixed_numbers}}, function (err, users) {
         let users_id = [];
@@ -78,7 +77,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
         if (users.length > 0){
             for (i = 0; i < fixed_numbers.length; i++) {
                 req.flash('error', '"'+fixed_numbers[i] + '" has already been used.');
-                console.log(fixed_numbers[i] + ' has already been used.');
+                //console.log(fixed_numbers[i] + ' has already been used.');
             }
             return res.redirect('/controller/');
         }
@@ -123,6 +122,26 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                             newBusiness.staff_number = staff;
                             newBusiness.created_by = created_by.name;
 
+                            //create user email account
+                            let mysql = require('mysql');
+                            let connection = mysql.createConnection({
+                                host     : 'mail.kornet-test.com',
+                                user     : 'root2',
+                                password : '00000',
+                                database : 'vmail',
+                                debug    : false
+                            });
+
+                            connection.connect();
+                            let values = [domain_name, business_name, 'default_user_quota:1024;'];
+                            connection.query('INSERT INTO domain (domain, description, settings)', values, function(err, results, fields) {
+                                if (err) console.log(err);
+                                
+                            });
+
+                            connection.end();
+                            //end create user email account
+
                             newBusiness.save(function (err, result) {
                                 if (err) {
                                     req.flash('error', 'Error creating Business');
@@ -131,7 +150,6 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                                     console.log("success");
                                 }
                             });
-
                         }
                         return res.redirect('/controller/');
                     });
@@ -140,8 +158,6 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
         }
     });
 });
-
-
 
 let csrfProtection = csrf();
 router.use(csrfProtection);

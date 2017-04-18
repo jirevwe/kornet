@@ -5,6 +5,7 @@ let passport = require('passport');
 let Order = require('../models/order');
 let Cart = require('../models/cart');
 let User = require('../models/user');
+let Wallet = require('../models/wallet');
 let multer = require('multer');
 let randomstring = require("randomstring");
 let messagebird = require('messagebird')(
@@ -118,27 +119,6 @@ router.post('/activate', isActivated, function (req, res, next) {
 
 router.get('/signup', notLoggedIn,  function (req, res, next) {
     let messages = req.flash('error');
-
-    let mysql = require('mysql');
-    //create user email account
-    let connection = mysql.createConnection({
-            host     : 'mail.kornet-test.com',
-            user     : 'root2',
-            password : '00000',
-            database : 'vmail',
-            debug    : false
-        });
-
-        connection.connect();
-
-        connection.query('SELECT * FROM domain', function(err, results, fields) {
-            if (err) console.log(err);
-            console.log(results);
-        });
-
-        connection.end();
-        //end create user email account
-
     res.render('user/signup', {csrfToken: req.csrfToken(), domain:'demo.kornet-test.com' ,messages:messages, hasErrors:messages.length > 0});
 });
 
@@ -176,6 +156,51 @@ router.post('/signin', notLoggedIn, passport.authenticate('local.signin', { fail
 router.get('/profile', isLoggedIn, function (req, res, next) {
     let successMsg = req.flash('success')[0];
     res.render('user/profile', {successMsg: successMsg, noMessage: !successMsg, user: req.user, csrfToken: req.csrfToken()});
+});
+
+router.get('/profile/wallet', isLoggedIn, function (req, res, next) {
+    let successMsg = req.flash('success')[0];
+    let user = req.user;
+
+    if(user.wallet == undefined){
+        let wallet = new Wallet({open: false, balance: 0});
+        wallet.save((err, result) => {
+            user.wallet = result._id;
+            
+            Wallet.update({ _id: result._id }, { open: true }, (err, doc) => {
+                if(err) console.log(err);
+            });
+            
+            user.save((err, _user) => {
+                if(err) console.log(err);
+            });
+            
+            var request = require('request');
+            var customer = {
+                first_name: user.first_name,
+                last_name: user.last_name,
+                email: user.email,
+                phone: user.phone_number
+            };
+            var options = {
+                headers: {
+                    'Authorization': ' Bearer sk_test_4844e2650b69fd92f0af204275ca74b9f1d1336f',
+                    'Content-Type' : 'application/json',
+                    'cache-control': 'no-cache'
+                },
+                body: JSON.stringify(customer)
+            };
+
+            request.post('https://api.paystack.co/customer', options, (error, response, body)=> {
+                if (error) console.log(error);
+                if (!error && response.statusCode == 200) {
+                    console.log(JSON.parse(body));
+                }
+            });
+        });
+    }
+    res.send(200);
+//    res.render('user/profile', {successMsg: successMsg, noMessage: !successMsg, user: user, csrfToken: req.csrfToken()});
 });
 
 router.get('/forgot', notLoggedIn, function (req, res, next) {

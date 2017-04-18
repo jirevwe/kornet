@@ -47,6 +47,7 @@
     "passport-local": "1.0.0",
     "passport-local-mongoose": "4.0.0",
     "password-hasher": "^1.0.1",
+    "paystack": "^1.4.1",
     "randomstring": "^1.1.5",
     "request": "^2.81.0",
     "request-promise": "^4.2.0",
