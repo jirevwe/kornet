@@ -12,6 +12,7 @@ let fs = require("fs");
 let _ = require('underscore')._;
 let uuid = require("uuid");
 let middleware = require('socketio-wildcard')();
+let rp = require('request-promise');
 
 /**
  * Get port from environment and store in Express.
@@ -252,11 +253,12 @@ io.sockets.on("connection", function(socket){
         chatHistory[user.inRoom].push("<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> " + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>");
         console.log(chatHistory[user.inRoom]);
 
-        var options = {
+        let options = {
             method: 'POST',
-            uri: 'http://api.posttestserver.com/post',
+            uri: 'http://localhost:3000/chat/chathistory',
             body: {
-                room_id: 'payload'
+                room: room,
+                chatHistory:chatHistory[user.inRoom]
             },
             json: true // Automatically stringifies the body to JSON
         };
@@ -264,9 +266,11 @@ io.sockets.on("connection", function(socket){
         rp(options)
             .then(function (parsedBody) {
                 // POST succeeded...
+                console.log(parsedBody);
             })
             .catch(function (err) {
                 // POST failed...
+                console.log(err);
             });
 
         io.sockets.in(user.inRoom).emit("save_message_to_client", {user: user.name, message:data["message"], room:room});
@@ -335,6 +339,26 @@ io.sockets.on("connection", function(socket){
                     chatHistory[user.inRoom].push(message);
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
             }
+
+            let options = {
+                method: 'POST',
+                uri: 'http://localhost:3000/chat/chathistory',
+                body: {
+                    room: room,
+                    chatHistory:chatHistory[user.inRoom]
+                },
+                json: true // Automatically stringifies the body to JSON
+            };
+
+            rp(options)
+                .then(function (parsedBody) {
+                    // POST succeeded...
+                    console.log(parsedBody);
+                })
+                .catch(function (err) {
+                    // POST failed...
+                    console.log(err);
+                });
             console.log(chatHistory[user.inRoom]);
         });
 

@@ -8,6 +8,20 @@ const fs = require('fs');
 
 let csrfProtection = csrf();
 
+router.post('/chathistory', function(req, res, next) {
+    let room = req.body.room;
+    let chatHistory = req.body.chatHistory;
+    console.log("details: ");
+    Room.update({room_id: room.id}, {history: chatHistory}, function (err, result) {
+        if (err) {
+            return res.status(500);
+        }
+        console.log(result);
+        //return res.status(200);
+    });
+    return res.status(200);
+});
+
 router.post('/room-chat', function(req, res, next) {
     var room_id = req.body.room_id;
     var chatHistory = req.body.chat_history;
@@ -30,7 +44,7 @@ router.post('/room-chat', function(req, res, next) {
         // });
         // return res.redirect('/');
     });
-
+    return res.status(200);
 });
 
 router.use(csrfProtection);
@@ -122,6 +136,7 @@ router.post('/add-room', function(req, res, next) {
         //return newRoom2;
     }
 
+    return res.status(200);
 });
 
 router.post('/update-room', function(req, res, next) {
@@ -146,6 +161,7 @@ router.post('/update-room', function(req, res, next) {
         }
     }
 
+    return res.status(200);
 });
 
 

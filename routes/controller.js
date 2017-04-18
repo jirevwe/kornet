@@ -109,12 +109,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                         }else {
 
                             let newBusiness = new Business;
-                            let success = {
-                                numbers: fixed_numbers,
-                                token: token,
-                                admin: fixed_numbers[0]
-                            };
-                            req.flash('success', success);
+
 
                             newBusiness.name = business_name;
                             newBusiness.domain = domain_name;
@@ -122,6 +117,13 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                             newBusiness.admin = users_id[0];
                             newBusiness.staff_number = staff;
                             newBusiness.created_by = created_by.name;
+
+                            let success = {
+                                numbers: fixed_numbers,
+                                token: token,
+                                admin: fixed_numbers[0]
+                            };
+                            req.flash('success', success);
 
                             newBusiness.save(function (err, result) {
                                 if (err) {
