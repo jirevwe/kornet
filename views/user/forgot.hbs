@@ -13,8 +13,8 @@
             <form id="forgot_pass">
                 <div class="col-md-12">
                     <div id="user_id_field" class="form-group ">
-                        <label for="user_id">Kornet Email or Phone Number</label>
-                        <input type="text" name="user_id" id="user_id" placeholder="Kornet Email or Phone Number" class="form-control">
+                        <label for="user_id">Kornet Username or Phone Number</label>
+                        <input type="text" name="user_id" id="user_id" placeholder="Kornet Username or Phone Number" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -37,7 +37,7 @@
                 </div>
                 <div class="col-md-12">
                     <div class="form-group">
-                        <button type="button" onclick="verify('verify_sec_answer')" name="verify_sec_answer"  class="btn btn-primary btn-block">Answer</button>
+                        <button type="button" onclick="verify('verify_sec_answer')" name="verify_sec_answer" class="btn btn-primary btn-block">Answer</button>
                     </div>
                 </div>
             </form>
@@ -172,7 +172,7 @@
             $.ajax({
                 method: "POST",
                 url: "http://localhost:3000/change_pass",
-                data: {password: password_id, email:user},
+                data: {password: password_id, user:user},
                 success: function(data) {
                     window.location.href = "http://localhost:3000/";
                 },
@@ -209,7 +209,7 @@
             $.ajax({
                 method: "POST",
                 url: "http://localhost:3000/"+choice,
-                data: {reply_id: reply_id, user_id:user},
+                data: {reply_id: reply_id, user_id: user},
                 success: function(data) {
                     if(data.result == 'error'){
                         error_div.html(data.message);

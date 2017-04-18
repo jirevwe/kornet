@@ -178,8 +178,15 @@ passport.serializeUser(function (user, done) {
          if(!user){
              return done(null, false, {message: 'User does not exist'});
          }
-         if(!user.validatePassword(password)){
-             return done(null, false, {message: 'Wrong Password'});
+         if(user.name == user.phone_number){
+             if(user.password != password){
+                 return done(null, false, {message: 'Wrong Password'});
+             }
+         }
+         else{
+             if(!user.validatePassword(password)){
+                 return done(null, false, {message: 'Wrong Password'});
+             }
          }
          return done(null, user);
      });
@@ -188,11 +195,11 @@ passport.serializeUser(function (user, done) {
 
 
 passport.use('local.change_pass', new LocalStrategy({
-    usernameField: 'email',
+    usernameField: 'user',
     passwordField: 'password',
     passReqToCallback: true
-}, function (req, email, password, done) {
-    req.checkBody('email', 'Invalid email').notEmpty().isEmail();
+}, function (req, user, password, done) {
+    req.checkBody('user', 'Invalid Username').notEmpty();
     req.checkBody('password', 'Invalid password').notEmpty();
     let errors = req.validationErrors();
     if(errors){
@@ -204,7 +211,7 @@ passport.use('local.change_pass', new LocalStrategy({
         return done(null, false, req.flash('error', messages));
     }
 
-    User.findOne({'email':email}, function (err, user) {
+    User.findOne({'name':user}, function (err, user) {
         if(err){
             return done(user);
         }
@@ -214,5 +221,54 @@ passport.use('local.change_pass', new LocalStrategy({
         user.password = user.encrypt(password);
         return done(null, user);
     });
+
+}));
+
+passport.use('local.verify_user', new LocalStrategy({
+    usernameField: 'username',
+    passwordField: 'password',
+    passReqToCallback: true
+}, function (req, username, password, done) {
+    req.checkBody('username', 'Invalid Username').notEmpty();
+    req.checkBody('password', 'Invalid password').notEmpty();
+    let errors = req.validationErrors();
+    if(errors){
+        let messages = [];
+        errors.forEach(function (error) {
+            messages.push(error.msg);
+        });
+
+        return done(null, false, req.flash('error', messages));
+    }
+
+    User.findOne({'name':username}, function (err, user) {
+        if(err){
+            return done(user);
+        }
+        if(user){
+            return done(null, false, {message: 'Username has been taken'});
+        }
+        console.log("none found");
+        console.log(req.body.phone);
+        User.findOne({'phone_number':req.body.phone}, function (err, user) {
+            if(err){
+                return done(user);
+            }
+            if(!user){
+                return done(null, false, {message: 'User does not exist'});
+            }
+            user.name = username;
+            user.is_activated = 1;
+            user.email = username+"@"+user.user_domain;
+            user.password = user.encrypt(password);
+
+            console.log("user");
+            console.log(user);
+
+            return done(null, user);
+
+        });
+    });
+
 
 }));

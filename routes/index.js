@@ -163,13 +163,18 @@ router.get('/signin', notLoggedIn, function (req, res, next) {
 });
 
 router.post('/signin', notLoggedIn, passport.authenticate('local.signin', { failureRedirect: '/signin', failureFlash: true }), function (req, res, next) {
-    if(req.session.oldUrl){
-        let oldUrl = req.session.oldUrl;
-        req.session.oldUrl = null;
-        res.redirect(oldUrl);
+    if(req.user.name == req.user.phone_number){
+        res.redirect('/choose');
     }
     else{
-        res.redirect('/');
+        if(req.session.oldUrl){
+            let oldUrl = req.session.oldUrl;
+            req.session.oldUrl = null;
+            res.redirect(oldUrl);
+        }
+        else{
+            res.redirect('/');
+        }
     }
 });
 
@@ -183,6 +188,12 @@ router.get('/forgot', notLoggedIn, function (req, res, next) {
     res.render('user/forgot', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
+router.get('/choose', isLoggedIn, function (req, res, next) {
+    let messages = req.flash('error');
+    let phone  = req.user.phone_number;
+    res.render('user/choose', {csrfToken: req.csrfToken(), phone:phone, messages:messages, hasErrors:messages.length > 0});
+});
+
 router.get('/logout', function (req, res, next) {
     req.logout();
     res.redirect('/');
@@ -191,7 +202,7 @@ router.get('/logout', function (req, res, next) {
 router.post('/sec_recovery', notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
     //console.log(req.body.user_id);
-    User.findOne({ $or: [ {'email':user_id}, {'phone_number':user_id} ] }, function (err, user) {
+    User.findOne({ $or: [ {'name':user_id}, {'phone_number':user_id} ] }, function (err, user) {
         if(err){
 
             return res.json({result: "error", message:"Error getting user"});
@@ -203,14 +214,14 @@ router.post('/sec_recovery', notLoggedIn, function (req, res, next) {
 
         let question = user.security_question;
 
-        return res.json({result: "success", user:user.email, question: question});
+        return res.json({result: "success", user:user.name, question: question});
     });
 });
 
 router.post('/token_recovery', notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
 
-    User.findOne({ $or: [ {'email':user_id}, {'phone_number':user_id} ] }, function (err, user) {
+    User.findOne({ $or: [ {'name':user_id}, {'phone_number':user_id} ] }, function (err, user) {
         if(err){
             return res.json({result: "error", message:"Error getting user"});
         }
@@ -244,7 +255,7 @@ router.post('/token_recovery', notLoggedIn, function (req, res, next) {
                 console.log(data);
             });
 
-            return res.json({result: "success", user:user.email});
+            return res.json({result: "success", user:user.name});
         });
     });
 });
@@ -253,7 +264,7 @@ router.post('/verify_token', notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
     let reply_id = req.body.reply_id;
     console.log(req.body);
-    User.findOne({'email':user_id}, function (err, user) {
+    User.findOne({'name':user_id}, function (err, user) {
         if(err){
             return res.json({result: "error", message:"Error getting user"});
         }
@@ -266,7 +277,7 @@ router.post('/verify_token', notLoggedIn, function (req, res, next) {
             return res.json({result: "error", message:"Wrong Token"});
         }
 
-        return res.json({result: "success", user:user.email});
+        return res.json({result: "success", user:user.name});
     });
 });
 
@@ -274,7 +285,7 @@ router.post('/verify_sec_answer', notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
     let reply_id = req.body.reply_id;
     console.log(req.body);
-    User.findOne({'email':user_id}, function (err, user) {
+    User.findOne({'name':user_id}, function (err, user) {
         if(err){
 
             return res.json({result: "error", message:"Error getting user"});
@@ -288,12 +299,23 @@ router.post('/verify_sec_answer', notLoggedIn, function (req, res, next) {
             return res.json({result: "error", message:"Wrong Answer"});
         }
 
-        return res.json({result: "success", user:user.email});
+        return res.json({result: "success", user:user.name});
     });
 });
 
 router.post('/change_pass', notLoggedIn, passport.authenticate('local.change_pass', { failureRedirect: '/forgot', failureFlash: true }), function (req, res, next) {
         res.json({url: '/'});
+});
+
+router.post('/verify_user', isLoggedIn, passport.authenticate('local.verify_user', { failureRedirect: '/choose', failureFlash: true }), function (req, res, next) {
+    if(req.session.oldUrl){
+        let oldUrl = req.session.oldUrl;
+        req.session.oldUrl = null;
+        res.redirect(oldUrl);
+    }
+    else{
+        res.redirect('/');
+    }
 });
 
 module.exports = router;
