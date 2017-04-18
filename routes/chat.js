@@ -64,16 +64,16 @@ let upload = multer({
 });
 
 /* GET home page. */
-router.get('/',isLoggedIn, function(req, res, next) {
+router.get('/',isActivated, function(req, res, next) {
     //console.log(req.user);
     res.render('chat/index', {layout: false, user: req.user, csrfToken: req.csrfToken()});
 });
 
-router.post('/upload', upload.single('attachment'), function(req, res, next){
+router.post('/upload', isActivated, upload.single('attachment'), function(req, res, next){
     return res.status(200).send(req.file);
 });
 
-router.post('/uploads/delete', function(req, res, next){
+router.post('/uploads/delete', isActivated, function(req, res, next){
     let file = req.body.file;
 
     fs.exists('./public/uploads/room/'+file.originalname, (exists) => {
@@ -91,7 +91,7 @@ router.post('/uploads/delete', function(req, res, next){
     return res.status(200);
 });
 
-router.post('/add-room', function(req, res, next) {
+router.post('/add-room', isActivated, function(req, res, next) {
     var room = req.body;
     console.log("room sent: "+room.id);
 
@@ -139,7 +139,7 @@ router.post('/add-room', function(req, res, next) {
     return res.status(200);
 });
 
-router.post('/update-room', function(req, res, next) {
+router.post('/update-room', isActivated, function(req, res, next) {
 
     var newroom = req.body;
     console.log("update room: "+newroom.id);
@@ -165,7 +165,7 @@ router.post('/update-room', function(req, res, next) {
 });
 
 
-router.get('/room-members/:id', function(req, res, next) {
+router.get('/room-members/:id', isActivated, function(req, res, next) {
     var room_id = req.params.id;
 
     Room.find({'room_id': room_id }).populate("members").exec(function(err,results){
@@ -184,10 +184,18 @@ router.get('/room-members/:id', function(req, res, next) {
 
 module.exports = router;
 
-function isLoggedIn(req, res, next){
-    if(req.isAuthenticated()){
-        return next();
+function isActivated(req, res, next){
+    if(req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
+        req.session.oldUrl = req.url;
+        res.redirect('/choose');
     }
-    req.session.oldUrl = req.url;
-    res.redirect('/signin');
+    else if(req.user.is_activated != 1 && req.isAuthenticated()){
+        req.session.oldUrl = req.url;
+        res.redirect('/activate');
+    }
+    else if(!req.isAuthenticated()){
+        req.session.oldUrl = req.url;
+        res.redirect('/signin');
+    }
+    return next();
 }

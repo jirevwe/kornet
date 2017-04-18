@@ -75,6 +75,7 @@ passport.serializeUser(function (user, done) {
           newUser.phone_number = req.body.phone;
           newUser.network_provider = req.body.network_provider;
           newUser.gender = req.body.gender;
+          newUser.is_activated = 0;
           newUser.password = newUser.encrypt(password);
           newUser.security_question = req.body.question;
           newUser.security_answer = newUser.encrypt(req.body.answer);

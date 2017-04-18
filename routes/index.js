@@ -320,13 +320,6 @@ router.post('/verify_user', notActivated, passport.authenticate('local.verify_us
 
 module.exports = router;
 
-// function isLoggedIn(req, res, next){
-//     if(req.isAuthenticated())
-//         return next();
-//     req.session.oldUrl = req.url;
-//     res.redirect('/');
-// }
-
 function notActivated(req, res, next){
     if(req.user.is_activated != 1 && req.isAuthenticated()){
         return next();
@@ -345,7 +338,7 @@ function isActivated(req, res, next){
     }
     else if(!req.isAuthenticated()){
         req.session.oldUrl = req.url;
-        res.redirect('/');
+        res.redirect('/signin');
     }
     return next();
 }
