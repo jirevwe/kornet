@@ -266,6 +266,8 @@ passport.use('local.verify_user', new LocalStrategy({
             }
             user.name = username;
             user.is_activated = 1;
+            user.security_question = req.body.question;
+            user.security_answer = req.body.answer;
             user.email = username+"@"+user.user_domain;
             user.password = user.encrypt(password);
 

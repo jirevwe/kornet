@@ -19,17 +19,40 @@
                         <input type="hidden" name="phone" id="phone_id" value="{{phone}}" class="form-control"/>
                         <input type="hidden" name="_csrf" value="{{ csrfToken }}">
                     </div>
-                    <p>PLEASE CHOOSE A NEW PASSWORD</p>
+                </div>
+
+                <p class="col-md-12">PLEASE CHOOSE SECURITY QUESTION</p>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <select name="question" class="form-control">
+                            <option value="What is the first name of the person you kissed">What is the first name of the person you kissed</option>
+                            <option value="In what city or town does your nearest sibling work">In what city or town does your nearest sibling work</option>
+                            <option value="What is the name of your primary school">What is the name of your primary school</option>
+                            <option value="Where did you write your first Jamb examination">Where did you write your first Jamb examination</option>
+                            <option value="In what city does your closest family member live">In what city does your closest family member live</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <input type="text" name="answer" placeholder="Security Answer" class="form-control"/>
+                    </div>
+                </div>
+                <p class="col-md-12">PLEASE CHOOSE A NEW PASSWORD</p>
+                <div class="col-md-6">
                     <div id="password_field" class="form-group">
                         <input type="password" name="password" id="password_id" placeholder="New Password" class="form-control">
                     </div>
+                </div>
+                <div class="col-md-6">
                     <div id="confirm_password_field" class="form-group">
                         <input type="password" name="confirm_password" id="confirm_password_id" placeholder="Confirm Password" class="form-control">
                     </div>
                 </div>
+
                 <div class="col-md-12">
                     <div class="form-group">
-                        <button type="button" onclick="verify_user()" name="password" class="btn btn-primary btn-block">Change Password</button>
+                        <button type="button" onclick="verify_user()" name="password" class="btn btn-primary btn-block">Create Username</button>
                     </div>
                 </div>
             </form>

@@ -78,19 +78,19 @@ router.get('/',  function (req, res, next) {
 
 });
 
-router.get('/download/:filename', function (req, res, next) {
+router.get('/download/:filename', isActivated, function (req, res, next) {
 	res.download('./tmp/' + req.params.filename, req.params.filename, function(err){
 		if (err) console.log(err);
 	});
 });
 
 
-router.get('/activate', isActivated, function (req, res, next) {
+router.get('/activate', notActivated, function (req, res, next) {
     let messages = req.flash('error');
     res.render('user/activate', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/activate', isActivated, function (req, res, next) {
+router.post('/activate', notActivated, function (req, res, next) {
 
     User.findOne({'email':req.user.email}, function (err, user) {
         if(err){
@@ -178,7 +178,7 @@ router.post('/signin', notLoggedIn, passport.authenticate('local.signin', { fail
     }
 });
 
-router.get('/profile', isLoggedIn, function (req, res, next) {
+router.get('/profile', isActivated, function (req, res, next) {
     let successMsg = req.flash('success')[0];
     res.render('user/profile', {successMsg: successMsg, noMessage: !successMsg, user: req.user, csrfToken: req.csrfToken()});
 });
@@ -188,7 +188,7 @@ router.get('/forgot', notLoggedIn, function (req, res, next) {
     res.render('user/forgot', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.get('/choose', isActivated, function (req, res, next) {
+router.get('/choose', notActivated, function (req, res, next) {
     let messages = req.flash('error');
     let phone  = req.user.phone_number;
     res.render('user/choose', {csrfToken: req.csrfToken(), phone:phone, messages:messages, hasErrors:messages.length > 0});
@@ -307,7 +307,7 @@ router.post('/change_pass', notLoggedIn, passport.authenticate('local.change_pas
         res.json({url: '/'});
 });
 
-router.post('/verify_user', isLoggedIn, passport.authenticate('local.verify_user', { failureRedirect: '/choose', failureFlash: true }), function (req, res, next) {
+router.post('/verify_user', notActivated, passport.authenticate('local.verify_user', { failureRedirect: '/choose', failureFlash: true }), function (req, res, next) {
     if(req.session.oldUrl){
         let oldUrl = req.session.oldUrl;
         req.session.oldUrl = null;
@@ -320,23 +320,35 @@ router.post('/verify_user', isLoggedIn, passport.authenticate('local.verify_user
 
 module.exports = router;
 
-function isLoggedIn(req, res, next){
-    if(req.isAuthenticated())
-        return next();
-    req.session.oldUrl = req.url;
-    res.redirect('/');
-}
+// function isLoggedIn(req, res, next){
+//     if(req.isAuthenticated())
+//         return next();
+//     req.session.oldUrl = req.url;
+//     res.redirect('/');
+// }
 
-function isActivated(req, res, next){
-    let user = req.user;
+function notActivated(req, res, next){
     if(req.user.is_activated != 1 && req.isAuthenticated()){
-        console.log("not activated");
-        console.log(user);
         return next();
     }
     res.redirect('/');
 }
 
+function isActivated(req, res, next){
+    if(req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
+        req.session.oldUrl = req.url;
+        res.redirect('/choose');
+    }
+    else if(req.user.is_activated != 1 && req.isAuthenticated()){
+        req.session.oldUrl = req.url;
+        res.redirect('/activate');
+    }
+    else if(!req.isAuthenticated()){
+        req.session.oldUrl = req.url;
+        res.redirect('/');
+    }
+    return next();
+}
 function notLoggedIn(req, res, next){
     if(!req.isAuthenticated())
         return next();
