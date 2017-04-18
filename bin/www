@@ -153,7 +153,6 @@ function Person (name, id, roomOwn, roomIn) {
 
 // Do the Socket.IO magic:
 let io = socketio.listen(server);
-io.use(middleware);
 let rooms = {};
 let users = {};
 let sockets = [];

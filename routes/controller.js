@@ -115,10 +115,10 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
 
                                 return res.render('controller/final', {
                                     layout: 'auth_header',
-                                    user: req.session.controller,
-                                    numbers: numbers,
-                                    pass: token,
-                                    admin: numbers[0]
+                                    // user: req.session.controller,
+                                    // numbers: numbers,
+                                    pass: token
+                                    // admin: numbers[0]
                                 });
                             });
                         }
