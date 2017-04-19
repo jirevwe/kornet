@@ -6,7 +6,9 @@ var Transaction = new Schema({
 	operation: Schema.Types.Number, // 0 => error, 1 => debit, 2: credit
 	transaction_type: Schema.Types.Number, //0 => Bank -> Wallet, 1 => Wallet -> Wallet, 2 => Wallet -> Bank 
 	created_at: {type: Schema.Types.Date, default: Date.now},
-	modified_at: {type: Schema.Types.Date, default: Date.now}
+	paid_at: {type: Schema.Types.Date, default: Date.now},
+	reference: Schema.Types.String,
+	channel: Schema.Types.String
 });
 
 module.exports = mongoose.model('Transaction', Transaction);

@@ -5,47 +5,63 @@
 
           <div class="row placeholders">
             <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4 id="balance">Label</h4>
-              <span class="text-muted">Something else</span>
+              <h4 id="balance">Balance: {{ wallet.balance }}</h4>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <a href="/wallet/fund" >Fund Wallet</a>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <a href="/wallet/send" >Send Money</a>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <a href="/wallet/withdraw" >Withdraw Money</a>
             </div>
           </div>
 
-          <h2 class="sub-header">Section title</h2>
+          <h2 class="sub-header">Transactions</h2>
           <div class="table-responsive">
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Header</th>
-                  <th>Header</th>
-                  <th>Header</th>
-                  <th>Header</th>
+                  <th>Reference</th>
+                  <th>Movement</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Date</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1,001</td>
-                  <td>Lorem</td>
-                  <td>ipsum</td>
-                  <td>dolor</td>
-                  <td>sit</td>
-                </tr>
+                {{# if transactions }}
+                  {{# each transactions }}
+                      <tr>
+                          <td>{{ this.reference }}</td>
+                          
+                          {{# ifCond this.transaction_type '==' 0 }}
+                            <td>Bank -> Wallet</td>
+                          {{else ifCond this.transaction_type '==' 1}}
+                            <td>Wallet -> Wallet</td>
+                          {{else ifCond this.transaction_type '==' 2}}
+                            <td>Wallet -> Bank</td>
+                          {{/ifCond}}
+
+                          {{# ifCond this.operation '==' 0 }}
+                            <td>Error</td>
+                          {{else ifCond this.operation '==' 1 }}
+                            <td>Debit</td>
+                          {{else ifCond this.operation '==' 2 }}
+                            <td>Credit</td>
+                          {{/ifCond}}
+
+                          <td>{{ this.amount }}</td>
+                          <td>{{ this.paid_at }}</td>
+                      </tr>
+                  {{/each}}
+                {{/if}}
               </tbody>
             </table>
           </div>
         </div>
       </div>
     </div>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-$(document).ready(function() {
-    var socketio = io.connect();
-    
-    socketio.on("wallet_details_to_client", function(data) {
-        let wallet_data = data['content'];
-        console.log(wallet_data);
-         $('#balance').text(wallet_data);
-    });
-});
-</script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.15/cr-1.3.3/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rr-1.2.0/sc-1.4.2/datatables.min.css"/>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.15/cr-1.3.3/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rr-1.2.0/sc-1.4.2/datatables.min.js"></script>

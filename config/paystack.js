@@ -10,8 +10,7 @@ exports.createCustomer = function(){
 	var options = {
 		headers: {
 			'Authorization': ' Bearer '.concat(SECRET_KEY),
-			'Content-Type' : 'application/json',
-			'cache-control': 'no-cache'
+			'Content-Type' : 'application/json'
 		},
 		body: JSON.stringify({
 			first_name: user.first_name,
@@ -22,24 +21,56 @@ exports.createCustomer = function(){
 	};
 	request.post('https://api.paystack.co/customer', options, (error, response, body)=> {
 		if (error) console.log(error);
-		//console.log(JSON.parse(body));
 	});
 }
 
 exports.getCustomers = function(user, callback){
 	var options = {
 		headers: {
-			'Authorization': ' Bearer '.concat(SECRET_KEY),
-			'cache-control': 'no-cache'
+			'Authorization': ' Bearer '.concat(SECRET_KEY)
 		}
 	};
 	request.get('https://api.paystack.co/customer', options, (error, response, body)=> {
 		if (error) console.log(error);
 		
 		let all_users = JSON.parse(body).data;
-		let use = all_users.find((email) => {
+		let use = all_users.find(() => {
 			return this.email = user.email;
 		});
 		callback(use);
+	});
+}
+
+exports.initTransaction = function(user, req, callback){
+	var options = {
+		headers: {
+			'Authorization': ' Bearer '.concat(SECRET_KEY),
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({amount: req.body.amount, email: user.email, callback_url: "http://localhost:3000/wallet" })
+	};
+	request.post('https://api.paystack.co/transaction/initialize', options, (error, response, body)=> {
+		if (error) console.log(error);
+		if(body != undefinded){
+			let res = JSON.parse(body).data;
+			callback(res.authorization_url);
+		}
+	});
+}
+
+exports.getTransaction = function(reference, callback){
+	var options = {
+		headers: {
+			'Authorization': ' Bearer '.concat(SECRET_KEY)
+		}
+	};
+	request.get('https://api.paystack.co/transaction', options, (error, response, body)=> {
+		if (error) console.log(error);
+		
+		let all_transactions = JSON.parse(body).data;
+		let transaction = all_transactions.find(() => {
+			return this.reference = reference;
+		});
+		callback(transaction);
 	});
 }
