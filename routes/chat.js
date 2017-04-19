@@ -180,8 +180,6 @@ router.get('/room-members/:id', isActivated, function(req, res, next) {
 
 });
 
-
-
 module.exports = router;
 
 function isActivated(req, res, next){

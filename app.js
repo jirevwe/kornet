@@ -20,6 +20,7 @@ var marketRoutes = require('./routes/market');
 var mailRoutes = require('./routes/mail');
 var homeRoutes = require('./routes/index');
 var chatRoutes = require('./routes/chat');
+var walletRoutes = require('./routes/wallet');
 
 var MONGOLAB_URI = "mongodb://localhost:27017/kornet";
 var mongo = MONGOLAB_URI;
@@ -79,11 +80,11 @@ app.use(function (req, res, next) {
 });
 
 app.use('/controller', controllerRoutes);
+app.use('/wallet', walletRoutes);
 app.use('/market', marketRoutes);
 app.use('/chat', chatRoutes);
 app.use('/mail', mailRoutes);
 app.use('/', homeRoutes);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

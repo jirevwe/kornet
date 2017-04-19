@@ -31,7 +31,7 @@ let upload = multer({
 router.get('/', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
-	setTimeout(() => { www.io.emit('hidden_mail_attr', {content: Date.now().toString()}); }, 1000);
+	setTimeout(() => { www.io.emit('hidden_mail_attr', { content: Date.now().toString() }); }, 1000);
 	res.render('mail/sendmail', { user: req.user, layout: 'mail_layout' });
 });
 
@@ -258,8 +258,7 @@ function refresh(mailbox_name, req, res) {
 		password: getLong(req.user.long_text),
 		host: 'mail.kornet-test.com',
 		port: 993,
-		tls: true,
-		debug: console.log
+		tls: true
 	});
 
 	imap.once('ready', function (err) {
