@@ -5,7 +5,7 @@ let passport = require('passport');
 let Order = require('../models/order');
 let Cart = require('../models/cart');
 let User = require('../models/user');
-let Wallet = require('../models/wallet');
+let Business = require('../models/business');
 let multer = require('multer');
 let randomstring = require("randomstring");
 let messagebird = require('messagebird')('oppA3GZBi0bjhGckAkaWcloUf');
@@ -62,6 +62,7 @@ router.post('/profile', upload, function (req, res, next) {
 });
 
 
+
 let csrfProtection = csrf();
 
 router.use(csrfProtection);
@@ -76,13 +77,6 @@ router.get('/',  function (req, res, next) {
     else
         res.render('index', {layout: false});
 });
-
-router.get('/download/:filename', isActivated, function (req, res, next) {
-	res.download('./tmp/' + req.params.filename, req.params.filename, function(err){
-		if (err) console.log(err);
-	});
-});
-
 
 router.get('/activate', notActivated, function (req, res, next) {
     let messages = req.flash('error');
@@ -160,6 +154,7 @@ router.get('/profile', isActivated, function (req, res, next) {
     let successMsg = req.flash('success')[0];
     res.render('user/profile', {successMsg: successMsg, noMessage: !successMsg, user: req.user, csrfToken: req.csrfToken()});
 });
+
 
 router.get('/forgot', notLoggedIn, function (req, res, next) {
     let messages = req.flash('error');
@@ -294,6 +289,69 @@ router.post('/verify_user', notActivated, passport.authenticate('local.verify_us
     else{
         res.redirect('/');
     }
+});
+
+// API ENDPOINTS
+router.get('/contacts', isActivated, function (req, res, next) {
+    let user = req.user;
+    if (user.user_domain != undefined ){
+        Business.find({'domain': user.user_domain }).populate("users", "id name email phone_number").exec(function(err,results){
+            if(err){
+                return res.json({result: "failed", contacts:[]});
+            }
+            let result = results[0];
+            let contact1 = result.users;
+
+            //return res.json({result: "success", contacts:});
+            User.find({'_id': user._id }).populate("contacts", "_id name email phone_number").exec(function(err,results){
+                if(err){
+                    return res.json({result: "failed", contacts:[]});
+                }
+
+                let result = results[0];
+                let contact2 = result.users;
+                let contacts = [];
+                if(contact2 != null){
+                    contacts = contact1.concat(contact2);
+                }
+                else{
+                    contacts = contact1;
+                }
+
+                return res.json({result: "success", contacts:contacts});
+            });
+        });
+    }
+    else{
+        if(user.contacts != undefined){
+            User.find({'_id': user._id }).populate("contacts", "_id name email phone_number").exec(function(err,results){
+                if(err){
+                    return res.json({result: "failed", contacts:[]});
+                }
+                let result = results[0];
+                return res.json({result: "success", contacts:result.contacts});
+            });
+        }
+       // return res.json({result: "success", contacts:[]});
+    }
+
+});
+
+router.post('/contacts', isActivated, function (req, res, next) {
+    let user = req.user;
+    let contacts = req.body.contacts;
+    User.update({_id: user.id}, {$addToSet: {members: {$each: contacts}}}, function (err, result) {
+        if (err)
+            return res.json({result: "failed"});
+        else
+            return res.json({result: "success"});
+    });
+});
+
+router.get('/download/:filename', isActivated, function (req, res, next) {
+    res.download('./tmp/' + req.params.filename, req.params.filename, function(err){
+        if (err) console.log(err);
+    });
 });
 
 module.exports = router;
