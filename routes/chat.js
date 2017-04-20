@@ -19,10 +19,10 @@ router.post('/chathistory', function(req, res, next) {
         console.log(result);
         //return res.status(200);
     });
-    return res.status(200);
+   // return res.status(200);
 });
 
-router.post('/room-chat', function(req, res, next) {
+router.post('/room-chat', isActivated, function(req, res, next) {
     var room_id = req.body.room_id;
     var chatHistory = req.body.chat_history;
 
@@ -64,7 +64,7 @@ let upload = multer({
 });
 
 /* GET home page. */
-router.get('/',isActivated, function(req, res, next) {
+router.get('/', isActivated, function(req, res, next) {
     //console.log(req.user);
     res.render('chat/index', {layout: false, user: req.user, csrfToken: req.csrfToken()});
 });
@@ -110,9 +110,11 @@ router.post('/add-room', isActivated, function(req, res, next) {
             }
 
             console.log("room saved: "+newRoom.room_id);
+            console.log("room password saved: "+newRoom.room_id);
+            res.json(200);
         });
 
-        //return newRoom;
+        //return res.send(200);
     }
     else {
         var ARoom =  new Room({});
@@ -129,14 +131,14 @@ router.post('/add-room', isActivated, function(req, res, next) {
             if(err){
                 console.log(err);
             }
-
             console.log("room password saved: "+newRoom.room_id);
+            return res.json(200);
         });
 
-        //return newRoom2;
+        //return res.send(200);
     }
 
-    return res.status(200);
+
 });
 
 router.post('/update-room', isActivated, function(req, res, next) {
@@ -157,11 +159,12 @@ router.post('/update-room', isActivated, function(req, res, next) {
                     console.log(err);
                 else
                     console.log(result);
+                return res.json(200);
             });
         }
     }
 
-    return res.status(200);
+    //return res.send(200);
 });
 
 
@@ -180,20 +183,50 @@ router.get('/room-members/:id', isActivated, function(req, res, next) {
 
 });
 
+router.get('/room-user/', isActivated, function(req, res, next) {
+    return res.json(req.user);
+
+});
+
+router.get('/room-creator/:id', isActivated, function(req, res, next) {
+    var room_id = req.params.id;
+    Room.find({'room_id': room_id }).populate("creator").exec(function(err,results){
+        if(err){
+            console.log(err);
+        }
+        let room = results[0];
+        let creator = room.creator;
+        res.json(creator);
+    });
+
+});
+
+router.get('/rooms', function(req, res, next) {
+
+    Room.find({}, function(err, results){
+        if(err){
+            console.log(err);
+        }
+        console.log(results);
+        return res.json(results);
+    });
+
+});
+
 module.exports = router;
 
 function isActivated(req, res, next){
-    if(req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
+    if(!req.isAuthenticated()){
         req.session.oldUrl = req.url;
-        res.redirect('/choose');
+        return res.redirect('/signin');
+    }
+    else if(req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
+        req.session.oldUrl = req.url;
+        return res.redirect('/choose');
     }
     else if(req.user.is_activated != 1 && req.isAuthenticated()){
         req.session.oldUrl = req.url;
-        res.redirect('/activate');
-    }
-    else if(!req.isAuthenticated()){
-        req.session.oldUrl = req.url;
-        res.redirect('/signin');
+        return res.redirect('/activate');
     }
     return next();
 }

@@ -242,6 +242,10 @@ io.sockets.on("connection", function(socket){
         socket.emit("list_mems_to_client", rooms[data]);
     });
 
+    socket.on("invite_mems_to_server", function(data) {
+        socket.emit("invite_mems_to_client", rooms[data]);
+    });
+
     socket.on('message_to_server', function(data) {
         // This callback runs when the server receives a new message from the client.
         let user = data['user'];

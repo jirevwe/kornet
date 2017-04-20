@@ -138,7 +138,9 @@
         .bg-warning{
             background-color: #f9ff95;
         }
-
+        .select2{
+            width: 100%; !important;
+        }
         @media(min-width:768px) {
             #wrapper {
                 padding-left: 250px;
@@ -215,7 +217,7 @@
     <script type="text/javascript">
 
         $(document).ready(function() {
-            $("#contacts").select2();
+            $("#members_contacts").select2();
         });
     </script>
 
@@ -265,6 +267,7 @@
     <!-- Function Script -->
     <script type ="text/javascript">
         var user;
+        var user_db;
         var rooms = [];
         var roomChatCount = {};
         var activeRoom = null;
@@ -273,7 +276,6 @@
         var curRooms = {};
         var users = {};
         let uploadfiles = [];
-        let uploadfiles_preview = [];
 
 
 
@@ -297,10 +299,21 @@
         var socketio = io.connect();
         socketio.on("new_user_to_client", function(data) {
             user = data;
+            $.ajax({
+                method: "GET",
+                url: "http://localhost:3000/chat/room-user",
+                success: function(data) {
+                    console.log(data);
+                    user_db = data;
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
         });
 
         socketio.on("user_exists_to_client", function(data) {
-            user = data;
+            //user = data;
             alert(user.name+" already exists");
             location.reload();
 
@@ -309,12 +322,55 @@
         socketio.on("room_list", function(data) {
             curRooms = data;
             for (r in curRooms) {
-                var room = curRooms[r];
-                if(room.isDM == true){
-                    $("#activeDms").append('<li id="' + room.id + '" class="active">' + room.name + '</li>');
-                }else{
-                    $("#activeRooms").append('<li id="' + room.id + '" class="active">' + room.name + '</li>');
-                }
+                let room = curRooms[r];
+//                if(room.isDM == true){
+//                    $("#activeDms").append('<li id="' + room.id + '" class="active">' + room.name + '</li>');
+//                }else{
+                $.ajax({
+                    method: "GET",
+                    url: "http://localhost:3000/chat/room-creator/"+room.id,
+                    success: function(data) {
+                        console.log(data);
+                        console.log(user_db);
+                        creator = data;
+
+                        if(room.isDM == true){
+                            $('#numMembers').hide();
+                            if(user.name == toMem.name){
+                                //$('#chatName').html(fromMem.name);
+                                $("#activeDms").append('<li id="' + room.id + '"class="active">' + fromMem.name + '</li>');
+                                activeRoom.name = fromMem.name;
+                            }
+                            if(user.name == fromMem.name){
+                                //$('#chatName').html(toMem.name);
+                                $("#activeDms").append('<li id="' + room.id + '"class="active">' + toMem.name + '</li>');
+                                activeRoom.name = toMem.name;
+                            }
+                        }
+                        else{
+                            console.log(user_db);
+                            console.log(creator);
+                            if(user_db._id == creator._id){
+                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                            }else if(user_db.user_domain == creator.user_domain){
+                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                            }else if(creator.user_type == 'Government' && room.is_private == false){
+                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                            }
+                        }
+
+//                            curRooms[room.id] = room;
+//
+//                            $('input[type="radio"]').prop('checked', false);
+//                            $('#reveal-if-active').hide();
+//                            $('#roomPass').val("");
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+                    //$("#activeRooms").append('<li id="' + room.id + '" class="active">' + room.name + '</li>');
+//                }
             }
         });
 
@@ -322,6 +378,7 @@
             var room = data['room'];
             var toMem = data['toMem'];
             var fromMem = data['fromMem'];
+            var creator = [];
             console.log("room is dm: "+room.isDM);
             roomChatCount[room.id] = 0;
 
@@ -336,35 +393,53 @@
                 url: "http://localhost:3000/chat/add-room",
                 data: room,
                 success: function(data) {
-                    console.log(data);
+                    //console.log(data);
+                    $.ajax({
+                        method: "GET",
+                        url: "http://localhost:3000/chat/room-creator/"+room.id,
+                        success: function(data) {
+                            console.log(data);
+                            console.log(user_db);
+                            creator = data;
+
+                            if(room.isDM == true){
+                                $('#numMembers').hide();
+                                if(user.name == toMem.name){
+                                    //$('#chatName').html(fromMem.name);
+                                    $("#activeDms").append('<li id="' + room.id + '"class="active">' + fromMem.name + '</li>');
+                                    activeRoom.name = fromMem.name;
+                                }
+                                if(user.name == fromMem.name){
+                                    //$('#chatName').html(toMem.name);
+                                    $("#activeDms").append('<li id="' + room.id + '"class="active">' + toMem.name + '</li>');
+                                    activeRoom.name = toMem.name;
+                                }
+                            }
+                            else{
+                                if(user_db._id == creator._id){
+                                    $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                                }else if(user_db.user_domain == creator.user_domain){
+                                    $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                                }else if(creator.user_type == 'Government' && room.is_private == false){
+                                    $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                                }
+                            }
+
+                            curRooms[room.id] = room;
+
+                            $('input[type="radio"]').prop('checked', false);
+                            $('#reveal-if-active').hide();
+                            $('#roomPass').val("");
+                        },
+                        error: function(err) {
+                            console.log(err);
+                        }
+                    });
                 },
                 error: function(err) {
                     console.log(err);
                 }
             });
-
-            if(room.isDM == true){
-                $('#numMembers').hide();
-                if(user.name == toMem.name){
-                    //$('#chatName').html(fromMem.name);
-                    $("#activeDms").append('<li id="' + room.id + '"class="active">' + fromMem.name + '</li>');
-                    activeRoom.name = fromMem.name;
-                }
-                if(user.name == fromMem.name){
-                    //$('#chatName').html(toMem.name);
-                    $("#activeDms").append('<li id="' + room.id + '"class="active">' + toMem.name + '</li>');
-                    activeRoom.name = toMem.name;
-                }
-            }
-            else{
-                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
-            }
-
-            curRooms[room.id] = room;
-
-            $('input[type="radio"]').prop('checked', false);
-            $('#reveal-if-active').hide();
-            $('#roomPass').val("");
         });
 
 
@@ -416,9 +491,6 @@
         socketio.on("list_mems_to_client", function(data) {
             room = data;
 
-//            for (m in data) {
-//
-//            }
             $.ajaxSetup({
                 cache:false
             });
@@ -437,6 +509,28 @@
                     $('#memHeader').empty();
                     $('#actionList').empty();
                 }
+            });
+        });
+
+        socketio.on("invite_mems_to_client", function(data) {
+            //room = data;
+            $.ajaxSetup({
+                cache:false
+            });
+            $.ajax({
+                url: "http://localhost:3000/contacts",
+                type: "GET"
+            }).success(function (data) {
+                var contacts = data.contacts;
+                if(contacts.length > 0){
+                    contacts.forEach(function (contact) {
+                        $("#members_contacts").append('<option value="' + contact.email + '">' + contact.name + '</option>');
+                    });
+                }else{
+                    $("#members_contacts").append(' No contacts found ');
+                    $('#invite_members_button').addClass("disabled");
+                }
+
             });
         });
 
@@ -831,6 +925,12 @@
                 socketio.emit("list_mems_to_server", activeRoom.id);
             });
 
+            $("#inviteMemsButton").click(function(){
+                //$("#memsList").empty();
+                $('#invite_members_button').removeClass("disabled");
+                socketio.emit("invite_mems_to_server", activeRoom.id);
+            });
+
             $("#uploadSubmit").click(function(){
                 socketio.emit("send_pic_to_server", {user:user, files:uploadfiles});
             });
@@ -968,6 +1068,21 @@
             }
         };
 
+        function invite_members(){
+            var array = [];
+            var opts = '';
+            if($('#select_all_members_button').is(':checked')){
+                $.each($('#members_contacts').prop('options'), function () {
+                    array.push(this.value);
+                });
+            }
+            else {
+                array = $('select#members_contacts').val();
+            }
+
+            console.log(array);
+        }
+
     </script>
 
 </head>
@@ -997,7 +1112,7 @@
             <div data-room="" id="chatName" class="col-sm-6"></div>
             <div id="numMembers" class="col-sm-6 text-right">
                 <button id="chatMemsButton" class="btn btn-info btn-sm" data-toggle="modal" data-target="#chatMemsModal">Members</button>
-                <button id="inviteMemsButton" class="btn btn-info btn-sm" data-toggle="modal" data-target="#inviteMemsModal">Invite Members</button>
+                <button id="inviteMemsButton" class="btn btn-info btn-sm" data-toggle="modal" data-target="#inviteMemsModal">Invite Contacts</button>
                 <a href="#menu-toggle" class="btn btn-info btn-sm" id="menu-toggle">Toggle Menu</a>
             </div>
         </div>
@@ -1156,23 +1271,16 @@
                     <div class="form-group">
                         <label for="contacts">select contacts</label>
                         <div class="col-md-12">
-                            <select name="contacts" id="contacts" class="select2 form-control" multiple="multiple">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
+                            <select name="contacts" id="members_contacts" class="select2 form-control" multiple="multiple">
+
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="checkbox-inline"><input type="checkbox" id="selectAll" name="selectAll">Select All</label>
+                        <label id="selectAll" class="checkbox-inline"><input type="checkbox" id="select_all_members_button" name="select_all_members_button">Select All</label>
                     </div>
                     <div class="form-group">
-                        <input type="submit" class="btn btn-info btn-sm" value="Invite to group">
+                        <input onclick="invite_members()" id="invite_members_button" class="btn btn-info btn-sm" value="Invite to group">
                     </div>
                 </form>
 
