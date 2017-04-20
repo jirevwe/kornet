@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 // var csrf = require('csrf');
-var paystack = require('../config/paystack');
+var utils = require('../utils/api');
 let Wallet = require('../models/wallet');
 let Transaction = require('../models/transaction');
 let www = require('../bin/www'); 
@@ -12,6 +12,10 @@ let www = require('../bin/www');
 router.get('/', isActivated, function (req, res, next) {
 	let successMsg = req.flash('success')[0];
 	let user = req.user;
+
+	utils.sendEmail(user, ['rtukpe@gmail.com', 'ray@demo.kornet-test.com'], {subject: 'invite stuff', body: 'we wanna invite you to do awesome stuff for us'}, (message) => {
+		console.log(message);
+	});
 
 	if(user.wallet == undefined){
 		let new_wallet = new Wallet({open: false, balance: 0});
@@ -27,7 +31,7 @@ router.get('/', isActivated, function (req, res, next) {
 			});
 
 			//create customer/user on paystack
-			paystack.createCustomer();
+			utils.createCustomer(user);
 
 			let wallet, customer = undefined;
 			Wallet.findById(user.wallet, (err, document) => {
@@ -60,11 +64,21 @@ router.get('/fund', isActivated, function (req, res, next) {
 	});
 });
 
+router.get('/withdraw', isActivated, function (req, res, next) {
+	let user = req.user;
+	let wallet = undefined;
+
+	Wallet.findById(user.wallet, (err, document) => {
+		wallet = document;
+		res.render('wallet/withdraw', { wallet: wallet, user: user });
+	});
+});
+
 router.post('/create-transaction', isActivated, function (req, res, next) {
 	let details = req.body.details;
 	let user = req.user;
 
-	paystack.getTransaction(details.reference, (response) => {
+	utils.getTransaction(details.reference, (response) => {
 		if(response == undefined) console.log('an error occured');
 		else{
 			let transaction = Transaction({
