@@ -11,7 +11,7 @@ let csrfProtection = csrf();
 router.post('/chathistory', function(req, res, next) {
     let room = req.body.room;
     let chatHistory = req.body.chatHistory;
-    console.log("details: ");
+   // console.log("details: ");
     Room.update({room_id: room.id}, {history: chatHistory}, function (err, result) {
         if (err) {
             return res.status(500);
@@ -95,12 +95,13 @@ router.post('/add-room', isActivated, function(req, res, next) {
     var room = req.body;
     console.log("room sent: "+room.id);
 
+
     if(room.password == ''){
         var newRoom =  new Room({
             name: room.name,
             room_id: room.id,
             creator: room.creator,
-            members: room['members[]'],
+            members: room.members,
             isDM: room.isDM,
             isPrivate: room.isPrivate
         });
@@ -122,7 +123,7 @@ router.post('/add-room', isActivated, function(req, res, next) {
             name: room.name,
             room_id: room.id,
             creator: room.creator,
-            members: room['members[]'],
+            members: room.members,
             isDM: room.isDM,
             isPrivate: room.isPrivate,
             password: ARoom.encrypt(room.password)
@@ -131,7 +132,7 @@ router.post('/add-room', isActivated, function(req, res, next) {
             if(err){
                 console.log(err);
             }
-            console.log("room password saved: "+newRoom.room_id);
+            console.log("room password saved: "+newRoom.members);
             return res.json(200);
         });
 
@@ -145,11 +146,11 @@ router.post('/update-room', isActivated, function(req, res, next) {
 
     var newroom = req.body;
     console.log("update room: "+newroom.id);
-
+    console.log(newroom.members);
 
     if(newroom.creator != req.user.id){
         console.log("not equal");
-        var members = newroom['members[]'];
+        var members = newroom.members;
         //console.log(members);
         var isArray = _.isArray(members);
         console.log(isArray);
@@ -194,9 +195,12 @@ router.get('/room-creator/:id', isActivated, function(req, res, next) {
         if(err){
             console.log(err);
         }
-        let room = results[0];
-        let creator = room.creator;
-        res.json(creator);
+        if(results){
+            let room = results[0];
+            let creator = room.creator;
+            return res.json(creator);
+        }
+       return res.json({});
     });
 
 });
@@ -207,9 +211,22 @@ router.get('/rooms', function(req, res, next) {
         if(err){
             console.log(err);
         }
-        console.log(results);
+        //console.log(results);
         return res.json(results);
     });
+
+});
+
+router.post('/invite-members', isActivated, function (req, res, next) {
+    let user = req.user;
+    let members = req.body.members;
+    let room_id = req.body.room_id;
+
+    utils.sendEmail(user, members, {subject: 'Chat room invite', body: user.name+' has invited you to join his chatroom <br> <a href="http://localhost:3000/chat/enter-room/'+room_id+'">click here</a>'}, (message) => {
+        console.log(message);
+    });
+
+    return res.json({result:'success'});
 
 });
 

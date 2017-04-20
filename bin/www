@@ -163,7 +163,41 @@ io.sockets.on("connection", function(socket){
 
     socket.on("new_user_to_server", function(data){
         let person = data;
-        //person.id = socket.id;
+
+        let options = {
+            method: 'GET',
+            uri: 'http://localhost:3000/chat/rooms',
+        };
+
+        rp(options)
+            .then(function (body) {
+                // POST succeeded...
+                body = JSON.parse(body);
+                //console.log("body length "+body.length);
+                for (i = 0; i < body.length; i++) {
+                    room = body[i];
+                    // console.log("room");
+                    // console.log(room);
+                    let password = '';
+                    chatHistory[room.room_id] = [];
+                    if(room.password != undefined){
+                        password = room.password;
+                    }
+                    if(room.history != undefined){
+                        chatHistory[room.room_id] = room.history;
+                    }
+                    rooms[room.room_id] = new Room(room.name, room.creator, room.room_id, room.isPrivate, password, room.isDM);
+
+                }
+                console.log("create history");
+                console.log(chatHistory);
+            })
+            .catch(function (err) {
+                // POST failed...
+                console.log(err);
+            });
+
+
         count = 0;
         _.each(users, function(user){
             if(user.name == person.name){
@@ -202,7 +236,8 @@ io.sockets.on("connection", function(socket){
         users[userId].owns = roomId;
         users[userId].inRoom = roomId;
 
-
+        console.log("create history");
+        console.log(chatHistory);
 
         chatHistory[roomId] = [];
 
@@ -220,6 +255,10 @@ io.sockets.on("connection", function(socket){
         rooms[roomId].addMember(users[data.id].id);
         let room = rooms[roomId];
         let userdata = users[data.id];
+
+        console.log("create history");
+        console.log(chatHistory);
+
         io.sockets.in(data.inRoom).emit("enter_room_to_client", {user:data, room:room});
 
         let keys = _.keys(chatHistory);

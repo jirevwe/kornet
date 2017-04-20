@@ -321,17 +321,15 @@
 
         socketio.on("room_list", function(data) {
             curRooms = data;
+
             for (r in curRooms) {
+                console.log(curRooms[r]);
                 let room = curRooms[r];
-//                if(room.isDM == true){
-//                    $("#activeDms").append('<li id="' + room.id + '" class="active">' + room.name + '</li>');
-//                }else{
+
                 $.ajax({
                     method: "GET",
                     url: "http://localhost:3000/chat/room-creator/"+room.id,
                     success: function(data) {
-                        console.log(data);
-                        console.log(user_db);
                         creator = data;
 
                         if(room.isDM == true){
@@ -348,13 +346,17 @@
                             }
                         }
                         else{
-                            console.log(user_db);
-                            console.log(creator);
+                            //console.log(user_db);
+                            //console.log(creator);
                             if(user_db._id == creator._id){
                                 $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
                             }else if(user_db.user_domain == creator.user_domain){
                                 $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
-                            }else if(creator.user_type == 'Government' && room.is_private == false){
+                            }
+                            else if($.inArray(user_db._id, room.members) != -1){
+                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                            }
+                            else if(creator.user_type == 'Government' && room.is_private == false){
                                 $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
                             }
                         }
@@ -465,7 +467,7 @@
                 }
             });
 
-            if(data['room'].isDM){
+            if(data['room'].isDM == true){
                 $('#numMembers').hide();
             }
             else{
@@ -652,7 +654,7 @@
         function enterRoom(id){
             activeRoom = curRooms[id];
 
-            if (activeRoom.isPrivate) {
+            if (activeRoom.isPrivate == true ){
                 $('#privateChatModal').modal('show');
 
                 $("#privateChatSubmit").click(function(){
@@ -692,7 +694,7 @@
 
         socketio.on("leave_room_to_client", function(data) {
             var room = data['room'];
-            if(!room.isDM && room.id == activeRoom.id) {
+            if(room.isDM == false && room.id == activeRoom.id) {
                 document.getElementById("chatlog").appendChild(document.createTextNode(data['userdata']));
                 document.getElementById("chatlog").appendChild(document.createElement("hr"));
             }
@@ -1070,7 +1072,6 @@
 
         function invite_members(){
             var array = [];
-            var opts = '';
             if($('#select_all_members_button').is(':checked')){
                 $.each($('#members_contacts').prop('options'), function () {
                     array.push(this.value);
@@ -1079,6 +1080,24 @@
             else {
                 array = $('select#members_contacts').val();
             }
+
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
+
+            $.ajax({
+                method: "POST",
+                url: "http://localhost:3000/chat/invite-members",
+                data: {members:array, room_id: activeRoom.id},
+                success: function(data) {
+                    $('#invite_alert').addClass('alert-success');
+                    $('#invite_alert').html('Invites have been sent');
+                },
+                error: function(err) {
+                    $('#invite_alert').addClass('alert-success');
+                    $('#invite_alert').html('Error sending invites');
+                }
+            });
 
             console.log(array);
         }
@@ -1265,7 +1284,7 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4>Room Members</h4>
             </div>
-
+                <div id="invite_alert" class="alert"></div>
             <div class="modal-body" id="">
                 <form action="">
                     <div class="form-group">
