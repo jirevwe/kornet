@@ -13,6 +13,7 @@ const fs = require('fs');
 let multer = require('multer');
 let www = require('../bin/www');
 let mkdirp = require('mkdirp');
+let utils = require('../utils/api');
 
 let storage = multer.diskStorage({
 	destination: './public/uploads/mail',
@@ -200,7 +201,7 @@ function getMailBody(mail, req) {
 
 	let imap = new Imap({
 		user: req.user.email,
-		password: getLong(req.user.long_text),
+		password: utils.getLong(req.user.long_text),
 		host: 'mail.kornet-test.com',
 		port: 993,
 		tls: true
@@ -255,7 +256,7 @@ function getMailBody(mail, req) {
 function refresh(mailbox_name, req, res) {
 	let imap = new Imap({
 		user: req.user.email,
-		password: getLong(req.user.long_text),
+		password: utils.getLong(req.user.long_text),
 		host: 'mail.kornet-test.com',
 		port: 993,
 		tls: true
@@ -346,7 +347,7 @@ router.post('/send/:id', function (req, res, next) {
 		logger: true,
 		auth: {
 			user: req.user.email,
-			pass: getLong(req.user.long_text)
+			pass: utils.getLong(req.user.long_text)
 		}
 	};
 	let sendmailer = mailer.createTransport(smtpTransport(smtpConfig));
@@ -354,7 +355,6 @@ router.post('/send/:id', function (req, res, next) {
 	//check if this mail is a reply
 	let reply = req.params.id == 0 ? '' : req.params.id;
 
-	// console.log(file);
 	let mailOptions = {
 		from: sender,
 		sender: sender,
@@ -378,7 +378,7 @@ router.post('/send/:id', function (req, res, next) {
 		mail.build(function (err, message) {
 			let imap = new Imap({
 				user: req.user.email,
-				password: getLong(req.user.long_text),
+				password: utils.getLong(req.user.long_text),
 				host: 'mail.kornet-test.com',
 				port: 993,
 				tls: true
@@ -421,7 +421,7 @@ router.post('/save/:id', function (req, res, next) {
 		logger: true,
 		auth: {
 			user: req.user.email,
-			pass: getLong(req.user.long_text)
+			pass: utils.getLong(req.user.long_text)
 		}
 	};
 
@@ -446,7 +446,7 @@ router.post('/save/:id', function (req, res, next) {
 	mail.build(function (err, message) {
 		let imap = new Imap({
 			user: req.user.email,
-			password: getLong(req.user.long_text),
+			password: utils.getLong(req.user.long_text),
 			host: 'mail.kornet-test.com',
 			port: 993,
 			tls: true
@@ -474,11 +474,5 @@ router.post('/save/:id', function (req, res, next) {
 	res.redirect('/mail');
 });
 //------------------------------------------------//
-
-function getLong(encrypted) {
-	let Crypto = require('crypto-js');
-	let decrypted = Crypto.AES.decrypt(encrypted, "$2a$05$d92IUG5ZHIpU0f8fvQitvOut05tuZdD4rDp5RF8BC/7zdFvUqBk52");
-	return decrypted.toString(Crypto.enc.Utf8);
-}
 
 module.exports = router;

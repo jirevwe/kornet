@@ -76,7 +76,6 @@ router.get('/',  function (req, res, next) {
         res.render('index', {layout: false, user: req.user});
     else
         res.render('index', {layout: false});
-
 });
 
 router.get('/activate', notActivated, function (req, res, next) {
