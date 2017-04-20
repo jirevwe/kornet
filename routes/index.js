@@ -299,30 +299,30 @@ router.post('/verify_user', notActivated, passport.authenticate('local.verify_us
 module.exports = router;
 
 function notActivated(req, res, next){
-    if(req.user.is_activated != 1 && req.isAuthenticated()){
-        return next();
-    }
-    res.redirect('/');
+	if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
+		return next();
+	}
+	res.redirect('/');
 }
 
 function isActivated(req, res, next){
-    if(req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
-        req.session.oldUrl = req.url;
-        res.redirect('/choose');
-    }
-    else if(req.user.is_activated != 1 && req.isAuthenticated()){
-        req.session.oldUrl = req.url;
-        res.redirect('/activate');
-    }
-    else if(!req.isAuthenticated()){
-        req.session.oldUrl = req.url;
-        res.redirect('/signin');
-    }
-    return next();
+	if(req.user && req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
+		req.session.oldUrl = req.url;
+		res.redirect('/choose');
+	}
+	else if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
+		req.session.oldUrl = req.url;
+		res.redirect('/activate');
+	}
+	else if(!req.isAuthenticated()){
+		req.session.oldUrl = req.url;
+		res.redirect('/signin');
+	}
+	return next();
 }
 
 function notLoggedIn(req, res, next){
-    if(!req.isAuthenticated())
-        return next();
-    res.redirect('/');
+	if(!req.isAuthenticated())
+		return next();
+	res.redirect('/');
 }

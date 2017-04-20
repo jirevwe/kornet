@@ -1,0 +1,76 @@
+<div class="container">
+	<div class="col-lg-4">
+	</div>
+	<div class="col-lg-4">
+		<form class="form-signin">
+			<div id="balance" name="balance" hidden>{{ wallet.balance }}</div> 
+			<h2 class="form-signin-heading">Cashout</h2>
+
+			<h5> Balance: {{ wallet.balance }}<h5>
+			<input onkeyup="verify()" type="text" id="amount" name="amount" placeholder="Amount: Max of {{ wallet.balance }}" class="form-control" required>
+			<select class="form-control" required>
+				{{# each banks}}
+					<option value="{{ this.name }}" id="bank" name="{{ this.code }}">{{ this.name }}</option>
+				{{/each}}
+			</select>
+			<input onkeyup="verify()" name="account-number" id="account-number" type="text" placeholder="Account Number" class="form-control" maxlength="10" required/>
+			{{!--<input name="account-name" id="account-name" type="text" placeholder="Account Name" class="form-control" required/>--}}
+			<button id="submit" name="submit" type="button" class="btn btn-lg btn-primary btn-block" onclick="call()"> Pay </button>
+		</form>
+	</div>
+</div>
+
+<script>
+	$(() => {
+		// Disable function
+		jQuery.fn.extend({
+			disable: function(state) {
+				return this.each(function() {
+					this.disabled = state;
+				});
+			}
+		});
+
+		$('#submit').disable(true);
+	});
+
+	function verify(){
+		let enable = false;
+
+		let balance = parseInt($('#balance').html(), 10);
+		let money =  parseInt($('#amount').val(), 10);
+		let button = $('#submit');
+		let account_number = $('#account-number').val();
+
+		enable = (money <= balance || money == 0) && account_number.length == 10 ? false : true;
+
+		button.disable(enable);
+	}
+
+    function call(){
+		let amount  = parseInt($('#amount').val(), 10);
+		let balance = parseInt($('#balance').html(), 10);
+		let account_number = $('#account-number').val();
+		
+		let bank = $('#bank');
+        console.log(+ ' ' + bank.html());
+
+		let options = {
+			account_number: account_number,
+			bank_code: bank.attr('name'),
+			first_name: '{{ user.first_name }}',
+ 			last_name: '{{ user.last_name }}'
+		};
+
+		let xhr = $.post('http://localhost:3000/wallet/cashout', options, (data, textStatus, jqXHR) => {});
+
+		let fn = () =>
+		{
+			if(xhr != undefined && xhr.readyState != 4)
+				xhr.abort();
+		};
+		setInterval(fn, 500);
+
+		setTimeout(() => { window.location = '/wallet'; }, 2000);
+	}
+</script>
