@@ -14,7 +14,6 @@
 				{{/each}}
 			</select>
 			<input onkeyup="verify()" name="account-number" id="account-number" type="text" placeholder="Account Number" class="form-control" maxlength="10" required/>
-			{{!--<input name="account-name" id="account-name" type="text" placeholder="Account Name" class="form-control" required/>--}}
 			<button id="submit" name="submit" type="button" class="btn btn-lg btn-primary btn-block" onclick="call()"> Pay </button>
 		</form>
 	</div>
@@ -48,16 +47,16 @@
 	}
 
     function call(){
-		let amount  = parseInt($('#amount').val(), 10);
+		let amount  = parseInt($('#amount').val(), 10) * 100;
 		let balance = parseInt($('#balance').html(), 10);
 		let account_number = $('#account-number').val();
 		
 		let bank = $('#bank');
-        console.log(+ ' ' + bank.html());
 
 		let options = {
 			account_number: account_number,
 			bank_code: bank.attr('name'),
+			amount: amount,
 			first_name: '{{ user.first_name }}',
  			last_name: '{{ user.last_name }}'
 		};
@@ -71,6 +70,7 @@
 		};
 		setInterval(fn, 500);
 
+		$('#submit').disable(true);
 		setTimeout(() => { window.location = '/wallet'; }, 2000);
 	}
 </script>
