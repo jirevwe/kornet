@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt-nodejs');
 var controllerSchema = new Schema({
     name: Schema.Types.String,
     email: Schema.Types.String,
+    telco: Schema.Types.String,
     password: {type: Schema.Types.String, required: true},
     created_by: {type: Schema.Types.String, required: true},
     created_at: {type: Schema.Types.Date, default: Date.now},
