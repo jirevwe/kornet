@@ -71,21 +71,21 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
         let users_id = [];
         if (err) {
             req.flash('error', 'Error getting user.');
-            return res.redirect('/controller/');
+            return res.redirect('/controller/create-batch');
         }
         if (users.length > 0){
             for (i = 0; i < fixed_numbers.length; i++) {
                 req.flash('error', '"'+fixed_numbers[i] + '" has already been used.');
                 //console.log(fixed_numbers[i] + ' has already been used.');
             }
-            return res.redirect('/controller/');
+            return res.redirect('/controller/create-batch');
         }
         else {
             User.insertMany(objects, function (err, result) {
                 if(err){
                     console.log(err);
                     req.flash('error', 'Error creating users.');
-                    return res.redirect('/controller/');
+                    return res.redirect('/controller/create-batch');
                 }else{
                     for (i = 0; i < result.length; i++) {
                         users_id.push(result[i]._id)
@@ -152,7 +152,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                                 }
                             });
                         }
-                        return res.redirect('/controller/');
+                        return res.redirect('/controller/create-batch');
                     });
                 }
             });
@@ -167,6 +167,12 @@ router.get('/', isLoggedIn, function (req, res, next) {
     let messages = req.flash('error');
     let successMsg = req.flash('success')[0];
     res.render('controller/index', {layout: 'auth_header', user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
+});
+
+router.get('/create-batch', isLoggedIn, function (req, res, next) {
+    let messages = req.flash('error');
+    let successMsg = req.flash('success')[0];
+    res.render('controller/create_batch', {layout: 'auth_header', user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
 });
 
 router.get('/signin', notLoggedIn, function (req, res, next) {

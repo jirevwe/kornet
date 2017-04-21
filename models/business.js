@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 var businessSchema = new Schema({
     name: {type: Schema.Types.String, required: true, index: { unique: true }},
     address: {type: Schema.Types.String},
+    default_pass: {type: Schema.Types.String},
     users: [{ type : Schema.Types.ObjectId, ref: 'User' }],
     domain: {type: Schema.Types.String, required: true, index: { unique: true }},
     rooms: [{ type : Schema.Types.ObjectId, ref: 'Room' }],

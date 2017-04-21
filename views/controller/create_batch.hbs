@@ -1,0 +1,85 @@
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="col-md-12">
+            <h1>Create Kornet Batch Users</h1>
+        </div>
+        {{> telco_nav }}
+        {{# if hasErrors}}
+            <div class="alert alert-danger">
+                {{# each messages}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
+            <p> <strong>Kornet Business has been created</strong> </p>
+            <p> <strong>Admin: </strong>{{successMsg.admin}} </p>
+            <p> <strong>Dafault Passwords: </strong>{{successMsg.token}} </p>
+        </div>
+
+        <form id="user_type">
+            <div class="col-md-6">
+                <button type="button" onclick="user_type('business')" class="btn btn-primary btn-block">Kornet Business</button>
+            </div>
+            <div class="col-md-6">
+                <button type="button" onclick="user_type('government')" class="btn btn-primary btn-block">Kornet Government</button>
+            </div>
+        </form>
+
+        <form action="/controller/business" id="business_form" method="post" enctype="multipart/form-data" hidden>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" name="business_name" id="business_name" placeholder="Business Name" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input type="text" name="domain_name" id="domain_name" placeholder="Domain Name" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input type="number" name="staff" id="staff" placeholder="Staff Number" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input type="file" name="staff_file" id="staff_file" placeholder="Staff File" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <select name="network_provider"  data-width="fit" class="form-control">
+                        <option value="MTN">MTN</option>
+                        <option value="Airtel">Airtel</option>
+                        <option value="Etisalat">Etisalat</option>
+                        <option value="Glo">Glo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" name="submit_business"  class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    let user_type_id =  $('#user_type');
+    let business_form_id = $('#business_form');
+
+    function user_type(type){
+        user_type_id.hide();
+        if(type == 'government'){
+            govt_form_id.show();
+        }
+        if(type == 'business'){
+            business_form_id.show();
+        }
+    }
+</script>
