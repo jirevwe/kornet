@@ -4,17 +4,36 @@
 	<form class="form-signin">
 		<script src="https://js.paystack.co/v1/inline.js"></script>
 		<h2 class="form-signin-heading">Fund Wallet</h2>
-		<input type="text" id="amount" name="amount" placeholder="amount" class="form-control" required>
-		<button type="button" class="btn btn-lg btn-primary btn-block" onclick="call()"> Pay </button>
+		<input onkeyup="verify()" type="text" id="amount" value="0" name="amount" placeholder="amount" class="form-control" required>
+		<button id="submit" name="submit" type="button" class="btn btn-lg btn-primary btn-block" onclick="call()"> Pay </button>
 	</form>
 </div>
  
 <script>
-	let xhr = undefined;
+	$(() => {
+		// Disable function
+		jQuery.fn.extend({
+			disable: function(state) {
+				return this.each(function() {
+					this.disabled = state;
+				});
+			}
+		});
+
+		$('#submit').disable(true);
+	});
+
+	function verify(){
+		let enable = false;
+		let amount = parseInt($('#amount').val(), 10);
+		enable = amount > 0 ? false : true;
+		$('#submit').disable(enable);
+	}
 
 	function call(){
-		let am = $('#amount').val();
-		payWithPaystack(am);
+		let am = parseInt($('#amount').val(), 10);
+		payWithPaystack(am * 100);
+		$('#submit').disable(true);
 	}
 
 	function payWithPaystack(amount){
@@ -34,7 +53,7 @@
 					transaction_type: 0
 				};
 
-				xhr = $.post('http://localhost:3000/wallet/create-transaction', body,(data, txtStat, jqXHR) => {});
+				let xhr = $.post('http://localhost:3000/wallet/create-transaction', body,(data, txtStat, jqXHR) => {});
 
 				let fn = () =>
 				{
@@ -44,9 +63,6 @@
 				setInterval(fn, 500);
 
 				setTimeout(() => { window.location = '/wallet'; }, 2000);
-			},
-			onClose: function(){
-				//show a message to the user
 			}
 		});
 		handler.openIframe();

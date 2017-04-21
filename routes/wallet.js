@@ -101,10 +101,37 @@ router.post('/cashout', isActivated, function (req, res, next) {
 			amount: options.amount,
 			recipient: recipient.recipient_code
 		};
+
 		utils.initTransfer(_options, (error, body) => {
 			let transferStatus = JSON.parse(body).data;
-			utils.resendOTP(transferStatus.transfer_code, (err, response) => {
-				console.log(response);
+
+			console.log(transferStatus);
+
+			let transaction = Transaction({
+				operation: 1,
+				transaction_type: 2,
+				amount: parseInt(transferStatus.amount, 10) / 100,
+				created_at: transferStatus.created_at,
+				paid_at: transferStatus.created_at,
+				reference: transferStatus.transfer_code,
+				channel: transferStatus.source
+			});
+			transaction.save((err, result) => {
+				Wallet.findById(user.wallet, (err, wallet) => {
+					if(err) console.log(err);
+
+					if(wallet.balance == null)
+						wallet.balance = 0;
+
+					wallet.balance -= result.amount;
+					wallet.transactions.push(result._id);
+					
+					wallet.save((error, new_wallet) => {
+						if(error) console.log(error);
+
+						res.redirect('/wallet');
+					});
+				});
 			});
 		});
 	});
@@ -120,7 +147,7 @@ router.post('/create-transaction', isActivated, function (req, res, next) {
 		if(response == undefined) console.log('an error occured');
 		else{
 			let transaction = Transaction({
-				amount: response.amount,
+				amount: parseInt(response.amount, 10) / 100,
 				operation: req.body.operation,
 				transaction_type: req.body.transaction_type,
 				created_at: response.created_at,
