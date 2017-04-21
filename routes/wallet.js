@@ -13,30 +13,31 @@ router.get('/', isActivated, function (req, res, next) {
 	let successMsg = req.flash('success')[0];
 	let user = req.user;
 
-	utils.sendEmail(user, ['rtukpe@gmail.com', 'ray@demo.kornet-test.com'], {subject: 'invite stuff', body: 'we wanna invite you to do awesome stuff for us'}, (message) => {
-		console.log(message);
-	});
-
 	if(user.wallet == undefined){
-		let new_wallet = new Wallet({open: false, balance: 0});
-		new_wallet.save((err, result) => {
-			user.wallet = result._id;
-			
-			Wallet.update({ _id: result._id }, { open: true }, (err, doc) => {
-				if(err) console.log(err);
-			});
+		//create customer and recipient on paystack
+		utils.createCustomer(user, (error, customer) => {
+			if (error) console.log(error);
 
-			user.save((err, _user) => {
-				if(err) console.log(err);
-			});
+			let new_wallet = new Wallet(
+				{ 
+					open: false,
+					balance: 0,
+					customer_id: customer.customer_code
+				});
+			new_wallet.save((err, wallet) => {
+				user.wallet = wallet;
+				
+				Wallet.update({ _id: wallet._id }, { open: true }, (err, doc) => {
+					if(err) console.log(err);
+				});
 
-			//create customer/user on paystack
-			utils.createCustomer(user);
+				user.save((err, _user) => {
+					if(err) console.log(err);
+				});
 
-			let wallet, customer = undefined;
-			Wallet.findById(user.wallet, (err, document) => {
-				wallet = document;
-				res.render('wallet/index', { wallet: wallet });
+				Wallet.findById(user.wallet, (err, document) => {
+					res.render('wallet/index', { wallet: document });
+				});
 			});
 		});
 	}else{
@@ -64,13 +65,48 @@ router.get('/fund', isActivated, function (req, res, next) {
 	});
 });
 
-router.get('/withdraw', isActivated, function (req, res, next) {
+router.get('/cashout', isActivated, function (req, res, next) {
 	let user = req.user;
-	let wallet = undefined;
 
 	Wallet.findById(user.wallet, (err, document) => {
-		wallet = document;
-		res.render('wallet/withdraw', { wallet: wallet, user: user });
+		utils.getBanks((error, banks) => {
+			if (error) console.log(error);
+
+			wallet = document;
+			res.render('wallet/cashout', { wallet: wallet, banks: banks, user: user });
+		});
+	});
+});
+
+router.post('/cashout', isActivated, function (req, res, next) {
+	let user = req.user;
+	let options = req.body;
+
+	utils.createRecipient(options, (error, response) => {
+		if (error) console.log(error);
+		let recipient = JSON.parse(response).data;
+
+		// create the recipient
+		if(wallet.recipient_id == undefined){
+			Wallet.findById(user.wallet, (err, wallet) => {
+				wallet.recipient_id = recipient.recipient_code;
+				wallet.save((err, new_wallet) => {
+					if (err) console.log(err);
+				});
+			});
+		}
+		
+		let _options = {
+			reason: 'Transfered money to bank account',
+			amount: options.amount,
+			recipient: recipient.recipient_code
+		};
+		utils.initTransfer(_options, (error, body) => {
+			let transferStatus = JSON.parse(body).data;
+			utils.resendOTP(transferStatus.transfer_code, (err, response) => {
+				console.log(response);
+			});
+		});
 	});
 });
 
@@ -78,7 +114,9 @@ router.post('/create-transaction', isActivated, function (req, res, next) {
 	let details = req.body.details;
 	let user = req.user;
 
-	utils.getTransaction(details.reference, (response) => {
+	utils.getTransaction(details.reference, (error, response) => {
+		if (error) console.log(error);
+
 		if(response == undefined) console.log('an error occured');
 		else{
 			let transaction = Transaction({
@@ -112,18 +150,18 @@ router.post('/create-transaction', isActivated, function (req, res, next) {
 module.exports = router;
 
 function notActivated(req, res, next){
-	if(req.user.is_activated != 1 && req.isAuthenticated()){
+	if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
 		return next();
 	}
 	res.redirect('/');
 }
 
 function isActivated(req, res, next){
-	if(req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
+	if(req.user && req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
 		req.session.oldUrl = req.url;
 		res.redirect('/choose');
 	}
-	else if(req.user.is_activated != 1 && req.isAuthenticated()){
+	else if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
 		req.session.oldUrl = req.url;
 		res.redirect('/activate');
 	}

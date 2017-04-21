@@ -4,10 +4,10 @@ var utils =  require('./api');
 /* ------------------------  PAYSTACK STUFF --------------------------- */
 let SECRET_KEY = 'sk_test_4844e2650b69fd92f0af204275ca74b9f1d1336f';
 
-exports.createCustomer = function(user){
+exports.createCustomer = function(user, callback){
 	var options = {
 		headers: {
-			'Authorization': ' Bearer '.concat(SECRET_KEY),
+			'Authorization': 'Bearer '.concat(SECRET_KEY),
 			'Content-Type' : 'application/json'
 		},
 		body: JSON.stringify({
@@ -18,40 +18,97 @@ exports.createCustomer = function(user){
 		})
 	};
 	request.post('https://api.paystack.co/customer', options, (error, response, body)=> {
-		if (error) console.log(error);
+		callback(error, JSON.parse(body).data);
+	});
+}
+
+/**
+ * params
+ * 		- account number
+ * 		- bank code
+ * 		- first name
+ * 		- last name
+ */
+exports.createRecipient = function(params, callback){
+	var options = {
+		headers: {
+			'Authorization': 'Bearer '.concat(SECRET_KEY),
+			'Content-Type' : 'application/json'
+		},
+		body: JSON.stringify({
+			type: "nuban",
+			name: params.first_name + " " + params.last_name,
+			account_number: params.account_number,
+			bank_code: params.bank_code,
+			currency: "NGN"
+		})
+	};
+	request.post('https://api.paystack.co/transferrecipient', options, (error, response, body)=> {
+		callback(error, body);
+	});
+}
+
+exports.resendOTP = function(code, callback){
+	var options = {
+		headers: {
+			'Authorization': 'Bearer '.concat(SECRET_KEY),
+			'Content-Type' : 'application/json'
+		},
+		body: JSON.stringify({
+			transfer_code: code
+		})
+	};
+	request.post('https://api.paystack.co/transfer/resend_otp', options, (error, response, body)=> {
+		callback(error, body);
+	});
+}
+
+exports.initTransfer = function(params, callback){
+	var options = {
+		headers: {
+			'Authorization': 'Bearer '.concat(SECRET_KEY),
+			'Content-Type' : 'application/json'
+		},
+		body: JSON.stringify({
+			source: "balance",
+			currency: 'NGN',
+			reason: params.reason,
+			amount: params.amount,
+			recipient: params.recipient
+		})
+	};
+	request.post('https://api.paystack.co/transfer', options, (error, response, body)=> {
+		callback(error, body);
 	});
 }
 
 exports.getCustomers = function(user, callback){
 	var options = {
 		headers: {
-			'Authorization': ' Bearer '.concat(SECRET_KEY)
+			'Authorization': 'Bearer '.concat(SECRET_KEY)
 		}
 	};
 	request.get('https://api.paystack.co/customer', options, (error, response, body)=> {
-		if (error) console.log(error);
-		
 		let all_users = JSON.parse(body).data;
 		let use = all_users.find(() => {
 			return this.email = user.email;
 		});
-		callback(use);
+		callback(error, use);
 	});
 }
 
 exports.initTransaction = function(user, req, callback){
 	var options = {
 		headers: {
-			'Authorization': ' Bearer '.concat(SECRET_KEY),
+			'Authorization': 'Bearer '.concat(SECRET_KEY),
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({amount: req.body.amount, email: user.email, callback_url: "http://localhost:3000/wallet" })
 	};
 	request.post('https://api.paystack.co/transaction/initialize', options, (error, response, body)=> {
-		if (error) console.log(error);
 		if(body != undefinded){
 			let res = JSON.parse(body).data;
-			callback(res.authorization_url);
+			callback(error, res.authorization_url);
 		}
 	});
 }
@@ -63,28 +120,24 @@ exports.getTransaction = function(reference, callback){
 		}
 	};
 	request.get('https://api.paystack.co/transaction', options, (error, response, body)=> {
-		if (error) console.log(error);
-		
 		let all_transactions = JSON.parse(body).data;
 		let transaction = all_transactions.find(() => {
 			return this.reference = reference;
 		});
-		callback(transaction);
+		callback(error, transaction);
 	});
 }
 
-exports.getBank = function(callback){
+exports.getBanks = function(callback){
 	var options = {
 		headers: {
-			'Authorization': ' Bearer '.concat(SECRET_KEY)
+			'Authorization': 'Bearer '.concat(SECRET_KEY)
 		}
 	};
 
 	request.get('https://api.paystack.co/bank', options, (error, response, body)=> {
-		if (error) console.log(error);
-		
 		let all_banks = JSON.parse(body).data;
-		callback(all_banks);
+		callback(error, all_banks);
 	});
 }
 
