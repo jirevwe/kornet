@@ -1,85 +1,57 @@
-<div class="row">
+  <div class="row">
     <div class="col-md-10 col-md-offset-1">
-        <div class="col-md-12">
-            <h1>Create Kornet Batch Users</h1>
-        </div>
+      <h1 class="page-header">Telco Portal</h1>
 
-        {{# if hasErrors}}
-            <div class="alert alert-danger">
-                {{# each messages}}
-                    <p>{{this}}</p>
-                {{/each}}
-            </div>
-        {{/if}}
+        {{> telco_nav }}
 
-        <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
-            <p> <strong>Kornet Business has been created</strong> </p>
-            <p> <strong>Admin: </strong>{{successMsg.admin}} </p>
-            <p> <strong>Dafault Passwords: </strong>{{successMsg.token}} </p>
-        </div>
+      <h2 class="sub-header">Transactions</h2>
+      <div class="table-responsive">
+        <table id="example" cellspacing="0" width="100%" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Movement</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!--{{# if transactions }}-->
+              <!--{{# each transactions }}-->
+                  <!--<tr>-->
+                      <!--<td>{{ this.reference }}</td>-->
+                      <!---->
+                      <!--{{# ifCond this.transaction_type '==' 0 }}-->
+                        <!--<td>Bank -> Wallet</td>-->
+                      <!--{{else ifCond this.transaction_type '==' 1}}-->
+                        <!--<td>Wallet -> Wallet</td>-->
+                      <!--{{else ifCond this.transaction_type '==' 2}}-->
+                        <!--<td>Wallet -> Bank</td>-->
+                      <!--{{/ifCond}}-->
 
-        <form id="user_type">
-            <div class="col-md-6">
-                <button type="button" onclick="user_type('business')" class="btn btn-primary btn-block">Kornet Business</button>
-            </div>
-            <div class="col-md-6">
-                <button type="button" onclick="user_type('government')" class="btn btn-primary btn-block">Kornet Government</button>
-            </div>
-        </form>
+                      <!--{{# ifCond this.operation '==' 0 }}-->
+                        <!--<td>Error</td>-->
+                      <!--{{else ifCond this.operation '==' 1 }}-->
+                        <!--<td>Debit</td>-->
+                      <!--{{else ifCond this.operation '==' 2 }}-->
+                        <!--<td>Credit</td>-->
+                      <!--{{/ifCond}}-->
 
-        <form action="/controller/business" id="business_form" method="post" enctype="multipart/form-data" hidden>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <input type="text" name="business_name" id="business_name" placeholder="Business Name" class="form-control">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <input type="text" name="domain_name" id="domain_name" placeholder="Domain Name" class="form-control">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <input type="number" name="staff" id="staff" placeholder="Staff Number" class="form-control">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <input type="file" name="staff_file" id="staff_file" placeholder="Staff File" class="form-control">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <select name="network_provider"  data-width="fit" class="form-control">
-                        <option value="MTN">MTN</option>
-                        <option value="Airtel">Airtel</option>
-                        <option value="Etisalat">Etisalat</option>
-                        <option value="Glo">Glo</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-                    <button type="submit" name="submit_business"  class="btn btn-primary btn-block">Submit</button>
-                </div>
-            </div>
-        </form>
-
+                      <!--<td>{{ this.amount }}</td>-->
+                      <!--<td>{{ this.paid_at }}</td>-->
+                  <!--</tr>-->
+              <!--{{/each}}-->
+            <!--{{/if}}-->
+          </tbody>
+        </table>
+      </div>
     </div>
-</div>
-
+  </div>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.15/cr-1.3.3/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rr-1.2.0/sc-1.4.2/datatables.min.css"/>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.15/cr-1.3.3/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rr-1.2.0/sc-1.4.2/datatables.min.js"></script>
 <script>
-    let user_type_id =  $('#user_type');
-    let business_form_id = $('#business_form');
-
-    function user_type(type){
-        user_type_id.hide();
-        if(type == 'government'){
-            govt_form_id.show();
-        }
-        if(type == 'business'){
-            business_form_id.show();
-        }
-    }
+  $(document).ready(function() {
+    $('#example').DataTable();
+} );
 </script>

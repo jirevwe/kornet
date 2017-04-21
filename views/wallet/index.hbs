@@ -1,68 +1,54 @@
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">WALLET</h1>
+  <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+      <h1 class="page-header">WALLET</h1>
+          <h4 id="balance">Balance: {{ wallet.balance }}</h4>
 
-          <div class="row placeholders">
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <h4 id="balance">Balance: {{ wallet.balance }}</h4>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-                <a href="/wallet/fund" >Fund Wallet</a>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-                <a href="/wallet/send" >Send Money</a>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-                <a href="/wallet/cashout" >Cashout</a>
-            </div>
-          </div>
+          {{> wallet_nav }}
 
-          <h2 class="sub-header">Transactions</h2>
-          <div class="table-responsive">
-            <table id="example" cellspacing="0" width="100%" class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Reference</th>
-                  <th>Movement</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{# if transactions }}
-                  {{# each transactions }}
-                      <tr>
-                          <td>{{ this.reference }}</td>
-                          
-                          {{# ifCond this.transaction_type '==' 0 }}
-                            <td>Bank -> Wallet</td>
-                          {{else ifCond this.transaction_type '==' 1}}
-                            <td>Wallet -> Wallet</td>
-                          {{else ifCond this.transaction_type '==' 2}}
-                            <td>Wallet -> Bank</td>
-                          {{/ifCond}}
+      <h2 class="sub-header">Transactions</h2>
+      <div class="table-responsive">
+        <table id="example" cellspacing="0" width="100%" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Movement</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{# if transactions }}
+              {{# each transactions }}
+                  <tr>
+                      <td>{{ this.reference }}</td>
 
-                          {{# ifCond this.operation '==' 0 }}
-                            <td>Error</td>
-                          {{else ifCond this.operation '==' 1 }}
-                            <td>Debit</td>
-                          {{else ifCond this.operation '==' 2 }}
-                            <td>Credit</td>
-                          {{/ifCond}}
+                      {{# ifCond this.transaction_type '==' 0 }}
+                        <td>Bank -> Wallet</td>
+                      {{else ifCond this.transaction_type '==' 1}}
+                        <td>Wallet -> Wallet</td>
+                      {{else ifCond this.transaction_type '==' 2}}
+                        <td>Wallet -> Bank</td>
+                      {{/ifCond}}
 
-                          <td>{{ this.amount }}</td>
-                          <td>{{ this.paid_at }}</td>
-                      </tr>
-                  {{/each}}
-                {{/if}}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                      {{# ifCond this.operation '==' 0 }}
+                        <td>Error</td>
+                      {{else ifCond this.operation '==' 1 }}
+                        <td>Debit</td>
+                      {{else ifCond this.operation '==' 2 }}
+                        <td>Credit</td>
+                      {{/ifCond}}
+
+                      <td>{{ this.amount }}</td>
+                      <td>{{ this.paid_at }}</td>
+                  </tr>
+              {{/each}}
+            {{/if}}
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.15/cr-1.3.3/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rr-1.2.0/sc-1.4.2/datatables.min.css"/>
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.15/cr-1.3.3/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rr-1.2.0/sc-1.4.2/datatables.min.js"></script>
 <script>
