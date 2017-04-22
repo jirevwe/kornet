@@ -28,6 +28,7 @@ exports.createCustomer = function(user, callback){
  * 		- bank code
  * 		- first name
  * 		- last name
+ * 		- amount
  */
 exports.createRecipient = function(params, callback){
 	var options = {
@@ -44,21 +45,6 @@ exports.createRecipient = function(params, callback){
 		})
 	};
 	request.post('https://api.paystack.co/transferrecipient', options, (error, response, body)=> {
-		callback(error, body);
-	});
-}
-
-exports.resendOTP = function(code, callback){
-	var options = {
-		headers: {
-			'Authorization': 'Bearer '.concat(SECRET_KEY),
-			'Content-Type' : 'application/json'
-		},
-		body: JSON.stringify({
-			transfer_code: code
-		})
-	};
-	request.post('https://api.paystack.co/transfer/resend_otp', options, (error, response, body)=> {
 		callback(error, body);
 	});
 }
@@ -94,22 +80,6 @@ exports.getCustomers = function(user, callback){
 			return this.email = user.email;
 		});
 		callback(error, use);
-	});
-}
-
-exports.initTransaction = function(user, req, callback){
-	var options = {
-		headers: {
-			'Authorization': 'Bearer '.concat(SECRET_KEY),
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({amount: req.body.amount, email: user.email, callback_url: "http://localhost:3000/wallet" })
-	};
-	request.post('https://api.paystack.co/transaction/initialize', options, (error, response, body)=> {
-		if(body != undefinded){
-			let res = JSON.parse(body).data;
-			callback(error, res.authorization_url);
-		}
 	});
 }
 
@@ -152,7 +122,6 @@ exports.getBanks = function(callback){
  * utils.sendEmail(user, ['mail@mail.com'], {subject: 'invite stuff', body: 'we wanna invite you to do awesome stuff for us'}, (message) => {
  * 		console.log(message);
  * });
- * 
  */
 exports.sendEmail = function(user, emails, options, callback){
 	let mailer = require("nodemailer");
@@ -229,6 +198,12 @@ exports.sendEmail = function(user, emails, options, callback){
 	}
 }
 /* ------------------------------ END MAIL STUFF ----------------------------------- */
+
+exports.generateTransactionReference = function(){
+	//T463309364588305
+	for (var text = '', possible = '0123456789', i = 0; 15 > i; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+	return 'T'.concat(text);
+}
 
 exports.validateEmail = function(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

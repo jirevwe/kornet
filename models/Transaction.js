@@ -8,7 +8,9 @@ var Transaction = new Schema({
 	created_at: {type: Schema.Types.Date, default: Date.now},
 	paid_at: {type: Schema.Types.Date, default: Date.now},
 	reference: Schema.Types.String,
-	channel: Schema.Types.String
+	channel: Schema.Types.String,
+	from: Schema.Types.String,
+	to: Schema.Types.String
 });
 
 module.exports = mongoose.model('Transaction', Transaction);

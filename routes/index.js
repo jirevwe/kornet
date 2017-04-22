@@ -27,9 +27,7 @@ let upload = multer({ storage : storage }).single('userPhoto');
 router.post('/profile', upload, function (req, res, next) {
 
     User.findOne({'_id':req.user._id}, function (err, user) {
-        if(err){
-            return done(user);
-        }
+        if(err) return done(user);
         if(!user){
             req.flash('error', 'User does not exist');
             return res.redirect('/profile');
@@ -51,17 +49,12 @@ router.post('/profile', upload, function (req, res, next) {
         user.next_of_kin_number = req.body.next_of_kin_number;
         user.modified_at = new Date();
         user.save(function(err) {
-            if (err)
-                console.log('error');
-            else
-                console.log(user);
+            if (err) console.log(err);
         });
         req.flash('success', 'Profile has been updated');
         return res.redirect('/profile');
     });
 });
-
-
 
 let csrfProtection = csrf();
 

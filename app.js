@@ -31,7 +31,6 @@ require('./config/passport');
 var app = express();
 app.set('port', process.env.PORT || 3000);
 
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.engine('.hbs', expressHbs({
@@ -70,8 +69,7 @@ app.engine('.hbs', expressHbs({
             else
                 return opts.inverse(this);
         },
-        formatDate: function (date, format) {
-            // moment(date, "YYYY-MM-DD");
+        formatDate: function (date) {
             return moment(date).format("YYYY-MM-DD");
         }
     }

@@ -12,7 +12,6 @@
             <tr>
               <th>Reference</th>
               <th>Movement</th>
-              <th>Type</th>
               <th>Amount</th>
               <th>Date</th>
             </tr>
@@ -31,13 +30,13 @@
                         <td>Wallet -> Bank</td>
                       {{/ifCond}}
 
-                      {{# ifCond this.operation '==' 0 }}
+                      {{!--{{# ifCond this.operation '==' 0 }}
                         <td>Error</td>
                       {{else ifCond this.operation '==' 1 }}
                         <td>Debit</td>
                       {{else ifCond this.operation '==' 2 }}
                         <td>Credit</td>
-                      {{/ifCond}}
+                      {{/ifCond}}--}}
 
                       <td>{{ this.amount }}</td>
                       <td>{{ this.paid_at }}</td>
@@ -54,5 +53,9 @@
 <script>
   $(document).ready(function() {
     $('#example').DataTable();
-} );
+  });
+
+  function dateFormat(date) {
+      return moment(date).format("YYYY-MM-DD");
+  }
 </script>

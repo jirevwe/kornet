@@ -20,7 +20,6 @@
 		</form>
 	</div>
 </div>
-
 <script>
 	$(() => {
 		// Disable function
@@ -63,7 +62,7 @@
  			last_name: '{{ user.last_name }}'
 		};
 
-		let xhr = $.post('http://localhost:3000/wallet/cashout', options, (data, textStatus, jqXHR) => {});
+		let xhr = $.post('http://localhost:3000/wallet/cashout', options);
 
 		let fn = () =>
 		{

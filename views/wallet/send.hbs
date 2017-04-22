@@ -1,0 +1,54 @@
+
+
+<div class="container">
+    {{> wallet_nav }}
+	<form class="form-signin">
+		<script src="https://js.paystack.co/v1/inline.js"></script>
+		<h2 class="form-signin-heading">Send Money</h2>
+		<input type="text" id="amount" value="0" name="amount" placeholder="Amount: Max of {{ wallet.balance }}" class="form-control" required>
+		<input type="text" id="user" name="user" placeholder="recipient's username" class="form-control" required>
+		<button id="submit" name="submit" type="button" class="btn btn-lg btn-primary btn-block" onclick="call()"> Pay </button>
+	</form>
+</div>
+<script type="text/javascript" src="/javascripts/jquery.autocomplete.min.js"></script>
+<script>
+	$('#user').autocomplete({
+		serviceUrl: '/wallet/autocomplete/users',
+		noCache: true
+	});
+
+	// Disable function
+	jQuery.fn.extend({
+		disable: function(state) {
+			return this.each(function() {
+				this.disabled = state;
+			});
+		}
+	});
+	$('#submit').disable(false);
+
+	function verify(){
+		let disable = false;
+
+		let username = $('#user').val();
+		let amount = parseInt($('#amount').val(), 10);
+
+		disable = amount > 0 && username.lenght > 0 ? false : true;
+
+		$('#submit').disable(!disable);
+	}
+
+	function call(){
+		let amount = parseInt($('#amount').val(), 10);
+		let user = $('#user').val();
+
+		let body = {
+			amount: amount,
+			user: user
+		};
+		
+		$.post('http://localhost:3000/wallet/send', body);
+		$('#submit').disable(true);
+		setTimeout(() => { window.location = '/wallet'; }, 2000);
+	}
+</script>

@@ -3,8 +3,10 @@ var router = express.Router();
 // var csrf = require('csrf');
 var utils = require('../utils/api');
 let Wallet = require('../models/wallet');
+let User = require('../models/user');
 let Transaction = require('../models/transaction');
-let www = require('../bin/www'); 
+let www = require('../bin/www');
+var Fawn = require("fawn");
 
 // let csrfProtection = csrf();
 // router.use(csrfProtection);
@@ -56,12 +58,25 @@ router.get('/', isActivated, function (req, res, next) {
 });
 
 router.get('/fund', isActivated, function (req, res, next) {
-	let user = req.user;
-	let wallet = undefined;
+	Wallet.findById(req.user.wallet, (err, wallet) => {
+		res.render('wallet/fund', { wallet: wallet, user: req.user });
+	});
+});
 
-	Wallet.findById(user.wallet, (err, document) => {
-		wallet = document;
-		res.render('wallet/fund', { wallet: wallet, user: user });
+router.get('/autocomplete/users', isActivated, function (req, res, next) {
+	User.find((err, users) => {
+		let _users = [];
+		for(let i = 0;i < users.length;i++){
+			if(users[i].wallet != undefined && users[i].name != req.user.name)
+				_users.push(users[i].name);
+		}
+		res.send({ query: "Unit", suggestions: _users });
+	});
+});
+
+router.get('/send', isActivated, function (req, res, next) {
+	Wallet.findById(req.user.wallet, (err, wallet) => {
+		res.render('wallet/send', { wallet: wallet, user: req.user });
 	});
 });
 
@@ -75,6 +90,53 @@ router.get('/cashout', isActivated, function (req, res, next) {
 			wallet = document;
 			res.render('wallet/cashout', { wallet: wallet, banks: banks, user: user });
 		});
+	});
+});
+
+router.post('/send', isActivated, function (req, res, next) {
+	User.findOne({name: req.body.user}, (err, other_user) => {
+		//save for this user
+		let transaction = Transaction({
+			transaction_type: 1,
+			amount: req.body.amount,
+			created_at: Date.now(),
+			paid_at: Date.now(),
+			reference: utils.generateTransactionReference(),
+			from: req.user.name,
+			to: other_user.name
+		});
+
+		transaction.save((err, result) => {
+			Wallet.find((err, wallets) => {
+				for(let i = 0; i < wallets.length ;i++){
+
+					if(req.user.wallet.equals(wallets[i]._id)) {
+						if(wallets[i].balance == null) wallets[i].balance = 0;
+
+						wallets[i].balance -= result.amount;
+						wallets[i].transactions.push(result._id);
+
+						wallets[i].save((error, new_wallet) => {
+							if(error) console.log(error);
+							console.log('other user wallet saved');
+						});
+					}
+
+					if(other_user.wallet.equals(wallets[i]._id)) {
+						if(wallets[i].balance == null) wallets[i].balance = 0;
+						
+						wallets[i].balance += result.amount;
+						wallets[i].transactions.push(result._id);
+						
+						wallets[i].save((error, new_wallet) => {
+							if(error) console.log(error);
+							console.log('other user wallet saved');
+						});
+					}
+				}
+			});
+		});
+		// db.wallets.update({ '_id': ObjectId("58f9f4d290fd32cc3fdddbc4") },{ $pull: { 'transactions': ObjectId("58fa721b4bd3fff46685c132") } });
 	});
 });
 
@@ -104,8 +166,6 @@ router.post('/cashout', isActivated, function (req, res, next) {
 
 		utils.initTransfer(_options, (error, body) => {
 			let transferStatus = JSON.parse(body).data;
-
-			console.log(transferStatus);
 
 			let transaction = Transaction({
 				operation: 1,
