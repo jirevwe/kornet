@@ -63,7 +63,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
             fixed_numbers.push(number);
             //console.log(number);
         }
-        objects.push({'name': number, 'email': 'none', 'phone_number': number, 'password': token, 'network_provider':network_provider,
+        objects.push({'name': number, 'email': 'none', 'phone_number': number, 'password': token, 'network_provider':created_by.telco,
             'user_type': 'Business', 'user_domain': domain_name, 'security_token': 'none', 'long_text': 'none'})
     }
 
@@ -164,9 +164,52 @@ let csrfProtection = csrf();
 router.use(csrfProtection);
 
 router.get('/', isLoggedIn, function (req, res, next) {
+    let user = req.session.controller;
+    let businesses = [];
     let messages = req.flash('error');
     let successMsg = req.flash('success')[0];
-    res.render('controller/index', {layout: 'auth_header', user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
+    Business.find({'created_by':user.name}).populate("admin").populate("users").exec(function (err, results) {
+        if(err){
+            console.log(err);
+            return res.redirect('/controller/');
+        }
+        if(results){
+            businesses = results;
+        }
+        //console.log(businesses);
+        return res.render('controller/index', {layout: 'auth_header', businesses:businesses, user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
+    });
+
+});
+
+router.get('/logout', isLoggedIn, function (req, res, next) {
+    req.session.controller = null;
+// this also works
+    delete req.session.controller;
+    res.redirect('/controller/');
+});
+
+
+
+
+router.get('/users/:id', isLoggedIn, function (req, res, next) {
+    let id = req.params.id;
+    let businesses = [];
+    Business.find({'_id':id}).populate("users", 'id, phone_number').exec(function (err, results) {
+        if(err){
+            console.log(err);
+            return res.json({});
+        }
+        //console.log(results);
+        if(results){
+            businesses = results[0];
+
+            return res.json(businesses.users);
+        }
+        return res.json({});
+        //console.log(businesses);
+    });
+
 });
 
 router.get('/create-batch', isLoggedIn, function (req, res, next) {
@@ -202,16 +245,17 @@ router.post('/signin', notLoggedIn, function (req, res, next) {
     });
 });
 
-router.get('/create', notLoggedIn, function (req, res, next) {
+router.get('/create', isLoggedIn, function (req, res, next) {
     let messages = req.flash('error');
     res.render('controller/create', {layout: 'auth_header', csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/create', notLoggedIn, function (req, res, next) {
+router.post('/create', isLoggedIn, function (req, res, next) {
     let email = req.body.email;
     let name = req.body.name;
     let password = req.body.password;
     let password2 = req.body.password2;
+    let user = req.session.controller;
 
     if(password != password2){
         req.flash('error', 'Passwords do not match');
@@ -234,7 +278,8 @@ router.post('/create', notLoggedIn, function (req, res, next) {
         newController.email = email;
         newController.name = name;
         newController.password = newController.encrypt(password);
-        newController.created_by = 'Jude';
+        newController.created_by = user.name;
+        newController.telco = user.telco;
 
         newController.save(function (err, result) {
             if(err){
@@ -242,8 +287,8 @@ router.post('/create', notLoggedIn, function (req, res, next) {
                 console.log(err);
                 return res.redirect('/controller/create');
             }
-
-            req.session.controller= newController;
+            req.flash('success', 'New user created');
+            //req.session.controller= newController;
             //console.log(req.session.controller);
             return res.redirect('/controller/');
         });
