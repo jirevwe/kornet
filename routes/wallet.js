@@ -1,17 +1,15 @@
 var express = require('express');
 var router = express.Router();
-// var csrf = require('csrf');
 var utils = require('../utils/api');
 let Wallet = require('../models/wallet');
 let User = require('../models/user');
 let Transaction = require('../models/transaction');
-let www = require('../bin/www');
-var Fawn = require("fawn");
+// var csrf = require('csrf');
 
 // let csrfProtection = csrf();
 // router.use(csrfProtection);
 
-router.get('/', isActivated, function (req, res, next) {
+router.get('/', utils.isActivated, function (req, res, next) {
 	let successMsg = req.flash('success')[0];
 	let user = req.user;
 
@@ -57,13 +55,13 @@ router.get('/', isActivated, function (req, res, next) {
 	}
 });
 
-router.get('/fund', isActivated, function (req, res, next) {
+router.get('/fund', utils.isActivated, function (req, res, next) {
 	Wallet.findById(req.user.wallet, (err, wallet) => {
 		res.render('wallet/fund', { wallet: wallet, user: req.user });
 	});
 });
 
-router.get('/autocomplete/users', isActivated, function (req, res, next) {
+router.get('/autocomplete/users', utils.isActivated, function (req, res, next) {
 	User.find((err, users) => {
 		let _users = [];
 		for(let i = 0;i < users.length;i++){
@@ -74,13 +72,13 @@ router.get('/autocomplete/users', isActivated, function (req, res, next) {
 	});
 });
 
-router.get('/send', isActivated, function (req, res, next) {
+router.get('/send', utils.isActivated, function (req, res, next) {
 	Wallet.findById(req.user.wallet, (err, wallet) => {
 		res.render('wallet/send', { wallet: wallet, user: req.user });
 	});
 });
 
-router.get('/cashout', isActivated, function (req, res, next) {
+router.get('/cashout', utils.isActivated, function (req, res, next) {
 	let user = req.user;
 
 	Wallet.findById(user.wallet, (err, document) => {
@@ -93,7 +91,7 @@ router.get('/cashout', isActivated, function (req, res, next) {
 	});
 });
 
-router.post('/send', isActivated, function (req, res, next) {
+router.post('/send', utils.isActivated, function (req, res, next) {
 	User.findOne({name: req.body.user}, (err, other_user) => {
 		//save for this user
 		let transaction = Transaction({
@@ -140,7 +138,7 @@ router.post('/send', isActivated, function (req, res, next) {
 	});
 });
 
-router.post('/cashout', isActivated, function (req, res, next) {
+router.post('/cashout', utils.isActivated, function (req, res, next) {
 	let user = req.user;
 	let options = req.body;
 
@@ -197,7 +195,7 @@ router.post('/cashout', isActivated, function (req, res, next) {
 	});
 });
 
-router.post('/create-transaction', isActivated, function (req, res, next) {
+router.post('/create-transaction', utils.isActivated, function (req, res, next) {
 	let details = req.body.details;
 	let user = req.user;
 
@@ -235,32 +233,3 @@ router.post('/create-transaction', isActivated, function (req, res, next) {
 });
 
 module.exports = router;
-
-function notActivated(req, res, next){
-	if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
-		return next();
-	}
-	res.redirect('/');
-}
-
-function isActivated(req, res, next){
-	if(req.user && req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
-		req.session.oldUrl = req.url;
-		res.redirect('/choose');
-	}
-	else if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
-		req.session.oldUrl = req.url;
-		res.redirect('/activate');
-	}
-	else if(!req.isAuthenticated()){
-		req.session.oldUrl = req.url;
-		res.redirect('/signin');
-	}
-	return next();
-}
-
-function notLoggedIn(req, res, next){
-	if(!req.isAuthenticated())
-		return next();
-	res.redirect('/');
-}

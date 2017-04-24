@@ -6,6 +6,7 @@ let Order = require('../models/order');
 let Cart = require('../models/cart');
 let User = require('../models/user');
 let Business = require('../models/business');
+var utils = require('../utils/api');
 let multer = require('multer');
 let randomstring = require("randomstring");
 let messagebird = require('messagebird')('oppA3GZBi0bjhGckAkaWcloUf');
@@ -71,12 +72,12 @@ router.get('/',  function (req, res, next) {
         res.render('index', {layout: false});
 });
 
-router.get('/activate', notActivated, function (req, res, next) {
+router.get('/activate', utils.notActivated, function (req, res, next) {
     let messages = req.flash('error');
     res.render('user/activate', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/activate', notActivated, function (req, res, next) {
+router.post('/activate', utils.notActivated, function (req, res, next) {
 
     User.findOne({'email':req.user.email}, function (err, user) {
         if(err){
@@ -102,12 +103,12 @@ router.post('/activate', notActivated, function (req, res, next) {
 
 });
 
-router.get('/signup', notLoggedIn,  function (req, res, next) {
+router.get('/signup', utils.notLoggedIn,  function (req, res, next) {
     let messages = req.flash('error');
     res.render('user/signup', {csrfToken: req.csrfToken(), domain:'demo.kornet-test.com' ,messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/signup', notLoggedIn,  passport.authenticate('local.signup', { failureRedirect: '/signup', failureFlash: true }), function (req, res, next) {
+router.post('/signup', utils.notLoggedIn,  passport.authenticate('local.signup', { failureRedirect: '/signup', failureFlash: true }), function (req, res, next) {
     if(req.user.is_activated == 0){
         res.redirect('/activate');
     }
@@ -122,12 +123,12 @@ router.post('/signup', notLoggedIn,  passport.authenticate('local.signup', { fai
     }
 });
 
-router.get('/signin', notLoggedIn, function (req, res, next) {
+router.get('/signin', utils.notLoggedIn, function (req, res, next) {
     let messages = req.flash('error');
     res.render('user/signin', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.post('/signin', notLoggedIn, passport.authenticate('local.signin', { failureRedirect: '/signin', failureFlash: true }), function (req, res, next) {
+router.post('/signin', utils.notLoggedIn, passport.authenticate('local.signin', { failureRedirect: '/signin', failureFlash: true }), function (req, res, next) {
     if(req.user.name == req.user.phone_number){
         res.redirect('/choose');
     }
@@ -143,18 +144,18 @@ router.post('/signin', notLoggedIn, passport.authenticate('local.signin', { fail
     }
 });
 
-router.get('/profile', isActivated, function (req, res, next) {
+router.get('/profile', utils.isActivated, function (req, res, next) {
     let successMsg = req.flash('success')[0];
     res.render('user/profile', {successMsg: successMsg, noMessage: !successMsg, user: req.user, csrfToken: req.csrfToken()});
 });
 
 
-router.get('/forgot', notLoggedIn, function (req, res, next) {
+router.get('/forgot', utils.notLoggedIn, function (req, res, next) {
     let messages = req.flash('error');
     res.render('user/forgot', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
-router.get('/choose', notActivated, function (req, res, next) {
+router.get('/choose', utils.notActivated, function (req, res, next) {
     let messages = req.flash('error');
     let phone  = req.user.phone_number;
     res.render('user/choose', {csrfToken: req.csrfToken(), phone:phone, messages:messages, hasErrors:messages.length > 0});
@@ -165,7 +166,7 @@ router.get('/logout', function (req, res, next) {
     res.redirect('/');
 });
 
-router.post('/sec_recovery', notLoggedIn, function (req, res, next) {
+router.post('/sec_recovery', utils.notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
     //console.log(req.body.user_id);
     User.findOne({ $or: [ {'name':user_id}, {'phone_number':user_id} ] }, function (err, user) {
@@ -184,7 +185,7 @@ router.post('/sec_recovery', notLoggedIn, function (req, res, next) {
     });
 });
 
-router.post('/token_recovery', notLoggedIn, function (req, res, next) {
+router.post('/token_recovery', utils.notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
 
     User.findOne({ $or: [ {'name':user_id}, {'phone_number':user_id} ] }, function (err, user) {
@@ -226,7 +227,7 @@ router.post('/token_recovery', notLoggedIn, function (req, res, next) {
     });
 });
 
-router.post('/verify_token', notLoggedIn, function (req, res, next) {
+router.post('/verify_token', utils.notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
     let reply_id = req.body.reply_id;
     console.log(req.body);
@@ -247,7 +248,7 @@ router.post('/verify_token', notLoggedIn, function (req, res, next) {
     });
 });
 
-router.post('/verify_sec_answer', notLoggedIn, function (req, res, next) {
+router.post('/verify_sec_answer', utils.notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
     let reply_id = req.body.reply_id;
     console.log(req.body);
@@ -269,11 +270,11 @@ router.post('/verify_sec_answer', notLoggedIn, function (req, res, next) {
     });
 });
 
-router.post('/change_pass', notLoggedIn, passport.authenticate('local.change_pass', { failureRedirect: '/forgot', failureFlash: true }), function (req, res, next) {
+router.post('/change_pass', utils.notLoggedIn, passport.authenticate('local.change_pass', { failureRedirect: '/forgot', failureFlash: true }), function (req, res, next) {
         res.json({url: '/'});
 });
 
-router.post('/verify_user', notActivated, passport.authenticate('local.verify_user', { failureRedirect: '/choose', failureFlash: true }), function (req, res, next) {
+router.post('/verify_user', utils.notActivated, passport.authenticate('local.verify_user', { failureRedirect: '/choose', failureFlash: true }), function (req, res, next) {
     if(req.session.oldUrl){
         let oldUrl = req.session.oldUrl;
         req.session.oldUrl = null;
@@ -285,7 +286,7 @@ router.post('/verify_user', notActivated, passport.authenticate('local.verify_us
 });
 
 // API ENDPOINTS
-router.get('/contacts', isActivated, function (req, res, next) {
+router.get('/contacts', utils.isActivated, function (req, res, next) {
     let user = req.user;
     if (user.user_domain != undefined ){
         Business.find({'domain': user.user_domain }).populate("users", "id name email phone_number").exec(function(err,results){
@@ -330,7 +331,7 @@ router.get('/contacts', isActivated, function (req, res, next) {
 
 });
 
-router.post('/contacts', isActivated, function (req, res, next) {
+router.post('/contacts', utils.isActivated, function (req, res, next) {
     let user = req.user;
     let contacts = req.body.contacts;
     User.update({_id: user.id}, {$addToSet: {members: {$each: contacts}}}, function (err, result) {
@@ -341,39 +342,10 @@ router.post('/contacts', isActivated, function (req, res, next) {
     });
 });
 
-router.get('/download/:filename', isActivated, function (req, res, next) {
+router.get('/download/:filename', utils.isActivated, function (req, res, next) {
     res.download('./tmp/' + req.params.filename, req.params.filename, function(err){
         if (err) console.log(err);
     });
 });
 
 module.exports = router;
-
-function notActivated(req, res, next){
-	if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
-		return next();
-	}
-	res.redirect('/');
-}
-
-function isActivated(req, res, next){
-	if(req.user && req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
-		req.session.oldUrl = req.url;
-		res.redirect('/choose');
-	}
-	else if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
-		req.session.oldUrl = req.url;
-		res.redirect('/activate');
-	}
-	else if(!req.isAuthenticated()){
-		req.session.oldUrl = req.url;
-		res.redirect('/signin');
-	}
-	return next();
-}
-
-function notLoggedIn(req, res, next){
-	if(!req.isAuthenticated())
-		return next();
-	res.redirect('/');
-}

@@ -221,3 +221,32 @@ exports.getLong = function (encrypted) {
 	let decrypted = Crypto.AES.decrypt(encrypted, "$2a$05$d92IUG5ZHIpU0f8fvQitvOut05tuZdD4rDp5RF8BC/7zdFvUqBk52");
 	return decrypted.toString(Crypto.enc.Utf8);
 }
+
+exports.notActivated = function(req, res, next){
+	if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
+		return next();
+	}
+	res.redirect('/');
+}
+
+exports.isActivated = function(req, res, next){
+	if(req.user && req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
+		req.session.oldUrl = req.url;
+		res.redirect('/choose');
+	}
+	else if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
+		req.session.oldUrl = req.url;
+		res.redirect('/activate');
+	}
+	else if(!req.isAuthenticated()){
+		req.session.oldUrl = req.url;
+		res.redirect('/signin');
+	}
+	return next();
+}
+
+exports.notLoggedIn = function(req, res, next){
+	if(!req.isAuthenticated())
+		return next();
+	res.redirect('/');
+}

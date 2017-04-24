@@ -295,9 +295,7 @@ router.post('/create', isLoggedIn, function (req, res, next) {
     });
 });
 
-
 module.exports = router;
-
 
 function isLoggedIn(req, res, next){
     //console.log(res.locals.controller);
