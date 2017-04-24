@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="col-md-12">
+            <h1>{{business.name}} - Add Batch Users</h1>
+            {{> telco_nav }}
+        </div>
+
+
+        {{# if hasErrors}}
+            <div class="alert alert-danger">
+                {{# each messages}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
+            <p> <strong>Admin: </strong>{{successMsg}} </p>
+        </div>
+
+
+        <form action="/controller/add-to-business" id="business_form" method="post" enctype="multipart/form-data">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" name="business_name" id="business_name" value="{{business.name}}" placeholder="Business Name" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="file" name="staff_file" id="staff_file" placeholder="Staff File" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" name="add_numbers_to_business"  class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>

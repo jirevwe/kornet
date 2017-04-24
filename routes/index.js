@@ -288,42 +288,57 @@ router.post('/verify_user', utils.notActivated, passport.authenticate('local.ver
 // API ENDPOINTS
 router.get('/contacts', utils.isActivated, function (req, res, next) {
     let user = req.user;
+    let contacts = [];
     if (user.user_domain != undefined ){
-        Business.find({'domain': user.user_domain }).populate("users", "id name email phone_number").exec(function(err,results){
+        Business.find({'domain': user.user_domain}).populate("users", "id name email phone_number is_activated").exec(function(err,results){
             if(err){
                 return res.json({result: "failed", contacts:[]});
             }
             let result = results[0];
+
             let contact1 = result.users;
 
+            for(i in contact1){
+                if(contact1[i].is_activated == 1 && contact1[i].name != user.name){
+                    contacts.push(contact1[i]);
+                }
+            }
+
             //return res.json({result: "success", contacts:});
-            User.find({'_id': user._id }).populate("contacts", "_id name email phone_number").exec(function(err,results){
+            User.find({'_id': user._id, 'is_activated': 1 }).populate("contacts", "_id name email phone_number is_activated").exec(function(err,results){
                 if(err){
                     return res.json({result: "failed", contacts:[]});
                 }
 
                 let result = results[0];
                 let contact2 = result.users;
-                let contacts = [];
-                if(contact2 != null){
-                    contacts = contact1.concat(contact2);
-                }
-                else{
-                    contacts = contact1;
-                }
 
+                if(contact2 != null){
+                    for(i in contact2){
+                        if(contact2[i].is_activated == 1 && contact2[i].name != user.name){
+                            contacts.push(contact1[i]);
+                        }
+                    }
+                }
                 return res.json({result: "success", contacts:contacts});
             });
         });
     }
     else{
         if(user.contacts != undefined){
-            User.find({'_id': user._id }).populate("contacts", "_id name email phone_number").exec(function(err,results){
+            User.find({'_id': user._id, 'is_activated': 1 }).populate("contacts", "_id name email phone_number is_activated").exec(function(err,results){
                 if(err){
                     return res.json({result: "failed", contacts:[]});
                 }
                 let result = results[0];
-                return res.json({result: "success", contacts:result.contacts});
+                let contact1 = result.contacts;
+
+                for(i in contact1){
+                    if(contact1[i].is_activated == 1 && contact1[i].name != user.name){
+                        contacts.push(contact1[i]);
+                    }
+                }
+                return res.json({result: "success", contacts:contacts});
             });
         }
        // return res.json({result: "success", contacts:[]});

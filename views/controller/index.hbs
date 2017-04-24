@@ -1,8 +1,9 @@
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
-      <h1 class="page-header">Telco Portal</h1>
-
-        {{> telco_nav }}
+        <div class="col-md-12">
+          <h1 class="page-header">Telco Portal</h1>
+            {{> telco_nav }}
+        </div>
         {{# if hasErrors}}
             <div class="alert alert-danger">
                 {{# each messages}}
@@ -13,7 +14,10 @@
         <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
             {{successMsg}}
         </div>
-      <h2 id="sub-header" class="sub-header">Businesses</h2>
+
+
+        <h2 id="sub-header" class="sub-header">Businesses</h2>
+        <p id="add_more" hidden><input id="add_more_id" value="Add More" type="button" class="btn btn-primary"></p>
       <div id="businesses_id" class="table-responsive">
         <table id="business_list" cellspacing="0" width="100%" class="table table-striped table-hover table-bordered">
           <thead>
@@ -54,6 +58,7 @@
                 <tbody id="numbers_list_body">
 
                 </tbody>
+
             </table>
         </div>
     </div>
@@ -93,15 +98,40 @@
               $('#sub-header').html('Numbers');
               let users = data;
               for(i in users){
-                  $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+default_pass+'</td><td></td></tr>');
+                  let id = "'"+users[i]._id+"'";
+                  $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+default_pass+'</td><td><a id="'+id+'" onclick="reassign('+id+', '+default_pass+', '+domain+')" class="btn btn-danger">Reassign</a></td></tr>');
               }
               $('#numbers_list').DataTable(datatableoptions);
+              $('#add_more').show();
+              $('#add_more_id').attr('onclick','add_more("'+id+'")');
           },
           error: function(err){
               console.log(err);
           }
       });
+  }
 
+  function add_more(id){
+      window.location.replace("/controller/add-batch/"+id);
+      //window.location.href = ;
+  }
 
+  function reassign(id, default_pass, domain_name){
+      alert(id);
+      $.ajaxSetup({
+          headers: {"X-CSRF-Token": "{{csrfToken}}" }
+      });
+
+      $.ajax({
+          method: "POST",
+          url: "http://localhost:3000/controller/reassign/"+id,
+          data: {password:default_pass, domain_name:domain_name},
+          success: function(data) {
+              console.log(data);
+          },
+          error: function(err) {
+              console.log(err);
+          }
+      });
   }
 </script>

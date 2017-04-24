@@ -1,0 +1,69 @@
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="col-md-12">
+            <h1 class="page-header">Telco Portal</h1>
+
+            {{> telco_nav }}
+        </div>
+
+        {{# if hasErrors}}
+            <div class="alert alert-danger">
+                {{# each messages}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
+            {{successMsg}}
+        </div>
+
+
+        <h2 id="sub-header" class="sub-header">Telcos</h2>
+        <p><a href="/controller/telcos/create" class="btn btn-primary">Add New</a></p>
+        <div id="businesses_id" class="table-responsive">
+            <table id="telcos_list" cellspacing="0" width="100%" class="table table-striped table-hover table-bordered">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{# if telcos }}
+                    {{# each telcos }}
+                        <tr>
+                            <td>{{ this.name }}</td>
+                            <td>{{ this.email }}</td>
+                        </tr>
+                    {{/each}}
+                {{/if}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+<script src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.min.js"></script>
+<script>
+    $(document).ready(function(){
+        datatableoptions = {
+            "paging": true,
+            "pageLength": 50,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'pdf'
+            ]
+        };
+        $('#telcos_list').DataTable(datatableoptions);
+
+    });
+</script>
