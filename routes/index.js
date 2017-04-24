@@ -61,7 +61,7 @@ let csrfProtection = csrf();
 
 router.use(csrfProtection);
 
-router.use('/', function (req, res, next) {
+router.use('/', utils.isActivated, function (req, res, next) {
     next();
 });
 

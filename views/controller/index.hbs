@@ -100,12 +100,13 @@
               for(i in users){
                   let id = "'"+users[i]._id+"'";
                   let pass = default_pass;
+                  let _id = users[i]._id;
                   let default_password = "'"+default_pass+"'";
                   let domain_name = "'"+domain+"'";
                   if(users[i].is_activated == 1){
-                      $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+pass+'</td><td><a id="'+id+'" onclick="reassign('+id+', '+default_password+', '+domain_name+')" class="btn btn-success">Reassign</a></td></tr>');
+                      $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+pass+'</td><td><a id="'+_id+'" onclick="reassign('+id+', '+default_password+', '+domain_name+')" class="btn btn-success">Reassign</a></td></tr>');
                   }else{
-                      $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+pass+'</td><td><a id="'+id+'" onclick="reassign('+id+', '+default_password+', '+domain_name+')" class="btn btn-danger">Reassign</a></td></tr>');
+                      $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+pass+'</td><td><a id="'+_id+'" onclick="reassign('+id+', '+default_password+', '+domain_name+')" class="btn btn-danger">Reassign</a></td></tr>');
                   }
               }
               $('#numbers_list').DataTable(datatableoptions);
@@ -124,7 +125,7 @@
   }
 
   function reassign(id, default_pass, domain_name){
-      alert(id);
+      //alert(id);
       $.ajaxSetup({
           headers: {"X-CSRF-Token": "{{csrfToken}}" }
       });
@@ -136,8 +137,8 @@
           success: function(data) {
               console.log(data);
               if(data.result == 'success'){
-                  $('#'+id+'').removeClass("btn-success");
-                  $('#'+id+'').addClass("btn-danger");
+                  $("#"+id+"").removeClass("btn-success");
+                  $("#"+id+"").addClass("btn-danger");
               }
           },
           error: function(err) {

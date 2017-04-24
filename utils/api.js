@@ -232,15 +232,15 @@ exports.notActivated = function(req, res, next){
 exports.isActivated = function(req, res, next){
 	if(req.user && req.user.name == req.user.phone_number && req.user.is_activated != 1 && req.isAuthenticated()){
 		req.session.oldUrl = req.url;
-		res.redirect('/choose');
+		return res.redirect('/choose');
 	}
 	else if(req.user && req.user.is_activated != 1 && req.isAuthenticated()){
 		req.session.oldUrl = req.url;
-		res.redirect('/activate');
+        return res.redirect('/activate');
 	}
 	else if(!req.isAuthenticated()){
 		req.session.oldUrl = req.url;
-		res.redirect('/signin');
+        return res.redirect('/signin');
 	}
 	return next();
 }
