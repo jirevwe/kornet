@@ -285,7 +285,7 @@ router.get('/logout', isLoggedIn, function (req, res, next) {
 router.get('/users/:id', isLoggedIn, function (req, res, next) {
     let id = req.params.id;
     let businesses = [];
-    Business.find({'_id':id}).populate("users", 'id, phone_number').exec(function (err, results) {
+    Business.find({'_id':id}).populate("users", 'id, phone_number is_activated').exec(function (err, results) {
         if(err){
             console.log(err);
             return res.json({});
@@ -380,7 +380,7 @@ router.get('/telcos/create', isLoggedIn, function (req, res, next) {
 });
 
 router.post('/reassign/:id', isLoggedIn, function (req, res, next) {
-    let user = req.session.controller;
+    let telco = req.session.controller;
     let reassign_id = req.params.id;
     let domain_name = req.body.domain_name;
     let password = req.body.password;
@@ -393,12 +393,10 @@ router.post('/reassign/:id', isLoggedIn, function (req, res, next) {
         if(!user){
             return res.json({result:'failed', message:'User not found'});
         }
-
-        user.name = user.number;
+        user.name = user.phone_number;
         user.email = 'none';
-        user.phone_number = user.number;
         user.password = password;
-        user.network_provider = user.telco;
+        user.network_provider = telco.telco;
         user.user_type = 'Business';
         user.security_token= 'none';
         user.long_text= 'none';
@@ -412,15 +410,15 @@ router.post('/reassign/:id', isLoggedIn, function (req, res, next) {
         user.next_of_kin = undefined;
         user.next_of_kin_number = undefined;
         user.state = undefined;
-        user.date_of_birth = undefined;
         user.profile_image = undefined;
-        user.contacts = undefined;
+        user.contacts = [];
         user.gender = undefined;
         user.is_activated = undefined;
         user.wallet = undefined;
 
-        user.save(function(err) {
+        user.save(function(err, result) {
             if (err) console.log(err);
+            console.log(result);
         });
         return res.json({result:'success', message:'Number has been reassigned'});
 

@@ -51,7 +51,7 @@
                 <thead>
                 <tr>
                     <th>Number</th>
-                    <th>Default Passwrod</th>
+                    <th>Default Password</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -99,7 +99,14 @@
               let users = data;
               for(i in users){
                   let id = "'"+users[i]._id+"'";
-                  $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+default_pass+'</td><td><a id="'+id+'" onclick="reassign('+id+', '+default_pass+', '+domain+')" class="btn btn-danger">Reassign</a></td></tr>');
+                  let pass = default_pass;
+                  let default_password = "'"+default_pass+"'";
+                  let domain_name = "'"+domain+"'";
+                  if(users[i].is_activated == 1){
+                      $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+pass+'</td><td><a id="'+id+'" onclick="reassign('+id+', '+default_password+', '+domain_name+')" class="btn btn-success">Reassign</a></td></tr>');
+                  }else{
+                      $('#numbers_list_body').append('<tr><td>'+users[i].phone_number+'</td><td>'+pass+'</td><td><a id="'+id+'" onclick="reassign('+id+', '+default_password+', '+domain_name+')" class="btn btn-danger">Reassign</a></td></tr>');
+                  }
               }
               $('#numbers_list').DataTable(datatableoptions);
               $('#add_more').show();
@@ -128,6 +135,10 @@
           data: {password:default_pass, domain_name:domain_name},
           success: function(data) {
               console.log(data);
+              if(data.result == 'success'){
+                  $('#'+id+'').removeClass("btn-success");
+                  $('#'+id+'').addClass("btn-danger");
+              }
           },
           error: function(err) {
               console.log(err);
