@@ -1,26 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css" media="screen">
+    <link rel="stylesheet" href="/stylesheets/main.css" media="screen">
+    <link rel="stylesheet" href="/stylesheets/font-awesome.min.css"  media="screen">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="/stylesheets/dropzone.min.css">
+    <link rel="stylesheet" href="/stylesheets/basic.min.css">
+
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/javascripts/main.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+
+    <script type="text/javascript" src="/javascripts/dropzone.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
+    <script type="text/javascript" src="/javascripts/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript">
+        tinymce.init({
+            selector: 'textarea'
+        });
+    </script>
+</head>
+<body>
 <div class="container">
-    <h1>Send Mail</h1>
-    <form id="sendmail" role="form" method="post">
-        <div class="form-group">
-            <label label-for="sender">Sender</label>
-            <input type="text" name="sender" value="{{user.email}}" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="recipient">Recipients</label>
-            <input type="text" name="recipient" placeholder="foobar@zee.com, &quot;Ray Tuk&quot; &lt;see@saw.com&gt;" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="cc">Cc</label>
-            <input type="text" name="cc" placeholder="foo@bar.com, &quot;Jude Dike&quot; &lt;mon@day.com&gt;" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="bcc">Bcc</label>
-            <input type="text" name="bcc" placeholder="wa@wu.com, &quot;Ismail Shomala&quot; &lt;public@holiday.com&gt;" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="subject">Subject</label>
-            <input type="text" name="subject" placeholder="Subject" class="form-control"/>
-        </div>
+    <h1>Edit {{ business.name }} Page</h1>
+    <form id="add-content" role="form" action="/business/save" method="post">
         <div class="form-group">
             <textarea rows="10" cols="40" name="content" placeholder="Content" class="form-control"></textarea>
         </div>
@@ -32,24 +46,16 @@
         <div id="stuff" hidden>
         </div>
         <div class="form-group">
-            <button type="submit" name="send" id="submit" value="submit" formaction="/business/save" class="btn btn-success">Send Mail &nbsp;</button>
+            <button type="submit" name="send" id="submit" value="submit" class="btn btn-success">Send Mail &nbsp;</button>
         </div>
     </form>
 </div>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
         let socketio = io.connect();
-        let mail_id = undefined;
+        let business_id = '{{ business._id }}';
 
-        socketio.on("hidden_mail_attr", function(data) {
-            $('#stuff').html('<input id="attr" type="text" name="attr" value="' + data['content'] +'"/>');
-            mail_id = data['content'];
-        });
-
-        if (mail_id == undefined){
-            mail_id = Date.now().toString();
-            $('#stuff').html('<input id="attr" type="text" name="attr" value="' + mail_id +'"/>');
-        }
+        $('#stuff').html('<input id="attr" type="text" name="attr" value="' + business_id +'"/>');
 
          String.prototype.getExtension = function() {
             var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
@@ -80,15 +86,15 @@
 
         let files = [];
         Dropzone.options.uploadzone = {
-            url:'/mail/upload',
+            url:'/business/upload',
             addRemoveLinks: true,
             paramName: 'attachment',
             maxFilesize: 10,
             maxFiles: 5,
             dictDefaultMessage: 'Drag an file here to upload, or click to select',
-            acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc, .xlxs, ',
+            acceptedFiles: '.png, .jpg, .jpeg, .gif',
             renameFilename: (name) => {
-                return mail_id + '-' + name;
+                return business_id + '-' + name;
             },
             init: function() {
                 let myDropzone = this;
@@ -101,7 +107,7 @@
                     console.log(error);
                 });
                 this.on('removedfile', function(file){
-                    let file_index = files.find((n) => { return n.originalname == mail_id + '-' +file.name });
+                    let file_index = files.find((n) => { return n.originalname == business_id + '-' +file.name });
                     xhr = $.ajax({
                         url: "http://localhost:3000/business/uploads/delete",
                         type: "POST",
@@ -129,3 +135,6 @@
             }
         };
 </script>
+</div>
+</body>
+</html>

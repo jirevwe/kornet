@@ -53,7 +53,10 @@
 					transaction_type: 0
 				};
 
-				let xhr = $.post('http://localhost:3000/wallet/create-transaction', body);
+				let xhr = $.post('http://localhost:3000/wallet/create-transaction', body, (data) => {
+					console.log(data);
+					setTimeout(() => { window.location = '/wallet'; }, 2000);
+				});
 
 				let fn = () =>
 				{
@@ -61,8 +64,6 @@
 						xhr.abort();
 				};
 				setInterval(fn, 500);
-
-				setTimeout(() => { window.location = '/wallet'; }, 2000);
 			}
 		});
 		handler.openIframe();

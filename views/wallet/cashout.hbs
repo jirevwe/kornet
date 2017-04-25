@@ -62,7 +62,10 @@
  			last_name: '{{ user.last_name }}'
 		};
 
-		let xhr = $.post('http://localhost:3000/wallet/cashout', options);
+		let xhr = $.post('http://localhost:3000/wallet/cashout', options, (data) => {
+			console.log(data);
+			setTimeout(() => { window.location = '/wallet'; }, 2000);
+		});
 
 		let fn = () =>
 		{
@@ -72,6 +75,5 @@
 		setInterval(fn, 500);
 
 		$('#submit').disable(true);
-		setTimeout(() => { window.location = '/wallet'; }, 2000);
 	}
 </script>
