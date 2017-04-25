@@ -67,7 +67,19 @@ let upload = multer({
 /* GET home page. */
 router.get('/', utils.isActivated, function(req, res, next) {
     //console.log(req.user);
-    res.render('chat/index', {layout: false, user: req.user, csrfToken: req.csrfToken()});
+    res.render('chat/index', {layout: false, utils:utils, user: req.user, csrfToken: req.csrfToken()});
+});
+
+router.post('/password', function(req, res, next) {
+    //console.log(req.user);
+    let password = req.body.password;
+
+    //console.log("password "+password);
+    let pass = utils.setLong(password);
+
+    //console.log(""+pass);
+
+    return res.json(""+pass);
 });
 
 router.post('/upload', utils.isActivated, upload.single('attachment'), function(req, res, next){
@@ -94,7 +106,8 @@ router.post('/uploads/delete', utils.isActivated, function(req, res, next){
 
 router.post('/add-room', utils.isActivated, function(req, res, next) {
     var room = req.body;
-    console.log("room sent: "+room.id);
+    console.log("room sent: ");
+    console.log(room);
 
 
     if(room.password == ''){
@@ -119,7 +132,6 @@ router.post('/add-room', utils.isActivated, function(req, res, next) {
         //return res.send(200);
     }
     else {
-        var ARoom =  new Room({});
         var newRoom2 =  new Room({
             name: room.name,
             room_id: room.id,
@@ -127,13 +139,13 @@ router.post('/add-room', utils.isActivated, function(req, res, next) {
             members: room.members,
             isDM: room.isDM,
             isPrivate: room.isPrivate,
-            password: ARoom.encrypt(room.password)
+            password: utils.setLong(room.password)
         });
         newRoom2.save(function (err, result) {
             if(err){
                 console.log(err);
             }
-            //console.log("room password saved: "+newRoom.members);
+            console.log("room password saved: "+newRoom2);
             return res.json(200);
         });
 
