@@ -133,7 +133,7 @@ router.post('/add-room', utils.isActivated, function(req, res, next) {
             if(err){
                 console.log(err);
             }
-            console.log("room password saved: "+newRoom.members);
+            //console.log("room password saved: "+newRoom.members);
             return res.json(200);
         });
 

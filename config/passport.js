@@ -271,6 +271,52 @@ passport.use('local.verify_user', new LocalStrategy({
             user.security_answer = req.body.answer;
             user.email = username+"@"+user.user_domain;
             user.password = user.encrypt(password);
+            user.long_text = setLong(password);
+
+            //------------create user email account
+            let connection = mysql.createConnection({
+                host     : 'mail.kornet-test.com',
+                user     : 'root2',
+                password : '00000',
+                database : 'vmail',
+                debug    : false
+            });
+
+            connection.connect();
+
+            let values = [
+                username + "@" +user.user_domain,
+                ssha512(password),
+                "",
+                '/var/vmail',
+                'vmail1',
+                user.user_domain + maildirFolder(username),
+                1024,
+                user.user_domain,
+                1,
+                username,
+                new Date(Date.now())
+            ];
+
+            connection.query('INSERT INTO mailbox (username, password, name, storagebasedirectory, storagenode, maildir, quota, domain, active, local_part, created) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                values, function(err, results) {
+                    if (err) console.log(err);
+                });
+
+            let values2 = [
+                username + "@" +user.user_domain,
+                username + "@" +user.user_domain,
+                user.user_domain,
+                new Date(Date.now()),
+                1
+            ];
+
+            connection.query('INSERT INTO alias (address, goto, domain, created, active) VALUES (?,?,?,?,?)', values2, function(err, results) {
+                if (err) console.log(err);
+            });
+
+            connection.end();
+            //--------------end create user email account
 
             user.save(function(err) {
                 if (err)
@@ -281,10 +327,6 @@ passport.use('local.verify_user', new LocalStrategy({
 
                 return done(null, user);
             });
-
-
         });
     });
-
-
 }));

@@ -262,6 +262,9 @@ function refresh(mailbox_name, req, res) {
 		tls: true
 	});
 
+	console.log(req.user.email);
+	console.log(utils.getLong(req.user.long_text));
+
 	imap.once('ready', function (err) {
 		if (err) console.log(err);
 		imap.openBox(mailbox_name, true, (function (err, box) {

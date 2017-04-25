@@ -85,6 +85,7 @@ router.post('/add-to-business', upload.single('staff_file'), isLoggedIn, functio
                         if (err) {
                             console.log(err);
                             req.flash('error', 'Error creating users.');
+                            return res.redirect('/controller/add-batch/'+business._id);
                         } else {
                             for (i = 0; i < result.length; i++) {
                                 users_id.push(result[i]._id)
@@ -92,13 +93,16 @@ router.post('/add-to-business', upload.single('staff_file'), isLoggedIn, functio
                             console.log(users_id);
                             let staff_number = parseInt(business.staff_number, 10) + parseInt(users_id.length, 10);
                             Business.update({_id: business._id}, {$addToSet: {users: {$each: users_id}}, staff_number:staff_number}, function (err, result) {
-                                if (err)
+                                if (err) {
                                     req.flash('error', 'Error creating users.');
-                                else
-                                    req.flash('success', 'Numbers have been added to '+business_name);
+                                    return res.redirect('/controller/add-batch/' + business._id);
+                                }
+                                else {
+                                    req.flash('success', 'Numbers have been added to ' + business_name);
+                                    return res.redirect('/controller/add-batch/' + business._id);
+                                }
                             });
 
-                            return res.redirect('/controller/add-batch/'+business._id);
                         }
                     });
                 }
@@ -118,9 +122,9 @@ router.post('/add-to-business', upload.single('staff_file'), isLoggedIn, functio
 router.post('/business', upload.single('staff_file'), isLoggedIn, function (req, res, next) {
     let business_name = req.body.business_name;
     let domain_name = req.body.domain_name;
-    let staff = req.body.staff;
+    // let staff = req.body.staff;
     let staff_file = req.file.filename;
-    let network_provider = req.body.network_provider;
+    // let network_provider = req.body.network_provider;
     let created_by = req.session.controller;
 
     let numbers = [];
@@ -218,9 +222,8 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
 
                             connection.connect();
                             let values = [domain_name, business_name, 'default_user_quota:1024;'];
-                            connection.query('INSERT INTO domain (domain, description, settings)', values, function(err, results, fields) {
+                            connection.query('INSERT INTO domain (domain, description, settings) VALUES (?,?,?)', values, function(err, results, fields) {
                                 if (err) console.log(err);
-                                
                             });
 
                             connection.end();
