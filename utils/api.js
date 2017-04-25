@@ -250,3 +250,8 @@ exports.notLoggedIn = function(req, res, next){
 		return next();
 	res.redirect('/');
 }
+
+exports.setLong = function(cleartext){
+    let Crypto = require('crypto-js');
+    return Crypto.AES.encrypt(cleartext, "$2a$05$d92IUG5ZHIpU0f8fvQitvOut05tuZdD4rDp5RF8BC/7zdFvUqBk52");
+}

@@ -346,8 +346,8 @@
                             }
                         }
                         else{
-                            //console.log(user_db);
-                            //console.log(creator);
+                            console.log(user_db);
+                            console.log(creator);
                             if(user_db._id == creator._id){
                                 $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
                             }else if(user_db.user_domain == creator.user_domain){
@@ -654,27 +654,38 @@
         function enterRoom(id){
             activeRoom = curRooms[id];
 
+            console.log("active rooms");
+            console.log(activeRoom);
+
             if (activeRoom.isPrivate == true ){
                 $('#privateChatModal').modal('show');
 
                 $("#privateChatSubmit").click(function(){
                     var isPass = $('#enterRoomPass').val();
 
-                    if (activeRoom.password === isPass) {
-                        if (user.inRoom != null && user.inRoom != id) {
-                            $('#chatlog').empty();
-                            socketio.emit("leave_room_to_server", {user: user, id: id});
+                    $.ajax({
+                        method: "POST",
+                        url: "http://localhost:3000/chat/password/",
+                        data: {password:isPass},
+                        success: function (data) {
+                            console.log(data);
+                            console.log(activeRoom.password);
+                            if (activeRoom.password == data || activeRoom.password == isPass) {
+                                if (user.inRoom != null && user.inRoom != id) {
+                                    $('#chatlog').empty();
+                                    socketio.emit("leave_room_to_server", {user: user, id: id});
+                                }
+                                user.inRoom = activeRoom.id;
+                                socketio.emit("enter_room_to_server", user);
+                                $('#chatroom-wrapper').show();
+                                $("#chatName").html("<h4>" + activeRoom.name + "</h4>");
+                                $('#privateChatModal').modal('hide');
+                                $('#enterRoomPass').val("");
+                            } else {
+                                alert("Invalid Password!");
+                            }
                         }
-
-                        user.inRoom = activeRoom.id;
-                        socketio.emit("enter_room_to_server", user);
-                        $('#chatroom-wrapper').show();
-                        $("#chatName").html("<h4>" + activeRoom.name + "</h4>");
-                        $('#privateChatModal').modal('hide');
-                        $('#enterRoomPass').val("");
-                    } else {
-                        alert("Invalid Password!");
-                    }
+                    });
                 });
             } else {
                 if (user.inRoom != null && user.inRoom != id) {
