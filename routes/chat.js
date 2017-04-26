@@ -75,11 +75,11 @@ router.post('/password', function(req, res, next) {
     let password = req.body.password;
 
     //console.log("password "+password);
-    let pass = utils.setLong(password);
+    let pass = utils.getLong(password);
 
     //console.log(""+pass);
 
-    return res.json(""+pass);
+    return res.json({password:pass});
 });
 
 router.post('/upload', utils.isActivated, upload.single('attachment'), function(req, res, next){

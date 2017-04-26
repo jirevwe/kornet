@@ -355,8 +355,6 @@
                         }
                         else{
                             console.log("nodm");
-                            console.log(user_db);
-                            console.log(creator);
                             if(user_db._id == creator._id){
                                 $("#activeRooms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
                             }else if(user_db.user_domain == creator.user_domain){
@@ -656,9 +654,9 @@
             activeRoom = curRooms[id];
 
             console.log("active rooms");
-            console.log(activeRoom);
+            console.log(activeRoom.isPrivate);
 
-            if (activeRoom.isPrivate == true ){
+            if (activeRoom.isPrivate == "true" ){
                 $('#privateChatModal').modal('show');
 
                 $("#privateChatSubmit").click(function(){
@@ -667,11 +665,12 @@
                     $.ajax({
                         method: "POST",
                         url: "http://localhost:3000/chat/password/",
-                        data: {password:isPass},
+                        data: {password:activeRoom.password},
                         success: function (data) {
-                            console.log(data);
+                            console.log("data");
+                            console.log(data.password);
                             console.log(activeRoom.password);
-                            if (activeRoom.password == data || activeRoom.password == isPass) {
+                            if (data.password == isPass) {
                                 if (user.inRoom != null && user.inRoom != id) {
                                     $('#chatlog').empty();
                                     socketio.emit("leave_room_to_server", {user: user, id: id});
@@ -1123,12 +1122,12 @@
 
     <!-- Sidebar -->
     <div id="sidebar-wrapper">
-        <ul style="overflow-y: scroll;" id="activeRooms" class="sidebar-nav">
+        <ul style="overflow-y: scroll; height: 50%;" id="activeRooms" class="sidebar-nav">
             <li id="createNewRoom" data-target="#newChatModal" data-toggle="modal">
                 Create New Room
             </li>
         </ul>
-        <ul style="overflow-y: scroll;" id="activeDms" class="dm-nav">
+        <ul style="overflow-y: scroll; height: 50%;" id="activeDms" class="dm-nav">
             <li id="DirectMessages">
                 Direct Messages
             </li>
