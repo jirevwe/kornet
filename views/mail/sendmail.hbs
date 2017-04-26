@@ -1,134 +1,167 @@
 <div class="container">
-    <h1>Send Mail</h1>
-    <form id="sendmail" role="form" action="/mail/send/0" method="post">
-        <div class="form-group">
-            <label label-for="sender">Sender</label>
-            <input type="text" name="sender" value="{{user.email}}" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="recipient">Recipients</label>
-            <input type="text" name="recipient" placeholder="foobar@zee.com, &quot;Ray Tuk&quot; &lt;see@saw.com&gt;" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="cc">Cc</label>
-            <input type="text" name="cc" placeholder="foo@bar.com, &quot;Jude Dike&quot; &lt;mon@day.com&gt;" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="bcc">Bcc</label>
-            <input type="text" name="bcc" placeholder="wa@wu.com, &quot;Ismail Shomala&quot; &lt;public@holiday.com&gt;" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label label-for="subject">Subject</label>
-            <input type="text" name="subject" placeholder="Subject" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <textarea rows="10" cols="40" name="content" placeholder="Content" class="form-control"></textarea>
-        </div>
-        <div id="uploadzone" class="form-group dropzone">
-            <div hidden>
-                <input type="file" id="attachment" name="attachment"/>
-            </div>
-        </div>
-        <div id="stuff" hidden>
-        </div>
-        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-        <div class="form-group">
-            <button type="submit" name="send" id="submit" value="submit" class="btn btn-success">Send Mail &nbsp;</button>
-        </div>
-    </form>
+	<h1>Send Mail</h1>
+	<form id="sendmail" role="form" method="post">
+		<div class="form-group">
+			<label label-for="sender">Sender</label>
+			<input type="text" id="sender" name="sender" value="{{user.email}}" class="form-control"/>
+		</div>
+		<div class="form-group">
+			<label label-for="recepient">Recipients</label>
+			<input type="text" id="recepient" name="recepient" placeholder="foobar@zee.com, &quot;Ray Tuk&quot; &lt;see@saw.com&gt;" class="form-control"/>
+		</div>
+		<div class="form-group">
+			<label label-for="cc">Cc</label>
+			<input type="text" id="cc" name="cc" placeholder="foo@bar.com, &quot;Jude Dike&quot; &lt;mon@day.com&gt;" class="form-control"/>
+		</div>
+		<div class="form-group">
+			<label label-for="bcc">Bcc</label>
+			<input type="text" id="bcc" name="bcc" placeholder="wa@wu.com, &quot;Ismail Shomala&quot; &lt;public@holiday.com&gt;" class="form-control"/>
+		</div>
+		<div class="form-group">
+			<label label-for="subject">Subject</label>
+			<input type="text" id="subject" name="subject" placeholder="Subject" class="form-control"/>
+		</div>
+		<div class="form-group">
+			<textarea rows="10" id="content" cols="40" name="content" placeholder="Content" class="form-control"></textarea>
+		</div>
+		<div id="uploadzone" class="form-group dropzone">
+			<div hidden>
+				<input type="file" id="attachment" name="attachment"/>
+			</div>
+		</div>
+		<div id="stuff" hidden>
+		</div>
+		<input type="hidden" name="_csrf" value="{{ csrfToken }}">
+	</form>
+	<div class="form-group">
+		<button name="submit" id="submit" value="submit" class="btn btn-success" onclick="sendMail()">Send Mail &nbsp;</button>
+	</div>
 </div>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
-        let socketio = io.connect();
-        let mail_id = undefined;
 
-        socketio.on("hidden_mail_attr", function(data) {
-            $('#stuff').html('<input id="attr" type="text" name="attr" value="' + data['content'] +'"/>');
-            mail_id = data['content'];
-        });
+function sendMail(){
+	let mailOptions = {
+		cc: $('#cc').val(),
+		bcc: $('#bcc').val(),
+		attr: $('#attr').val(),
+		subject: $('#subject').val(),
+		content: tinyMCE.activeEditor.getContent(),
+		sender: $('#sender').val(),
+		recepient: $('#recepient').val()
+	};
 
-        if (mail_id == undefined){
-            mail_id = Date.now().toString();
-            $('#stuff').html('<input id="attr" type="text" name="attr" value="' + mail_id +'"/>');
-        }
+	let _xhr = $.ajax({
+		url: "http://localhost:3000/mail/send/0",
+		headers: {"X-CSRF-Token": "{{csrfToken}}" },
+		type: "POST",
+		data: mailOptions,
+		success: (data) => {			
+			let xhr2 = $.ajax({
+				url: "http://localhost:3000/mail/save-mail",
+				headers: {"X-CSRF-Token": "{{csrfToken}}" },
+				type: "POST",
+				data: data,
+				success: (data) => {
+					xhr2.abort();
+					window.location = 'http://localhost:3000/mail';
+				}
+			});
+			_xhr.abort();
+		}
+	});
+};
 
-         String.prototype.getExtension = function() {
-            var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
-                                                    // (supports `\\` and `/` separators)
-                pos = basename.lastIndexOf(".");       // get last position of `.`
+let socketio = io.connect();
+let mail_id = undefined;
 
-            if (basename === "" || pos < 1)            // if file name is empty or ...
-                return "";                             //  `.` not found (-1) or comes first (0)
+socketio.on("hidden_mail_attr", function(data) {
+	$('#stuff').html('<input id="attr" type="text" name="attr" value="' + data['content'] +'"/>');
+	mail_id = data['content'];
+});
 
-            return basename.slice(pos + 1);            // extract extension ignoring `.`
-        };
+if (mail_id == undefined){
+	mail_id = Date.now().toString();
+	$('#stuff').html('<input id="attr" type="text" name="attr" value="' + mail_id +'"/>');
+}
 
-        Array.prototype.indexOf || (Array.prototype.indexOf = function(d, e) {
-            var a;
-            if (null == this) throw new TypeError('"this" is null or not defined');
-            var c = Object(this),
-                b = c.length >>> 0;
-            if (0 === b) return -1;
-            a = +e || 0;
-            Infinity === Math.abs(a) && (a = 0);
-            if (a >= b) return -1;
-            for (a = Math.max(0 <= a ? a : b - Math.abs(a), 0); a < b;) {
-                if (a in c && c[a] === d) return a;
-                a++
-            }
-            return -1
-        });
+String.prototype.getExtension = function() {
+	var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
+											// (supports `\\` and `/` separators)
+		pos = basename.lastIndexOf(".");       // get last position of `.`
 
-        let files = [];
-        Dropzone.options.uploadzone = {
-            url:'/mail/upload',
-            headers: {"X-CSRF-Token": "{{csrfToken}}" },
-            addRemoveLinks: true,
-            paramName: 'attachment',
-            maxFilesize: 10,
-            maxFiles: 5,
-            dictDefaultMessage: 'Drag an file here to upload, or click to select',
-            acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc, .xlxs, ',
-            renameFilename: (name) => {
-                return mail_id + '-' + name;
-            },
-            init: function() {
-                let myDropzone = this;
-                let xhr = undefined;
+	if (basename === "" || pos < 1)            // if file name is empty or ...
+		return "";                             //  `.` not found (-1) or comes first (0)
 
-                this.on('success', function(file, resp){
-                    files.push(resp);
-                });
-                this.on('error',  function (file, error, xhr){
-                    console.log(error);
-                });
-                this.on('removedfile', function(file){
-                    let file_index = files.find((n) => { return n.originalname == mail_id + '-' +file.name });
-                    xhr = $.ajax({
-                        url: "http://localhost:3000/business/uploads/delete",
-                        headers: {"X-CSRF-Token": "{{csrfToken}}" },
-                        type: "POST",
-                        data: {file : file_index}
-                    });
-                    files.splice(files.indexOf(file_index), 1);
-                });
+	return basename.slice(pos + 1);            // extract extension ignoring `.`
+};
 
-                let fn = () =>
-                {
-                    if(xhr != undefined && xhr.readyState != 4)
-                        xhr.abort(); 
-                };
-                setInterval(fn, 500);
-            },
-            accept: function(file, done) {
-                let ext = file.name.toString().getExtension();
-                if( ext == 'pdf' || ext == 'png' || ext == 'jpeg'|| ext == 'jpg' ||
-                    ext == 'docx' || ext == 'doc' || ext == 'xlsx' || ext == 'xls'
-                ){
-                    done();
-                }
-                else
-                    done('Invalid file type');
-            }
-        };
+Array.prototype.indexOf || (Array.prototype.indexOf = function(d, e) {
+	var a;
+	if (null == this) throw new TypeError('"this" is null or not defined');
+	var c = Object(this),
+		b = c.length >>> 0;
+	if (0 === b) return -1;
+	a = +e || 0;
+	Infinity === Math.abs(a) && (a = 0);
+	if (a >= b) return -1;
+	for (a = Math.max(0 <= a ? a : b - Math.abs(a), 0); a < b;) {
+		if (a in c && c[a] === d) return a;
+		a++
+	}
+	return -1;
+});
+
+let files = [];
+Dropzone.options.uploadzone = {
+	url:'/mail/upload',
+	headers: {"X-CSRF-Token": "{{csrfToken}}" },
+	addRemoveLinks: true,
+	paramName: 'attachment',
+	maxFilesize: 10,
+	maxFiles: 5,
+	dictDefaultMessage: 'Drag an file here to upload, or click to select',
+	acceptedFiles: '.png, .jpg, .jpeg, .gif, .pdf, .zip, .docx, .doc, .xlxs, ',
+	renameFilename: (name) => {
+		return mail_id + '-' + name;
+	},
+	init: function() {
+		let myDropzone = this;
+		let xhr = undefined;
+
+		this.on('success', function(file, resp){
+			files.push(resp);
+		});
+		this.on('error',  function (file, error, xhr){
+			console.log(error);
+		});
+		this.on('removedfile', function(file){
+			let file_index = files.find((n) => { return n.originalname == mail_id + '-' +file.name });
+			xhr = $.ajax({
+				url: "http://localhost:3000/mail/uploads/delete",
+				headers: {"X-CSRF-Token": "{{csrfToken}}" },
+				type: "POST",
+				data: {file : file_index}
+			});
+			files.splice(files.indexOf(file_index), 1);
+		});
+
+		let fn = () =>
+		{
+			if(xhr != undefined && xhr.readyState != 4)
+				xhr.abort(); 
+		};
+		setInterval(fn, 500);
+	},
+	accept: function(file, done) {
+		let ext = file.name.toString().getExtension();
+		if( ext == 'pdf' || ext == 'png' || ext == 'jpeg'|| ext == 'jpg' ||
+			ext == 'docx' || ext == 'doc' || ext == 'xlsx' || ext == 'xls' || ext == 'gif'
+		){
+			done();
+		}
+		else
+			done('Invalid file type');
+	}
+};
 </script>

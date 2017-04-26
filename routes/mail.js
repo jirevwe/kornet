@@ -6,7 +6,7 @@ let Imap = require('imap');
 let inspect = require('util').inspect;
 let simpleParser = require("mailparser").simpleParser;
 let async = require('async');
-let composer = require('mailcomposer');
+let MailComposer = require('nodemailer/lib/mail-composer');
 let Mail = require('../models/mail');
 let path = require('path');
 let fs = require('fs');
@@ -15,9 +15,6 @@ let www = require('../bin/www');
 let mkdirp = require('mkdirp');
 let utils = require('../utils/api');
 var csrf = require('csurf');
-
-let csrfProtection = csrf();
-router.use(csrfProtection);
 
 let storage = multer.diskStorage({
 	destination: './public/uploads/mail',
@@ -32,6 +29,11 @@ let upload = multer({
 	},
 	storage : storage 
 });
+
+
+
+let csrfProtection = csrf();
+router.use(csrfProtection);
 
 router.get('/', function (req, res, next) {
 	if (!req.isAuthenticated())
@@ -325,10 +327,10 @@ function refresh(mailbox_name, req, res) {
 router.post('/send/:id', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
-
+	
 	let subject = req.body.subject || 'No Subject';
-	let recipient = req.body.recipient;
-	let content = req.body.content || " ";
+	let recepient = req.body.recepient;
+	let content = req.body.content || '';
 	let sender = req.body.sender;
 	let cc = req.body.cc;
 	let bcc = req.body.bcc;
@@ -337,9 +339,9 @@ router.post('/send/:id', function (req, res, next) {
 	
 	let _files = fs.readdirSync('./public/uploads/mail');
 	if(_files != undefined && _files.length > 0){
-		for (a_file in _files){
-			if(_files[a_file] != '.DS_Store' && _files[a_file].includes(file_prefix)){
-				files.push({ filename: _files[a_file], content: fs.createReadStream('./public/uploads/mail/' + _files[a_file]) });
+		for (let i = 0;i < _files.length;i++){
+			if(_files[i] != '.DS_Store' && _files[i].includes(file_prefix)){
+				files.push({ filename: _files[i].split(file_prefix+'-')[1], content: fs.createReadStream('./public/uploads/mail/' + _files[i]) });
 			}
 		}
 	}
@@ -362,7 +364,7 @@ router.post('/send/:id', function (req, res, next) {
 	let mailOptions = {
 		from: sender,
 		sender: sender,
-		to: recipient,
+		to: recepient,
 		html: content,
 		text: content,
 		cc: cc,
@@ -373,81 +375,39 @@ router.post('/send/:id', function (req, res, next) {
 		date: new Date(Date.now())
 	};
 
-	let mail = composer(mailOptions);
-
-	sendmailer.sendMail(mailOptions, function (err, res) {
+	sendmailer.sendMail(mailOptions).then((sentMessageInfo) => {
+		console.log(sentMessageInfo);
+		res.send(mailOptions);
+	}).catch((err) => {
 		if (err) console.log(err);
-		else console.log("Message sent: " + res.messageId);
-
-		mail.build(function (err, message) {
-			let imap = new Imap({
-				user: req.user.email,
-				password: utils.getLong(req.user.long_text),
-				host: 'mail.kornet-test.com',
-				port: 993,
-				tls: true
-			});
-
-			imap.once('ready', function () {
-				imap.openBox('Sent', false, function (err, box) {
-					if (err) console.log(err);
-					imap.append(message, { mailbox: 'Sent', flags: ['Seen'], date: new Date(Date.now()) }, function (err) {
-						if (err) console.log(err);
-						console.log('Saved in Mailbox (Sent)');
-						imap.end();
-					});
-				});
-			});
-			imap.connect();
-		});
 	});
-	res.redirect('/mail');
 });
-//---------------------------------------------------------//
 
-//-------------------- Post (Save Draft) ------------------//
-router.post('/save/:id', function (req, res, next) {
-	if (!req.isAuthenticated())
-		return res.redirect('/');
+router.post('/save-mail', function (req, res, next) {
 
-	let subject = req.body.subject;
-	let recipient = req.body.recipient;
-	let content = req.body.content;
-	let sender = req.body.sender;
-	let cc = req.body.cc;
-	let bcc = req.body.bcc;
-	let file = req.file;
+	console.log(req.body);
 
-	let smtpConfig = {
-		host: 'mail.kornet-test.com',
-		port: 587,
-		secure: false,
-		logger: true,
-		auth: {
-			user: req.user.email,
-			pass: utils.getLong(req.user.long_text)
-		}
-	};
-
-	//check if this mail is a reply
-	let reply = req.params.id == 0 ? "" : req.params.id;
-	// console.log(file);
 	let mailOptions = {
-		from: sender,
-		sender: sender,
-		to: recipient,
-		html: content,
-		text: content,
-		cc: cc,
-		bcc: bcc,
-		inReplyTo: reply,
-		subject: subject,
-		attachments: [{ filename: file.originalname, content: file.buffer, contentType: file.mimetype, encoding: file.encoding }],
-		date: new Date(Date.now())
+		from: req.body.from,
+		sender: req.body.sender,
+		to: req.body.to,
+		html: req.body.html,
+		text: req.body.text,
+		cc: req.body.cc,
+		bcc: req.body.bcc,
+		inReplyTo: req.body.inReplyTo,
+		subject: req.body.subject,
+		attachments: req.body.attachments,
+		date: req.body.date
 	};
 
-	let mail = composer(mailOptions);
-	mail.build(function (err, message) {
+	console.log(mailOptions);
+
+	let mail = new MailComposer(mailOptions);
+
+	mail.compile().build(function(err, message){
+		if (err) console.log(err);
+
 		let imap = new Imap({
 			user: req.user.email,
 			password: utils.getLong(req.user.long_text),
@@ -457,12 +417,10 @@ router.post('/save/:id', function (req, res, next) {
 		});
 
 		imap.once('ready', function () {
-			imap.openBox('Drafts', false, function (err, box) {
+			imap.openBox('Sent', false, function (err, box) {
 				if (err) console.log(err);
-
-				imap.append(message, { mailbox: 'Drafts', date: new Date(Date.now()) }, function (err) {
+				imap.append(message, { mailbox: 'Sent', flags: ['Seen'], date: new Date(Date.now()) }, function (err) {
 					if (err) console.log(err);
-					console.log('Saved in Drafts');
 					imap.end();
 				});
 			});
@@ -471,12 +429,13 @@ router.post('/save/:id', function (req, res, next) {
 			console.log(err);
 		});
 		imap.once('end', function () {
-			console.log('Connection ended');
+			console.log('Saved in Mailbox');
+			res.send({message: 'Saved in Mailbox'});
 		});
 		imap.connect();
 	});
-	res.redirect('/mail');
 });
-//------------------------------------------------//
+
+//---------------------------------------------------------//
 
 module.exports = router;
