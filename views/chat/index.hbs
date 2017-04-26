@@ -321,59 +321,60 @@
 
         socketio.on("room_list", function(data) {
             curRooms = data;
-
+            var rooms = [];
             for (r in curRooms) {
-                console.log(curRooms[r]);
-                let room = curRooms[r];
+                console.log(curRooms[r].id);
+                rooms.push(curRooms[r].id);
+            }
+            $.ajaxSetup({
+                headers: {"X-CSRF-Token": "{{csrfToken}}" }
+            });
 
-                $.ajax({
-                    method: "GET",
-                    url: "http://localhost:3000/chat/room-creator/"+room.id,
-                    success: function(data) {
-                        creator = data;
-
-                        if(room.isDM == true){
+            //console.log(rooms);
+            $.ajax({
+                method: "POST",
+                url: "http://localhost:3000/chat/room-creator",
+                data: {rooms:rooms},
+                success: function(data) {
+                    for(i = 0; i < data.all_results.length; i++){
+                        room = data.all_results[i];
+                        creator = room.creator;
+                        if(room.isDM == 'true'){
+                            console.log("dm");
                             $('#numMembers').hide();
-                            if(user.name == toMem.name){
+                            if(user_db._id == creator._id){
                                 //$('#chatName').html(fromMem.name);
-                                $("#activeDms").append('<li id="' + room.id + '"class="active">' + fromMem.name + '</li>');
-                                activeRoom.name = fromMem.name;
+                                $("#activeDms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
+                                //activeRoom.name = fromMem.name;
                             }
-                            if(user.name == fromMem.name){
+                            if(user_db._id != creator._id){
                                 //$('#chatName').html(toMem.name);
-                                $("#activeDms").append('<li id="' + room.id + '"class="active">' + toMem.name + '</li>');
-                                activeRoom.name = toMem.name;
+                                $("#activeDms").append('<li id="' + room.room_id + '" class="active">' + creator.name + '</li>');
+                                //activeRoom.name = toMem.name;
                             }
                         }
                         else{
+                            console.log("nodm");
                             console.log(user_db);
                             console.log(creator);
                             if(user_db._id == creator._id){
-                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                                $("#activeRooms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
                             }else if(user_db.user_domain == creator.user_domain){
-                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                                $("#activeRooms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
                             }
                             else if($.inArray(user_db._id, room.members) != -1){
-                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                                $("#activeRooms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
                             }
                             else if(creator.user_type == 'Government' && room.is_private == false){
-                                $("#activeRooms").append('<li id="' + room.id + '"class="active">' + room.name + '</li>');
+                                $("#activeRooms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
                             }
                         }
-
-//                            curRooms[room.id] = room;
-//
-//                            $('input[type="radio"]').prop('checked', false);
-//                            $('#reveal-if-active').hide();
-//                            $('#roomPass').val("");
-                    },
-                    error: function(err) {
-                        console.log(err);
                     }
-                });
-                    //$("#activeRooms").append('<li id="' + room.id + '" class="active">' + room.name + '</li>');
-//                }
-            }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
         });
 
         socketio.on("create_room_to_client", function(data) {
@@ -404,7 +405,7 @@
                             console.log(user_db);
                             creator = data;
 
-                            if(room.isDM == true){
+                            if(room.isDM == 'true'){
                                 $('#numMembers').hide();
                                 if(user.name == toMem.name){
                                     //$('#chatName').html(fromMem.name);
@@ -467,7 +468,7 @@
                 }
             });
 
-            if(data['room'].isDM == true){
+            if(data['room'].isDM == 'true'){
                 $('#numMembers').hide();
             }
             else{
@@ -1122,12 +1123,12 @@
 
     <!-- Sidebar -->
     <div id="sidebar-wrapper">
-        <ul id="activeRooms" class="sidebar-nav">
+        <ul style="overflow-y: scroll;" id="activeRooms" class="sidebar-nav">
             <li id="createNewRoom" data-target="#newChatModal" data-toggle="modal">
                 Create New Room
             </li>
         </ul>
-        <ul id="activeDms" class="dm-nav">
+        <ul style="overflow-y: scroll;" id="activeDms" class="dm-nav">
             <li id="DirectMessages">
                 Direct Messages
             </li>
