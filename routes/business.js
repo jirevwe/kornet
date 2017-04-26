@@ -21,7 +21,7 @@ let upload = multer({
 	storage : storage
 });
 
-// var csrf = require('csrf');
+// var csrf = require('csurf');
 
 // let csrfProtection = csrf();
 // router.use(csrfProtection);

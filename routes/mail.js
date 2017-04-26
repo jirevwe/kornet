@@ -14,6 +14,10 @@ let multer = require('multer');
 let www = require('../bin/www');
 let mkdirp = require('mkdirp');
 let utils = require('../utils/api');
+var csrf = require('csurf');
+
+let csrfProtection = csrf();
+router.use(csrfProtection);
 
 let storage = multer.diskStorage({
 	destination: './public/uploads/mail',
@@ -33,7 +37,7 @@ router.get('/', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
 	setTimeout(() => { www.io.emit('hidden_mail_attr', { content: Date.now().toString() }); }, 1000);
-	res.render('mail/sendmail', { user: req.user, layout: 'mail_layout' });
+	res.render('mail/sendmail', {csrfToken: req.csrfToken(), user: req.user, layout: 'mail_layout' });
 });
 
 router.post('/upload', upload.single('attachment'), function(req, res, next){
@@ -64,7 +68,7 @@ router.get('/sent', function (req, res, next) {
 	let query = Mail.find({ mailbox: "Sent", user: req.user.email });
 	query.exec(function (err, docs) {
 		if (err) console.log(err);
-		res.render('mail/mailbox', { messages: docs, mailbox: 'sent', layout: 'mail_layout' });
+		res.render('mail/mailbox', { csrfToken: req.csrfToken(), messages: docs, mailbox: 'sent', layout: 'mail_layout' });
 	});
 });
 
@@ -75,7 +79,7 @@ router.get('/inbox', function (req, res, next) {
 	let query = Mail.find({ mailbox: "Inbox", user: req.user.email });
 	query.exec(function (err, docs) {
 		if (err) console.log(err);
-		res.render('mail/mailbox', { messages: docs, mailbox: 'inbox', layout: 'mail_layout' });
+		res.render('mail/mailbox', {csrfToken: req.csrfToken(), messages: docs, mailbox: 'inbox', layout: 'mail_layout' });
 	});
 });
 
@@ -86,7 +90,7 @@ router.get('/drafts', function (req, res, next) {
 	let query = Mail.find({ mailbox: "Drafts", user: req.user.email });
 	query.exec(function (err, docs) {
 		if (err) console.log(err);
-		res.render('mail/drafts', { messages: docs, mailbox: 'drafts', layout: 'mail_layout' });
+		res.render('mail/drafts', {csrfToken: req.csrfToken(), messages: docs, mailbox: 'drafts', layout: 'mail_layout' });
 	});
 });
 
@@ -98,7 +102,7 @@ router.get('/trash', function (req, res, next) {
 	let query = Mail.find({ mailbox: "Trash", user: req.user.email });
 	query.exec(function (err, docs) {
 		if (err) console.log(err);
-		res.render('mail/trash', { messages: docs, mailbox: 'trash', layout: 'mail_layout' });
+		res.render('mail/trash', {csrfToken: req.csrfToken(), messages: docs, mailbox: 'trash', layout: 'mail_layout' });
 	});
 });
 //--------------------------------------------------//
@@ -143,7 +147,7 @@ router.get('/reply/:id', function (req, res, next) {
 	}
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/reply', { user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/reply', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
 
@@ -153,7 +157,7 @@ router.get('/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/email', { user: req.user, message: mail, layout: 'mail_layout' });
+		res.render('mail/email', {csrfToken: req.csrfToken(), user: req.user, message: mail, layout: 'mail_layout' });
 	});
 });
 
@@ -163,7 +167,7 @@ router.get('/trash/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/trash_item', { user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/trash_item', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
 
@@ -173,7 +177,7 @@ router.get('/edit/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/edit_draft', { user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/edit_draft', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
 
@@ -183,7 +187,7 @@ router.get('/drafts/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/edit_draft', { user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/edit_draft', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
 	});
 });
 
@@ -324,7 +328,7 @@ router.post('/send/:id', function (req, res, next) {
 
 	let subject = req.body.subject || 'No Subject';
 	let recipient = req.body.recipient;
-	let content = req.body.content;
+	let content = req.body.content || " ";
 	let sender = req.body.sender;
 	let cc = req.body.cc;
 	let bcc = req.body.bcc;
@@ -335,7 +339,7 @@ router.post('/send/:id', function (req, res, next) {
 	if(_files != undefined && _files.length > 0){
 		for (a_file in _files){
 			if(_files[a_file] != '.DS_Store' && _files[a_file].includes(file_prefix)){
-				files.push({ filename: _files[a_file].split(file_prefix)[0], content: fs.createReadStream('./public/uploads/mail/' + _files[a_file]) });
+				files.push({ filename: _files[a_file], content: fs.createReadStream('./public/uploads/mail/' + _files[a_file]) });
 			}
 		}
 	}
