@@ -1,6 +1,6 @@
 <div class="container">
     <h1>Send Mail</h1>
-    <form id="sendmail" role="form" action="/mail/send" method="post">
+    <form id="sendmail" role="form" action="/mail/send/0" method="post">
         <div class="form-group">
             <label label-for="sender">Sender</label>
             <input type="text" name="sender" value="{{user.email}}" class="form-control"/>
@@ -31,6 +31,7 @@
         </div>
         <div id="stuff" hidden>
         </div>
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
         <div class="form-group">
             <button type="submit" name="send" id="submit" value="submit" class="btn btn-success">Send Mail &nbsp;</button>
         </div>
@@ -81,6 +82,7 @@
         let files = [];
         Dropzone.options.uploadzone = {
             url:'/mail/upload',
+            headers: {"X-CSRF-Token": "{{csrfToken}}" },
             addRemoveLinks: true,
             paramName: 'attachment',
             maxFilesize: 10,
@@ -104,6 +106,7 @@
                     let file_index = files.find((n) => { return n.originalname == mail_id + '-' +file.name });
                     xhr = $.ajax({
                         url: "http://localhost:3000/business/uploads/delete",
+                        headers: {"X-CSRF-Token": "{{csrfToken}}" },
                         type: "POST",
                         data: {file : file_index}
                     });
