@@ -129,7 +129,7 @@ router.get('/signin', utils.notLoggedIn, function (req, res, next) {
 });
 
 router.post('/signin', utils.notLoggedIn, passport.authenticate('local.signin', { failureRedirect: '/signin', failureFlash: true }), function (req, res, next) {
-    if(req.user.name == req.user.phone_number){
+    if(req.user.name == req.user.phone_number || (req.user.user_domain == 'Business' && req.user.is_activated != 1) ){
         res.redirect('/choose');
     }
     else{

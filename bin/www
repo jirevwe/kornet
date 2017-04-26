@@ -236,14 +236,17 @@ io.sockets.on("connection", function(socket){
         users[userId].owns = roomId;
         users[userId].inRoom = roomId;
 
-        console.log("create history");
-        console.log(chatHistory);
+        // console.log("create history");
+        // console.log(chatHistory);
 
         chatHistory[roomId] = [];
 
+        console.log("create toMem");
+        console.log(toMem);
+
         room.addMember(users[userId].id);
         if(toMem != null){
-            room.addMember(toMem.id);
+            room.addMember(toMem._id);
         }
         io.sockets.emit('create_room_to_client', {room:room, toMem:toMem, fromMem:fromMem});
     });

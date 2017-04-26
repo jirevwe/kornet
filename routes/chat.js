@@ -75,11 +75,11 @@ router.post('/password', function(req, res, next) {
     let password = req.body.password;
 
     //console.log("password "+password);
-    let pass = utils.setLong(password);
+    let pass = utils.getLong(password);
 
     //console.log(""+pass);
 
-    return res.json(""+pass);
+    return res.json({password:pass});
 });
 
 router.post('/upload', utils.isActivated, upload.single('attachment'), function(req, res, next){
@@ -197,6 +197,19 @@ router.get('/room-members/:id', utils.isActivated, function(req, res, next) {
 
 });
 
+router.get('/enter-room/:id', utils.isActivated, function(req, res, next) {
+    var room_id = req.params.id;
+    var user = req.user;
+
+    Room.update({'room_id': room_id}, {$addToSet: {members: user._id}}, function (err, result) {
+        if (err)
+            console.log(err);
+        else
+            console.log(result);
+        return res.redirect('/chat');
+    });
+});
+
 router.get('/room-user/', utils.isActivated, function(req, res, next) {
     return res.json(req.user);
 
@@ -204,16 +217,40 @@ router.get('/room-user/', utils.isActivated, function(req, res, next) {
 
 router.get('/room-creator/:id', utils.isActivated, function(req, res, next) {
     var room_id = req.params.id;
+
     Room.find({'room_id': room_id }).populate("creator").exec(function(err,results){
         if(err){
             console.log(err);
         }
         if(results){
+            console.log(results);
             let room = results[0];
             let creator = room.creator;
             return res.json(creator);
         }
        return res.json({});
+    });
+
+});
+
+router.post('/room-creator', utils.isActivated, function(req, res, next) {
+
+    var rooms_id = req.body.rooms;
+
+    console.log("rooms id");
+    console.log(rooms_id);
+
+    Room.find({'room_id': {$in : rooms_id}}).populate("creator").exec(function(err,results){
+        if(err){
+            console.log(err);
+        }
+        if(results){
+            console.log("room creator");
+            console.log(results);
+
+            return res.json({all_results:results});
+        }
+        return res.json({});
     });
 
 });
