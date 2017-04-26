@@ -4,11 +4,11 @@
     <div class="list-group">
         <div href="/mail/{{message._id}}" class="list-group-item">
             <h4 class="list-group-item-heading">{{message.subject}}</h4>
-            {{# if_eq messages.mailbox 'Inbox'}}
-            <p class="list-group-item-text">From: {{message.from.text}}</p>
+            {{# ifCond message.mailbox '==' 'Inbox'}}
+                <p class="list-group-item-text">From: {{message.from.text}}</p>
             {{else}}
-            <p class="list-group-item-text">To: {{message.to.text}}</p>
-            {{/if_eq}}
+                <p class="list-group-item-text">To: {{message.to.text}}</p>
+            {{/ifCond}}
             <p class="list-group-item-text">Date: {{message.date}}</p>
             <br>
             <div class="list-group-item-text container" id="text">

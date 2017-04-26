@@ -3,19 +3,11 @@
     <form role="form" enctype="multipart/form-data" method="post">
         <div class="form-group">
             <label label-for="sender">Sender</label>
-                {{# if_eq messages.mailbox 'Inbox'}}
-                    <input type="text" placeholder="Sender" value="{{messages.to.text}}" name="sender" class="form-control"/>
-                    {{else}}
-                    <input type="text" placeholder="Sender" value="{{messages.from.text}}" name="sender" class="form-control"/>
-                {{/if_eq}}
+            <input type="text" placeholder="Sender" value="{{ user.email }}" name="sender" class="form-control"/>
         </div>
         <div class="form-group">
             <label label-for="recipient">Recipient</label>
-            {{# if_eq messages.mailbox 'Inbox'}}
-                <input type="text" placeholder="Recipient" value="{{messages.from.text}}" name="recipient" class="form-control"/>
-            {{else}}
-                <input type="text" placeholder="Recipient" value="{{messages.to.text}}" name="recipient" class="form-control"/>
-            {{/if_eq}}
+            <input type="text" placeholder="Recipient" value="{{messages.to.text}}" name="recipient" class="form-control"/>
         </div>
         <div class="form-group">
             <label label-for="subject">Subject</label>

@@ -9,7 +9,7 @@ let async = require('async');
 let composer = require('mailcomposer');
 let Mail = require('../models/mail');
 let path = require('path');
-const fs = require('fs');
+let fs = require('fs');
 let multer = require('multer');
 let www = require('../bin/www');
 let mkdirp = require('mkdirp');
@@ -262,9 +262,6 @@ function refresh(mailbox_name, req, res) {
 		tls: true
 	});
 
-	console.log(req.user.email);
-	console.log(utils.getLong(req.user.long_text));
-
 	imap.once('ready', function (err) {
 		if (err) console.log(err);
 		imap.openBox(mailbox_name, true, (function (err, box) {
@@ -338,7 +335,7 @@ router.post('/send/:id', function (req, res, next) {
 	if(_files != undefined && _files.length > 0){
 		for (a_file in _files){
 			if(_files[a_file] != '.DS_Store' && _files[a_file].includes(file_prefix)){
-				files.push({ filename: _files[a_file], content: fs.createReadStream('./public/uploads/mail/' + _files[a_file]) });
+				files.push({ filename: _files[a_file].split(file_prefix)[0], content: fs.createReadStream('./public/uploads/mail/' + _files[a_file]) });
 			}
 		}
 	}
