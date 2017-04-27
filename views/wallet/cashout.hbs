@@ -64,15 +64,11 @@
 
 		let xhr = $.post('http://localhost:3000/wallet/cashout', options, (data) => {
 			console.log(data);
-			setTimeout(() => { window.location = '/wallet'; }, 2000);
-		});
-
-		let fn = () =>
-		{
-			if(xhr != undefined && xhr.readyState != 4)
+			setTimeout(() => {
 				xhr.abort();
-		};
-		setInterval(fn, 500);
+				window.location = '/wallet';
+			}, 2000);
+		});
 
 		$('#submit').disable(true);
 	}

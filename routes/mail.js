@@ -30,8 +30,6 @@ let upload = multer({
 	storage : storage 
 });
 
-
-
 let csrfProtection = csrf();
 router.use(csrfProtection);
 
@@ -385,8 +383,6 @@ router.post('/send/:id', function (req, res, next) {
 
 router.post('/save-mail', function (req, res, next) {
 
-	console.log(req.body);
-
 	let mailOptions = {
 		from: req.body.from,
 		sender: req.body.sender,
@@ -400,8 +396,6 @@ router.post('/save-mail', function (req, res, next) {
 		attachments: req.body.attachments,
 		date: req.body.date
 	};
-
-	console.log(mailOptions);
 
 	let mail = new MailComposer(mailOptions);
 

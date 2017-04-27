@@ -1,5 +1,3 @@
-
-
 <div class="container">
     {{> wallet_nav }}
 	<form class="form-signin">
@@ -47,9 +45,12 @@
 			user: user
 		};
 		
-		$.post('http://localhost:3000/wallet/send', body, (data) => {
+		let xhr = $.post('http://localhost:3000/wallet/send', body, (data) => {
 			console.log(data);
-			setTimeout(() => { window.location = '/wallet'; }, 2000);
+			setTimeout(() => {
+				xhr.abort();
+				window.location = '/wallet';
+			}, 2000);
 		});
 		$('#submit').disable(true);
 	}

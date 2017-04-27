@@ -29,15 +29,6 @@
 					  {{else ifCond this.transaction_type '==' 2}}
 						<td>Wallet -> Bank</td>
 					  {{/ifCond}}
-
-					  {{!--{{# ifCond this.operation '==' 0 }}
-						<td>Error</td>
-					  {{else ifCond this.operation '==' 1 }}
-						<td>Debit</td>
-					  {{else ifCond this.operation '==' 2 }}
-						<td>Credit</td>
-					  {{/ifCond}}--}}
-
 					  <td>{{ this.amount }}</td>
 					  <td>{{ this.paid_at }}</td>
 				  </tr>

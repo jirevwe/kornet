@@ -45,7 +45,7 @@
 			phone: '{{ user.phone }}',
 			amount: amount,
 			reference: 'FUND YOUR WALLET',
-			callback: function(response){
+			callback: function(response) {
 				//create a tramsaction
 				let body = {
 					details : response,
@@ -53,17 +53,9 @@
 					transaction_type: 0
 				};
 
-				let xhr = $.post('http://localhost:3000/wallet/create-transaction', body, (data) => {
-					console.log(data);
-					setTimeout(() => { window.location = '/wallet'; }, 2000);
-				});
-
-				let fn = () =>
-				{
-					if(xhr != undefined && xhr.readyState != 4)
-						xhr.abort();
-				};
-				setInterval(fn, 500);
+				$.post('http://localhost:3000/wallet/create-transaction', body);
+				$('#amount').val('');
+				window.location = '/wallet';
 			}
 		});
 		handler.openIframe();

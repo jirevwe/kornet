@@ -134,6 +134,7 @@ router.post('/send', utils.isActivated, function (req, res, next) {
 				}
 			});
 		});
+		res.send({message: 'success'});
 		// db.wallets.update({ '_id': ObjectId("58f9f4d290fd32cc3fdddbc4") },{ $pull: { 'transactions': ObjectId("58fa721b4bd3fff46685c132") } });
 	});
 });
@@ -187,7 +188,8 @@ router.post('/cashout', utils.isActivated, function (req, res, next) {
 					wallet.save((error, new_wallet) => {
 						if(error) console.log(error);
 
-						res.redirect('/wallet');
+						// res.redirect('/wallet');
+						res.send({message: 'success'});
 					});
 				});
 			});
@@ -228,6 +230,7 @@ router.post('/create-transaction', utils.isActivated, function (req, res, next) 
 					});
 				});
 			});
+			res.send({message: 'success'});
 		}
 	});
 });
