@@ -347,7 +347,7 @@
                                 $("#activeDms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
                                 //activeRoom.name = fromMem.name;
                             }
-                            if(user_db._id != creator._id && room.members.indexOf(user_db._id) != -1){
+                            if(user_db._id != creator._id){
                                 //$('#chatName').html(toMem.name);
                                 $("#activeDms").append('<li id="' + room.room_id + '" class="active">' + creator.name + '</li>');
                                 //activeRoom.name = toMem.name;
@@ -403,7 +403,7 @@
                             console.log(user_db);
                             creator = data;
 
-                            console.log(room.isDM);
+                            console.log(room);
 
                             if(room.isDM){
                                 $('#numMembers').hide();
@@ -799,6 +799,7 @@
             else{
                 //enterRoom(exist.id);
                 $('#memModal').modal('hide');
+                $('#numMembers').show();
             }
 
         }
@@ -806,7 +807,7 @@
         function roomExist(roomname){
             var room_name = roomname;
             var roomexists = false;
-            $.each(rooms, function(rooms, room) {
+            $.each(curRooms, function(rooms, room) {
                 console.log("DM room: "+room.name);
                 console.log("new DM: "+room_name);
                 if(room.name == room_name){
@@ -858,14 +859,14 @@
                 $('input[type="radio"]').prop('checked', false);
 
                 var exist = false;
-                $.each(rooms, function(rooms, room) {
-                    console.log("exsting rooms "+room.name);
-                    console.log("new room "+roomName);
-
-                    if(room.name == roomName) {
-                        exist = true;
-                    }
-                });
+//                $.each(curRooms, function(rooms, room) {
+//                    console.log("exsting rooms "+room.name);
+//                    console.log("new room "+roomName);
+//
+//                    if(room.name == roomName) {
+//                        exist = true;
+//                    }
+//                });
 
                 if(exist) {
                     alert('Room already exists');
