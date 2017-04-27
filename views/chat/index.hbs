@@ -347,7 +347,7 @@
                                 $("#activeDms").append('<li id="' + room.room_id + '" class="active">' + room.name + '</li>');
                                 //activeRoom.name = fromMem.name;
                             }
-                            if(user_db._id != creator._id){
+                            if(user_db._id != creator._id && room.members.indexOf(user_db._id) != -1){
                                 //$('#chatName').html(toMem.name);
                                 $("#activeDms").append('<li id="' + room.room_id + '" class="active">' + creator.name + '</li>');
                                 //activeRoom.name = toMem.name;
@@ -403,7 +403,9 @@
                             console.log(user_db);
                             creator = data;
 
-                            if(room.isDM == 'true'){
+                            console.log(room.isDM);
+
+                            if(room.isDM){
                                 $('#numMembers').hide();
                                 if(user.name == toMem.name){
                                     //$('#chatName').html(fromMem.name);
