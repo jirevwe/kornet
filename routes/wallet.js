@@ -41,18 +41,16 @@ router.get('/', utils.isActivated, function (req, res, next) {
 			});
 		});
 	}else{
-		let wallet = undefined; let transactions = [];
-		Wallet.findById(user.wallet, (err, document) => {
-			wallet = document;
-			for(let i = 0; i < wallet.transactions.length; i++){
-				Transaction.findById(wallet.transactions[i], (err, _transaction)=>{
-					if (err) console.log(err);
-					transactions.push(_transaction);
-				});
-			}
-			res.render('wallet/index', { wallet: wallet, transactions: transactions });
+		Wallet.findById(user.wallet, (err, wallet) => {
+			res.render('wallet/index', { wallet: wallet });
 		});
 	}
+});
+
+router.get('/t/all', (req, res, next)=>{
+	Transaction.find({}, (err, transactions) => {
+		res.send(transactions);
+	});
 });
 
 router.get('/fund', utils.isActivated, function (req, res, next) {
@@ -135,7 +133,6 @@ router.post('/send', utils.isActivated, function (req, res, next) {
 			});
 		});
 		res.send({message: 'success'});
-		// db.wallets.update({ '_id': ObjectId("58f9f4d290fd32cc3fdddbc4") },{ $pull: { 'transactions': ObjectId("58fa721b4bd3fff46685c132") } });
 	});
 });
 

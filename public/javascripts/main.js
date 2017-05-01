@@ -4,21 +4,45 @@ let csv   = '<img class="icon icons8-CSV" src="data:image/png;base64,iVBORw0KGgo
 let excel = '<img class="icon icons8-Microsoft-Excel" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACr0lEQVRoQ+2ZMUwTURjH/98pTQebOKIDMSGxpk2Aqy5udqyKsYsG3NSAMhlJ2Boau5nQOKGSqJNoGAQFw1g3BwGjLOqii+hIgoMxps98V+98XK+ldy28d+be0vbuvev/933/73uXO0LIB4VcPyIA1RmMMvC/ZoBSk5nefb+rJhGZgjAAkLleWjvUaeC2LZQupmP41ZUyDMMEhEkgUwD9REi4xb4vrbX9f+5r+rpgciKZ2N8V7ycyLKEEwdFNESjWSmT3FCBdTHcb1ZgpqmKABXN0IdBLRL6gZbA9BegrZEQrUfUzpyfT42e6M1dArL/MP+/zWtwwmjoBsPCl/IKn1gjAjyeCWijKgJ8oN5v77taqc3pwIW99Xzw/33CJPUebDCgFuHRyGBO5cSdahfkiXrxddH4n4gewfHMJiXhtA769PIXHr2e3RVcpACthgYcP1m5nvm5u4HR50BHIcAzJ4+P3T7gwPVRnDeVFfOLIcTy4POMIu/JwBCtfVi0ohrOHfdxNoByABd0ZnkL22ClL25vPK7j6aBSlfBHnzFo22FZsL6+h3EIsyh1tFssAPLZ+/kCufMb61BaAhV3PjuJaduSv6K2mhSuDaJEBFsQdZ27sqVPQzQpXBtCiBmwAuWV6dSUvC2kDILfMjc1vTibuVWZwt3Lf0/98UAsLya2Ui7XwbNLqTPbIlc+CobQtYnkzsyPOewODya1VS4Dt3edfy3RvcDdmx1H58KqOQWkNJLuPYm7siSPK7Xd5M+PbjIvTQ3X7gVIA2Sbscfa6PNwbHN/I8Q2dlvtAwzazwwktulBQ8dq00XYAlNZAO8LttRGARxSj50J+rBXUQoEeLYb+4a5XZEP1eL1Va4TqBUerUADC84rJB9SuTA38tmVX1AS4aAQQIGgdXRJloKPhDHCxP336lkC882iaAAAAAElFTkSuQmCC" width="24" height="24">'
 
 function getDrafts(){
-	let xhr = $.get("http://localhost:3000/mail/q/drafts", function(data, status, xhr){
-		
+	let xhr = $.get("http://localhost:3000/mail/q/drafts", function(mails){
+		let div = $('#messages');
+		let content = '';
+		for (let i = 0;i < mails.length;i++){
+			content += '<a href="/mail/edit/' + mails[i]._id +'" class="list-group-item">';
+			content += '<h4 class="list-group-item-heading">' + mails[i].subject +'</h4>'
+			content += '<p class="list-group-item-text">To: ' + mails[i].to.text +'</p>'
+			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
+			content += '</a>'
+		}
+		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
+		else div.html(content);
 		xhr.abort();
 	});
 }
 
 function getTrash(){
-	$.get("http://localhost:3000/mail/q/trash", function(data, status, xhr){
-		
+	let xhr = $.get("http://localhost:3000/mail/q/trash", function(mails){
+		let div = $('#messages');
+		let content = '';
+		for (let i = 0;i < mails.length;i++){
+			content += '<a href="/mail/trash/' + mails[i]._id +'" class="list-group-item">';
+			content += '<h4 class="list-group-item-heading">' + mails[i].subject +'</h4>'
+
+			if(mails[i].mailbox == 'Inbox') content += '<p class="list-group-item-text">From: ' + mails[i].from.text +'</p>'
+			else if(mails[i].mailbox == 'Sent') content += '<p class="list-group-item-text">To: ' + mails[i].to.text +'</p>'
+			
+			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
+			content += '</a>'
+		}
+
+		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
+		else div.html(content);
 		xhr.abort();
 	});
 }
 
 function getInbox(){
-	$.get("http://localhost:3000/mail/q/inbox", function(mails, status, xhr){
+	let xhr = $.get("http://localhost:3000/mail/q/inbox", function(mails){
 		let div = $('#messages');
 		let content = '';
 		for (let i = 0;i < mails.length;i++){
@@ -28,13 +52,14 @@ function getInbox(){
 			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
 			content += '</a>'
 		}
-		div.html(content);
+		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
+		else div.html(content);
 		xhr.abort();
 	});
 }
 
 function getSent(){
-	$.get("http://localhost:3000/mail/q/sent", function(mails, status, xhr){
+	let xhr = $.get("http://localhost:3000/mail/q/sent", function(mails){
 		let div = $('#messages');
 		let content = '';
 		for (let i = 0;i < mails.length;i++){
@@ -44,7 +69,36 @@ function getSent(){
 			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
 			content += '</a>'
 		}
+		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
+		else div.html(content);
+		xhr.abort();
+	});
+}
+
+function dateFormat(date) {
+	return moment(date).format('MMMM Do YYYY, h:mm:ss a');
+}
+
+function getTransaction(){
+	let xhr = $.get("http://localhost:3000/wallet/t/all", function(transactions){
+		let div = $('#table-body');
+		let content = '';
+		for (let i = 0;i < transactions.length;i++){
+			content += '<tr><td>' + transactions[i].reference + '</td>'
+			if (transactions[i].transaction_type == 0){
+				content += '<td>Bank -> Wallet</td>';
+			}
+			else if (transactions[i].transaction_type == 1){
+				content += '<td>Wallet -> Wallet</td>';
+			}
+			else if (transactions[i].transaction_type == 2){
+				content += '<td>Wallet -> Bank</td>';
+			}
+			content += '<td>' + transactions[i].amount + '</td>';
+			content += '<td>' + dateFormat(transactions[i].paid_at) + '</td></tr>';
+		}
 		div.html(content);
+		$('#wallet-table').DataTable();
 		xhr.abort();
 	});
 }
