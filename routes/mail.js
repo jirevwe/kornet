@@ -46,95 +46,94 @@ router.post('/upload', upload.single('attachment'), function(req, res, next){
 
 router.post('/uploads/delete', function(req, res, next){
 	let file = req.body.file;
+	if(file == undefined) return res.status(404).send('File Doesn\'t Exist');
 	fs.exists('./'+file.path, (exists) => {
 		if(exists){
 			fs.unlink('./'+file.path, (err) => {
-				if (err) {
-					console.log(err);
-					return res.status(200);
-				}
-				console.log('successfully deleted');
+				if (err)  return res.status(404).send('Delete Failed');
+				return res.status(200).send('Successfully Deleted');
 			});
-		}
-	})
-	return res.status(200);
+		}else return res.status(404).send('File Doesn\'t Exist');
+	});
 });
 
-//--------------- View Mailboxes -------------------//
-router.get('/sent', function (req, res, next) {
-	if (!req.isAuthenticated()) {
-		return res.redirect('/');
-	}
+//------------------------ Sent ------------------------//
+router.get('/q/sent', function (req, res, next) {
 	let query = Mail.find({ mailbox: "Sent", user: req.user.email });
 	query.exec(function (err, docs) {
 		if (err) console.log(err);
-		res.render('mail/mailbox', { csrfToken: req.csrfToken(), messages: docs, mailbox: 'sent', layout: 'mail_layout' });
+		return res.send(docs);
+	});
+});
+
+router.get('/sent', function (req, res, next) {
+	if (!req.isAuthenticated()) return res.redirect('/');
+	res.render('mail/mailbox', { csrfToken: req.csrfToken(), mailbox: 'sent', layout: 'mail_layout' });
+});
+
+//------------------------ Inbox -----------------------//
+router.get('/q/inbox', function (req, res, next) {
+	let query = Mail.find({ mailbox: "Inbox", user: req.user.email });
+	query.exec(function (err, docs) {
+		if (err) console.log(err);
+		return res.send(docs);
 	});
 });
 
 router.get('/inbox', function (req, res, next) {
-	if (!req.isAuthenticated()) {
-		return res.redirect('/');
-	}
-	let query = Mail.find({ mailbox: "Inbox", user: req.user.email });
+	if (!req.isAuthenticated()) return res.redirect('/');
+	res.render('mail/mailbox', {csrfToken: req.csrfToken(), mailbox: 'inbox', layout: 'mail_layout' });
+});
+
+//------------------------ Drafts -----------------------//
+
+router.get('/q/drafts', function (req, res, next) {
+	let query = Mail.find({ mailbox: "Drafts", user: req.user.email });
 	query.exec(function (err, docs) {
 		if (err) console.log(err);
-		res.render('mail/mailbox', {csrfToken: req.csrfToken(), messages: docs, mailbox: 'inbox', layout: 'mail_layout' });
+		return res.send(docs);
 	});
 });
 
 router.get('/drafts', function (req, res, next) {
-	if (!req.isAuthenticated()) {
-		return res.redirect('/');
-	}
-	let query = Mail.find({ mailbox: "Drafts", user: req.user.email });
+	if (!req.isAuthenticated()) return res.redirect('/');
+	res.render('mail/drafts', {csrfToken: req.csrfToken(), mailbox: 'drafts', layout: 'mail_layout' });
+});
+//--------------------------------------------------//
+
+//------------------------ Trash -----------------------//
+router.get('/q/trash', function (req, res, next) {
+	let query = Mail.find({ mailbox: "Trash", user: req.user.email });
 	query.exec(function (err, docs) {
 		if (err) console.log(err);
-		res.render('mail/drafts', {csrfToken: req.csrfToken(), messages: docs, mailbox: 'drafts', layout: 'mail_layout' });
+		return res.send(docs);
 	});
 });
 
 router.get('/trash', function (req, res, next) {
-	if (!req.isAuthenticated()) {
-		return res.redirect('/');
-	}
-
-	let query = Mail.find({ mailbox: "Trash", user: req.user.email });
-	query.exec(function (err, docs) {
-		if (err) console.log(err);
-		res.render('mail/trash', {csrfToken: req.csrfToken(), messages: docs, mailbox: 'trash', layout: 'mail_layout' });
-	});
+	if (!req.isAuthenticated()) return res.redirect('/');
+	res.render('mail/trash', {csrfToken: req.csrfToken(), mailbox: 'trash', layout: 'mail_layout' });
 });
 //--------------------------------------------------//
 
 //--------------- Refresh Tasks -------------------//
-
-router.get('/refresh', function (req, res, next) {
-	refresh("Inbox", req, res);
-	return res.status(200);
-});
-
-router.get('/refresh/sent', function (req, res, next) {
-	if (!req.isAuthenticated())
-		return res.redirect('/');
+router.get('/r/sent', function (req, res, next) {
+	if (!req.isAuthenticated()) return res.redirect('/');
 	refresh("Sent", req, res);
 });
 
-router.get('/refresh/inbox', function (req, res, next) {
-	if (!req.isAuthenticated())
-		return res.redirect('/');
+router.get('/r/inbox', function (req, res, next) {
+	if (!req.isAuthenticated()) return res.redirect('/');
 	refresh("Inbox", req, res);
 });
 
-router.get('/refresh/trash', function (req, res, next) {
-	if (!req.isAuthenticated())
-		return res.redirect('/');
+router.get('/r/trash', function (req, res, next) {
+	if (!req.isAuthenticated()) return res.redirect('/');
 	refresh("Trash", req, res);
 });
 
-router.get('/refresh/drafts', function (req, res, next) {
-	if (!req.isAuthenticated())
-		return res.redirect('/');
+router.get('/r/drafts', function (req, res, next) {
+	if (!req.isAuthenticated()) return res.redirect('/');
 	refresh("Drafts", req, res);
 });
 //---------------------------------------------------------//
@@ -193,14 +192,14 @@ router.get('/drafts/:id', function (req, res, next) {
 
 router.get('/mail-body/:id', function (req, res, next) {
 	Mail.findById(req.params.id, function (err, mail) {
-		getMailBody(mail, req);
+		getMailBody(mail, req, res);
 	});
 	return res.status(200);
 });
 //------------------------------------------------------------//
 
 //----------------- Get Mail Body Function ------------------//
-function getMailBody(mail, req) {
+function getMailBody(mail, req, res) {
 	let attachments = [];
 
 	let imap = new Imap({
@@ -237,7 +236,6 @@ function getMailBody(mail, req) {
 										attachments.push({link:'/download/' + files[att].filename, name: files[att].filename});
 									}
 								}
-								www.io.emit('imap_end_attachment', { content: attachments });
 								imap.end();
 							}
 						});
@@ -248,9 +246,11 @@ function getMailBody(mail, req) {
 	});
 	imap.once('error', function (err) {
 		console.log(err);
+		res.send(err);
 	});
 	imap.once('end', (err) => {
-		if (err) console.log(err);
+		if (err) res.send(err);
+		res.send(attachments);
 	});
 	imap.connect();
 }
@@ -374,7 +374,6 @@ router.post('/send/:id', function (req, res, next) {
 	};
 
 	sendmailer.sendMail(mailOptions).then((sentMessageInfo) => {
-		console.log(sentMessageInfo);
 		res.send(mailOptions);
 	}).catch((err) => {
 		if (err) console.log(err);
@@ -429,7 +428,6 @@ router.post('/save-mail', function (req, res, next) {
 		imap.connect();
 	});
 });
-
 //---------------------------------------------------------//
 
 module.exports = router;

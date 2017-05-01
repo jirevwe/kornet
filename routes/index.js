@@ -290,7 +290,7 @@ router.get('/contacts', utils.isActivated, function (req, res, next) {
     let user = req.user;
     let contacts = [];
     if (user.user_domain != undefined ){
-        Business.find({'domain': user.user_domain}).populate("users", "id name email phone_number is_activated").exec(function(err,results){
+        Business.find({'domain': user.user_domain}).populate("users", "id name email phone_number is_activated").exec(function(err, results){
             if(err){
                 return res.json({result: "failed", contacts:[]});
             }

@@ -55,8 +55,11 @@
 
 				$.post('http://localhost:3000/wallet/create-transaction', body);
 				$('#amount').val('');
+			},
+			onClose: function(){
+				alert('window closed');
 				window.location = '/wallet';
-			}
+			}	
 		});
 		handler.openIframe();
 	}
