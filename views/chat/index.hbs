@@ -403,7 +403,9 @@
                             console.log(user_db);
                             creator = data;
 
-                            if(room.isDM == 'true'){
+                            console.log(room);
+
+                            if(room.isDM){
                                 $('#numMembers').hide();
                                 if(user.name == toMem.name){
                                     //$('#chatName').html(fromMem.name);
@@ -797,6 +799,7 @@
             else{
                 //enterRoom(exist.id);
                 $('#memModal').modal('hide');
+                $('#numMembers').show();
             }
 
         }
@@ -804,7 +807,7 @@
         function roomExist(roomname){
             var room_name = roomname;
             var roomexists = false;
-            $.each(rooms, function(rooms, room) {
+            $.each(curRooms, function(rooms, room) {
                 console.log("DM room: "+room.name);
                 console.log("new DM: "+room_name);
                 if(room.name == room_name){
@@ -856,14 +859,14 @@
                 $('input[type="radio"]').prop('checked', false);
 
                 var exist = false;
-                $.each(rooms, function(rooms, room) {
-                    console.log("exsting rooms "+room.name);
-                    console.log("new room "+roomName);
-
-                    if(room.name == roomName) {
-                        exist = true;
-                    }
-                });
+//                $.each(curRooms, function(rooms, room) {
+//                    console.log("exsting rooms "+room.name);
+//                    console.log("new room "+roomName);
+//
+//                    if(room.name == roomName) {
+//                        exist = true;
+//                    }
+//                });
 
                 if(exist) {
                     alert('Room already exists');
