@@ -68,7 +68,7 @@ router.get('/q/sent', function (req, res, next) {
 
 router.get('/sent', function (req, res, next) {
 	if (!req.isAuthenticated()) return res.redirect('/');
-	res.render('mail/mailbox', { csrfToken: req.csrfToken(), mailbox: 'sent', layout: 'mail_layout' });
+	res.render('mail/inbox', { csrfToken: req.csrfToken(), mailbox: 'sent', layout: 'mail_layout' });
 });
 
 //------------------------ Inbox -----------------------//
@@ -82,7 +82,7 @@ router.get('/q/inbox', function (req, res, next) {
 
 router.get('/inbox', function (req, res, next) {
 	if (!req.isAuthenticated()) return res.redirect('/');
-	res.render('mail/mailbox', {csrfToken: req.csrfToken(), mailbox: 'inbox', layout: 'mail_layout' });
+	res.render('mail/inbox', {csrfToken: req.csrfToken(), mailbox: 'inbox', layout: 'mail_layout' });
 });
 
 //------------------------ Drafts -----------------------//

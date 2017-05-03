@@ -46,11 +46,10 @@ function getInbox(){
 		let div = $('#messages');
 		let content = '';
 		for (let i = 0;i < mails.length;i++){
-			content += '<a href="/mail/' + mails[i]._id +'" class="list-group-item">';
-			content += '<h4 class="list-group-item-heading">' + mails[i].subject +'</h4>'
-			content += '<p class="list-group-item-text">From: ' + mails[i].from.text +'</p>'
-			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
-			content += '</a>'
+			content += '<a href="/mail/' + mails[i]._id +'" class="msg list-group-item"><div class="msg__avatar"><img class="avatar avatar--sm" src="/img/avatar/avatar1.jpg" alt=""></div>'
+			content += '<span class="msg__sender">' + mails[i].from.text +'</span>'
+			content += '<span class="msg__subject">' + mails[i].subject +'</span>'
+			content += '<span class="msg__snippet">Some long text about the some kfhjkhsf dfsjkh dsfjd ...</span></a>'
 		}
 		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
 		else div.html(content);

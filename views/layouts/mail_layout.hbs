@@ -8,13 +8,12 @@
     <meta name="author" content="">
 
     <link rel="stylesheet" href="/stylesheets/bootstrap.min.css" media="screen">
-    <link rel="stylesheet" href="/stylesheets/main.css" media="screen">
     <link rel="stylesheet" href="/stylesheets/font-awesome.min.css"  media="screen">
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="/stylesheets/dropzone.min.css">
     <link rel="stylesheet" href="/stylesheets/basic.min.css">
-
+    <link rel="stylesheet" href="/stylesheets/main.css">
 
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
@@ -24,27 +23,11 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
     <script type="text/javascript" src="/javascripts/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript" src="/javascripts/bundle.js"></script>
     <script type="text/javascript" src="/javascripts/main.js"></script>
-    <script type="text/javascript">
-        tinymce.init({
-            selector: 'textarea'
-        });
-    </script>
+    <script type="text/javascript"> tinymce.init({ selector: 'textarea' }); </script>
 </head>
 <body>
-<div id="wrapper">
-    <div id="sidebar-wrapper">
-        <ul class="sidebar-nav">
-            <li><a href="/mail">Send Mail</a></li>
-            <li><a href="/mail/inbox">Inbox</a></li>
-            <li><a href="/mail/sent">Sent</a></li>
-            <li><a href="/mail/drafts">Drafts</a></li>
-            <li><a href="/mail/trash">Trash</a></li>
-        </ul>
-    </div>
-    <div class="container">
-        {{{body}}}
-    </div>
-</div>
+    {{{body}}}
 </body>
 </html>
