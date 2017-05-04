@@ -50,6 +50,8 @@ passport.serializeUser(function (user, done) {
 
          return done(null, false, req.flash('error', messages));
      }
+     console.log("req body");
+     console.log(req.body);
      User.findOne({ $or: [ {'name':username}, {'phone_number':req.body.phone} ] }, function (err, user) {
           if(err){
               return done(user);
@@ -149,6 +151,8 @@ passport.serializeUser(function (user, done) {
                 }
                 console.log(data);
             });
+
+            console.log(result);
 
             return done(null, newUser);
         });

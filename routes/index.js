@@ -74,7 +74,7 @@ router.get('/',  function (req, res, next) {
 
 router.get('/activate', utils.notActivated, function (req, res, next) {
     let messages = req.flash('error');
-    res.render('user/activate', {csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
+    res.render('user/activate', {phone:req.user.phone_number, csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
 });
 
 router.post('/activate', utils.notActivated, function (req, res, next) {

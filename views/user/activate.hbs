@@ -1,6 +1,26 @@
-<div class="row">
-    <div class="col-md-4 col-md-offset-4">
-        <h1>Activate Account</h1>
+<!--<div class="row">-->
+    <!--<div class="col-md-4 col-md-offset-4">-->
+        <!--<h1>Activate Account</h1>-->
+        <!--{{# if hasErrors}}-->
+            <!--<div class="alert alert-danger">-->
+                <!--{{# each messages}}-->
+                    <!--<p>{{this}}</p>-->
+                <!--{{/each}}-->
+            <!--</div>-->
+        <!--{{/if}}-->
+        <!--<form >-->
+            <!--<div class="form-group">-->
+                <!--<label for="token">Activation Token</label>-->
+                <!--<input type="text" name="token" id="token " class="form-control">-->
+            <!--</div>-->
+            <!--<input type="hidden" name="_csrf" value="{{ csrfToken }}">-->
+            <!--<button type="submit" class="btn btn-primary">Activate</button>-->
+        <!--</form>-->
+    <!--</div>-->
+<!--</div>-->
+
+<div class="page page--grey">
+    <div class="container container--sm">
         {{# if hasErrors}}
             <div class="alert alert-danger">
                 {{# each messages}}
@@ -8,13 +28,16 @@
                 {{/each}}
             </div>
         {{/if}}
-        <form action="/activate" method="post">
-            <div class="form-group">
-                <label for="token">Activation Token</label>
-                <input type="text" name="token" id="token " class="form-control">
+        <form class="form form--login" action="/activate" method="post">
+            <h1 class="form__title">Enter the account key sent to <em>{{ phone }}</em></h1>
+            <div class="form__group">
+                <input name="token" id="token" type="text" pattern="[0-9]{4}" maxlength="6" class="form__input u-text-center" autofocus="">
             </div>
-            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-            <button type="submit" class="btn btn-primary">Activate</button>
+            <p class="form__hint">your account key may take a few moments to arrive. Please wait 30 seconds before trying to resend. <em><a href="#">Resend</a></em></p>
+            <div class="form__action">
+                <button type="submit" class="btn btn--full">Verify</button>
+            </div>
+            <div class="form__footer">or <a href="/" data-navigo>call me</a> with my account key</div>
         </form>
     </div>
 </div>
