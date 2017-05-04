@@ -35,7 +35,7 @@ app.set('port', process.env.PORT || 3000);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.engine('.hbs', expressHbs({
-    defaultLayout: 'marketplace_layout',
+    defaultLayout: 'main_layout',
     extname: '.hbs',
     helpers: {
         ifCond: function (v1, operator, v2, options) {

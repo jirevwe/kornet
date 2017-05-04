@@ -36,13 +36,13 @@ router.get('/', utils.isActivated, function (req, res, next) {
 				});
 
 				Wallet.findById(user.wallet, (err, document) => {
-					res.render('wallet/index', { wallet: document });
+					res.render('wallet/index', {layout: 'auth_header', wallet: document });
 				});
 			});
 		});
 	}else{
 		Wallet.findById(user.wallet, (err, wallet) => {
-			res.render('wallet/index', { wallet: wallet });
+			res.render('wallet/index', {layout: 'auth_header', wallet: wallet });
 		});
 	}
 });
@@ -55,7 +55,7 @@ router.get('/t/all', (req, res, next)=>{
 
 router.get('/fund', utils.isActivated, function (req, res, next) {
 	Wallet.findById(req.user.wallet, (err, wallet) => {
-		res.render('wallet/fund', { wallet: wallet, user: req.user });
+		res.render('wallet/fund', {layout: 'auth_header', wallet: wallet, user: req.user });
 	});
 });
 
@@ -72,7 +72,7 @@ router.get('/autocomplete/users', utils.isActivated, function (req, res, next) {
 
 router.get('/send', utils.isActivated, function (req, res, next) {
 	Wallet.findById(req.user.wallet, (err, wallet) => {
-		res.render('wallet/send', { wallet: wallet, user: req.user });
+		res.render('wallet/send', {layout: 'auth_header', wallet: wallet, user: req.user });
 	});
 });
 
@@ -84,7 +84,7 @@ router.get('/cashout', utils.isActivated, function (req, res, next) {
 			if (error) console.log(error);
 
 			wallet = document;
-			res.render('wallet/cashout', { wallet: wallet, banks: banks, user: user });
+			res.render('wallet/cashout', {layout: 'auth_header', wallet: wallet, banks: banks, user: user });
 		});
 	});
 });

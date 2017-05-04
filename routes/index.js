@@ -67,9 +67,9 @@ router.use('/', function (req, res, next) {
 
 router.get('/',  function (req, res, next) {
     if(req.user)
-        res.render('index', {layout: false, user: req.user});
+        res.render('index', {user: req.user});
     else
-        res.render('index', {layout: false});
+        res.render('index', {});
 });
 
 router.get('/activate', utils.notActivated, function (req, res, next) {
