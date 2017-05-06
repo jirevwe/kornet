@@ -1,9 +1,9 @@
-<div class="container">
-	<h1>Send Mail</h1>
+{{> mailHeader classString="header--purple" }} {{> sidebar}}
+<div class="inbox">
 	<form id="sendmail" role="form" method="post">
 		<div class="form-group">
 			<label label-for="sender">Sender</label>
-			<input type="text" id="sender" name="sender" value="{{user.email}}" class="form-control"/>
+			<input type="text" id="sender" name="sender" value="{{user.email}}" class="form-control" readonly/>
 		</div>
 		<div class="form-group">
 			<label label-for="recepient">Recipients</label>
