@@ -48,7 +48,7 @@ router.post('/save', upload.single('attachment'), function(req, res, next){
 	
 	let _files = fs.readdirSync('./public/uploads/business');
 	if(_files != undefined && _files.length > 0){
-		for (a_file in _files){
+		for (let a_file in _files){
 			if(_files[a_file] != '.DS_Store' && _files[a_file].includes(file_prefix)){
 				files.push(_files[a_file]);
 			}
@@ -78,7 +78,7 @@ router.post('/uploads/delete', function(req, res, next){
 				}
 			});
 		}
-	})
+	});
 	return res.status(200);
 });
 
