@@ -3,6 +3,7 @@ let http = require("http");
 let router = express.Router();
 let Controller = require('../models/controller');
 let Business = require('../models/business');
+let Government = require('../models/govt');
 let User = require('../models/user');
 let passport = require('passport');
 const fs = require('fs');
@@ -20,11 +21,25 @@ let storage = multer.diskStorage({
     }
 });
 
+let govt_storage = multer.diskStorage({
+    destination: './public/uploads/government',
+    filename: function(req, file, cb) {
+        cb( null, file.originalname);
+    }
+});
+
 let upload = multer({
     limits: {
         fileSize: 10240000
     },
     storage : storage
+});
+
+let govt_upload = multer({
+    limits: {
+        fileSize: 10240000
+    },
+    storage : govt_storage
 });
 
 router.post('/add-to-business', upload.single('staff_file'), isLoggedIn, function (req, res, next) {
@@ -239,6 +254,143 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
                             newBusiness.save(function (err, result) {
                                 if (err) {
                                     req.flash('error', 'Error creating Business');
+                                    console.log(err);
+                                }else{
+                                    console.log("success");
+                                }
+                            });
+                        }
+                        return res.redirect('/controller/create-batch');
+                    });
+                }
+            });
+        }
+    });
+});
+
+router.post('/government', govt_upload.single('staff_file'), isLoggedIn, function (req, res, next) {
+    let government_name = req.body.government_name;
+    let domain_name = req.body.domain_name;
+    let government_type = req.body.government_type;
+    let staff_file = req.file.filename;
+    let government_tier = req.body.government_tier;
+    let created_by = req.session.controller;
+
+    let numbers = [];
+    let token = randomstring.generate({
+        length: 5,
+        charset: 'numeric'
+    });
+    console.log("your password is "+token);
+
+
+    let csv = loader('./public/uploads/government/' + staff_file);
+    //console.log(csv);
+    _.map(csv, function (num, key) {
+        numbers.push(_.toArray(num));
+    });
+
+    numbers = _.flatten(numbers);
+
+    let objects = [];
+    let fixed_numbers = [];
+    for (i = 0; i < numbers.length; i++) {
+        let number = numbers[i];
+        if (number.match("^0")) {
+            number = number.replace("0", "+234");
+            fixed_numbers.push(number);
+            //console.log(number);
+        }
+        if (number.match("^234")) {
+            number = number.replace("234", "+234");
+            fixed_numbers.push(number);
+            //console.log(number);
+        }
+        objects.push({'name': number, 'email': 'none', 'phone_number': number, 'password': token, 'network_provider':created_by.telco,
+            'user_type': 'Government', 'user_domain': domain_name, 'security_token': 'none', 'long_text': 'none'})
+    }
+
+    User.find({'phone_number': {$in : fixed_numbers}}, function (err, users) {
+        let users_id = [];
+        if (err) {
+            req.flash('error', 'Error getting user.');
+            return res.redirect('/controller/create-batch');
+        }
+        if (users.length > 0){
+            for (i = 0; i < fixed_numbers.length; i++) {
+                req.flash('error', '"'+fixed_numbers[i] + '" has already been used.');
+                //console.log(fixed_numbers[i] + ' has already been used.');
+            }
+            return res.redirect('/controller/create-batch');
+        }
+        else {
+            User.insertMany(objects, function (err, result) {
+                if(err){
+                    console.log(err);
+                    req.flash('error', 'Error creating users.');
+                    return res.redirect('/controller/create-batch');
+                }else{
+                    for (i = 0; i < result.length; i++) {
+                        users_id.push(result[i]._id)
+                    }
+
+                    Government.findOne({ $or: [ {'name':government_name}, {'domain':domain_name} ] }, function (err, government) {
+                        if(err){
+                            req.flash('error', 'Error getting government.');
+                        }
+                        if(government){
+                            if(government.name == government_name){
+                                req.flash('error', '"'+government_name+'" Business name has been taken.');
+
+                            }
+                            if(government.domain == domain_name){
+                                req.flash('error', '"'+domain_name+'" Domain name has been taken.');
+
+                            }
+                        }else {
+
+                            let newGovernment = new Government;
+
+
+                            newGovernment.name = government_name;
+                            newGovernment.domain = domain_name;
+                            newGovernment.users = users_id;
+                            newGovernment.admin = users_id[0];
+                            newGovernment.staff_number = users_id.length;
+                            newGovernment.created_by = created_by.name;
+                            newGovernment.default_pass = token;
+                            newGovernment.type = government_type;
+                            newGovernment.tier = government_tier;
+
+                            //create user email account
+                            let mysql = require('mysql');
+                            let connection = mysql.createConnection({
+                                host     : 'mail.kornet-test.com',
+                                user     : 'root2',
+                                password : '00000',
+                                database : 'vmail',
+                                debug    : false
+                            });
+
+                            connection.connect();
+                            let values = [domain_name, government_name, 'default_user_quota:1024;'];
+                            connection.query('INSERT INTO domain (domain, description, settings) VALUES (?,?,?)', values, function(err, results, fields) {
+                                if (err) console.log(err);
+                            });
+
+                            connection.end();
+                            //end create user email account
+
+                            let success = {
+                                numbers: fixed_numbers,
+                                token: token,
+                                admin: fixed_numbers[0]
+                            };
+                            req.flash('success', success);
+
+                            newGovernment.save(function (err, result) {
+                                if (err) {
+                                    req.flash('error', 'Error creating Government');
                                     console.log(err);
                                 }else{
                                     console.log("success");

@@ -39,30 +39,61 @@
                     <input type="text" name="domain_name" id="domain_name" placeholder="Domain Name" class="form-control">
                 </div>
             </div>
-            <!--<div class="col-md-6">-->
-                <!--<div class="form-group">-->
-                    <!--<input type="number" name="staff" id="staff" placeholder="Staff Number" class="form-control">-->
-                <!--</div>-->
-            <!--</div>-->
             <div class="col-md-12">
                 <div class="form-group">
                     <input type="file" name="staff_file" id="staff_file" placeholder="Staff File" class="form-control">
                 </div>
             </div>
-            <!--<div class="col-md-6">-->
-                <!--<div class="form-group">-->
-                    <!--<select name="network_provider"  data-width="fit" class="form-control">-->
-                        <!--<option value="MTN">MTN</option>-->
-                        <!--<option value="Airtel">Airtel</option>-->
-                        <!--<option value="Etisalat">Etisalat</option>-->
-                        <!--<option value="Glo">Glo</option>-->
-                    <!--</select>-->
-                <!--</div>-->
-            <!--</div>-->
+
             <div class="col-md-12">
                 <div class="form-group">
                     <input type="hidden" name="_csrf" value="{{ csrfToken }}">
                     <button type="submit" name="submit_business"  class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </div>
+        </form>
+
+        <form action="/controller/government" id="government_form" method="post" enctype="multipart/form-data" hidden>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" name="government_name" id="government_name" placeholder="Institution Name" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" name="domain_name" id="domain_name" placeholder="Domain Name" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-12">
+                <label for="government_type"> Government Type</label>
+                <div class="form-group">
+                    <select name="government_type" id="government_type" class="form-control">
+                        <option value="Ministry">Ministry</option>
+                        <option value="Parastatal">Parastatal</option>
+                        <option value="Court">Court</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="government_tier"> Government Tier</label>
+                    <select name="government_tier" id="government_tier" class="form-control">
+                        <option value="Federal">Federal</option>
+                        <option value="State">State</option>
+                        <option value="Local">Local</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="file" name="staff_file" id="staff_file" placeholder="Staff File" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" name="submit_government"  class="btn btn-primary btn-block">Submit</button>
                 </div>
             </div>
         </form>
@@ -73,6 +104,7 @@
 <script>
     let user_type_id =  $('#user_type');
     let business_form_id = $('#business_form');
+    let govt_form_id = $('#government_form');
 
     function user_type(type){
         user_type_id.hide();

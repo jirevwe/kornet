@@ -1,5 +1,4 @@
 <div class="page page--grey">
-    {{> header classString="header--purple" }}
     {{# if hasErrors}}
         <div class="alert alert-danger">
             {{# each messages}}
@@ -55,8 +54,8 @@
 
             </form>
 
-            <form id="change_password" method="post" hidden>
-                <h1 class="form__title">PLEASE CHOOSE A NEW PASSWORD</h1>
+            <form id="change_password" class="form form--login" method="post" hidden>
+                <h1 class="form__title">Please choose a new password</h1>
                 <div id="password_field" class="form__group">
                     <input type="password" name="password_id" id="password_id" placeholder="New Password" class="form__input">
                 </div>
@@ -72,88 +71,6 @@
         </div>
     </div>
 </div>
-<!--<div class="row">-->
-    <!--<div class="col-md-8 col-md-offset-2">-->
-        <!--<h1 class="text-center">Recover Passsword</h1>-->
-        <!---->
-        <!--<div id="error" class="alert alert-danger" hidden></div>-->
-        <!--<div id="forgot-pane">-->
-            <!--<form id="forgot_pass">-->
-                <!--<div class="col-md-12">-->
-                    <!--<div id="user_id_field" class="form-group ">-->
-                        <!--<label for="user_id">Kornet Username or Phone Number</label>-->
-                        <!--<input type="text" name="user_id" id="user_id" placeholder="Kornet Username or Phone Number" class="form-control">-->
-                    <!--</div>-->
-                <!--</div>-->
-                <!--<div class="col-md-6">-->
-                    <!--<button type="button" onclick="forgot_password('sec_recovery')" name="sec_question" class="btn btn-primary btn-block">Use Security Questions</button>-->
-                <!--</div>-->
-                <!--<div class="col-md-6">-->
-                    <!--<button type="button" onclick="forgot_password('token_recovery')" name="token" class="btn btn-primary btn-block">Send Security token</button>-->
-                <!--</div>-->
-            <!--</form>-->
-
-            <!--<form id="answer_question" method="post" hidden>-->
-                <!--<div class="col-md-12">-->
-                    <!--<div class="form-group">-->
-                        <!--<p id="sec_question"></p>-->
-                    <!--</div>-->
-
-                    <!--<div id="reply_id_field" class="form-group">-->
-                        <!--<input type="text" name="sec_reply_id" id="sec_reply_id" placeholder="Answer" class="form-control">-->
-                    <!--</div>-->
-                <!--</div>-->
-                <!--<div class="col-md-12">-->
-                    <!--<div class="form-group">-->
-                        <!--<button type="button" onclick="verify('verify_sec_answer')" name="verify_sec_answer" class="btn btn-primary btn-block">Answer</button>-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</form>-->
-
-            <!--<form id="send_token" method="post" hidden>-->
-                <!--<div class="col-md-12">-->
-                    <!--<div class="form-group">-->
-                        <!--<p>Please enter token sent to your phone.</p>-->
-                    <!--</div>-->
-                    <!--<div id="reply_id_field" class="form-group">-->
-                        <!--<input type="text" name="token_reply_id" id="token_reply_id" placeholder="Token" class="form-control">-->
-                    <!--</div>-->
-                <!--</div>-->
-
-                <!--<div class="form-group">-->
-                    <!--<div class="col-md-8">-->
-                        <!--<button type="button" onclick="verify('verify_token')" name="verify_token" class="btn btn-primary btn-block">Enter Token</button>-->
-                    <!--</div>-->
-                    <!--<div class="col-md-4">-->
-                        <!--<button type="button" onclick="forgot_password('token_recovery')" name="token" class="btn btn-primary btn-block">Resend Security token</button>-->
-                    <!--</div>-->
-
-                <!--</div>-->
-            <!--</form>-->
-
-            <!--<form id="change_password" method="post" hidden>-->
-                <!--<div class="col-md-12">-->
-                    <!--<p>PLEASE CHOOSE A NEW PASSWORD</p>-->
-                    <!--<div id="password_field" class="form-group">-->
-                        <!--<input type="password" name="password_id" id="password_id" placeholder="New Password" class="form-control">-->
-                    <!--</div>-->
-                    <!--<div id="confirm_password_field" class="form-group">-->
-                        <!--<input type="password" name="confirm_password_id" id="confirm_password_id" placeholder="Confirm Password" class="form-control">-->
-                    <!--</div>-->
-                <!--</div>-->
-                <!--<div class="col-md-12">-->
-                    <!--<div class="form-group">-->
-                        <!--<button type="button" onclick="change_password_()" name="password" class="btn btn-primary btn-block">Change Password</button>-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</form>-->
-
-            <!--<div class="col-md-6 col-md-offset-3" id="reset-link" hidden>-->
-                <!--<a href="/forgot" class="btn btn-default btn-block">Restart Process</a>-->
-            <!--</div>-->
-        <!--</div>-->
-    <!--</div>-->
-<!--</div>-->
 
 <script>
     let id_field =  $('#user_id_field');
