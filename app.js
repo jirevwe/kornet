@@ -75,7 +75,7 @@ app.engine('.hbs', expressHbs({
                 return opts.inverse(this);
         },
         formatDate: function (date) {
-            return moment(date).format("YYYY-MM-DD");
+            return moment(date).format('YYYY-MM-DD');
         }
     }
 }));
@@ -84,8 +84,8 @@ app.set('view engine', '.hbs');
 // uncomment after placing your favicon in /public
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true }));
 app.use(cookieParser());
 app.use(validator());
 app.use(session({

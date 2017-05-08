@@ -58,5 +58,9 @@
     "stripe": "^4.16.0",
     "unoconv": "^0.1.2",
     "uuid": "^3.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-google": "^0.7.1"
   }
 }
