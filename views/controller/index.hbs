@@ -14,8 +14,6 @@
         <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
             {{successMsg}}
         </div>
-
-
         <h2 id="sub-header" class="sub-header">Businesses</h2>
         <p id="add_more" hidden><input id="add_more_id" value="Add More" type="button" class="btn btn-primary"></p>
       <div id="businesses_id" class="table-responsive">
@@ -38,8 +36,8 @@
                       <td>{{ this.domain }}</td>
                       <td>{{ this.staff_number }}</td>
                       <td>{{ this.admin.phone_number }}</td>
-                      <td>{{formatDate this.created_at }}</td>
-                      <td>{{formatDate this.modified_at }}</td>
+                      <td>{{ formatDate this.created_at }}</td>
+                      <td>{{ formatDate this.modified_at }}</td>
                   </tr>
               {{/each}}
             {{/if}}
@@ -85,7 +83,6 @@
           ]
       };
     $('#business_list').DataTable(datatableoptions);
-
   });
 
   function view_numbers(id, name, default_pass, domain, staff_number){
