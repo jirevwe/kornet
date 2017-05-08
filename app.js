@@ -13,6 +13,8 @@ var flash = require('connect-flash');
 var validator = require('express-validator');
 var MongoStore = require('connect-mongo')(session);
 var moment = require('moment');
+var request = require('request');
+
 
 //define the routes
 var controllerRoutes = require('./routes/controller');
@@ -26,6 +28,8 @@ var businessRoutes = require('./routes/business');
 var MONGOLAB_URI = "mongodb://localhost:27017/kornet";
 var mongo = MONGOLAB_URI;
 mongoose.connect(mongo);
+
+let Business = require('./models/business');
 
 require('./config/passport');
 
@@ -100,6 +104,7 @@ app.use(express.static(path.join(__dirname, 'node_modules')));
 app.use(function (req, res, next) {
     res.locals.login = req.isAuthenticated();
     res.locals.session = req.session;
+    res.locals.user = req.user;
     next();
 });
 

@@ -1,67 +1,114 @@
-<div class="row">
-    <div class="col-md-8 col-md-offset-2">
-        <h1 class="text-center">First Sign In</h1>
-        {{# if hasErrors}}
-            <div class="alert alert-danger">
-                {{# each messages}}
-                    <p>{{this}}</p>
-                {{/each}}
+<div class="page page--grey">
+    {{> header classString="header--purple" }}
+    <div class="container container--sm">
+
+        <form id="choose_username_form" action="/verify_user" method="post" class="form form--login">
+            <div id="error_div" class="alert alert-danger" hidden></div>
+            <h1 class="form__title">First Sign In</h1>
+            <div class="form__group">
+                <label class="form__label sr-only">Choose A Username</label>
+                <input type="text" id="username_id" name="username" placeholder="Choose A Username" onblur="Ourfunction()" class="form__input" required/>
+                <input type="hidden" name="phone" id="phone_id" value="{{phone}}" class="form-control"/>
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             </div>
-        {{/if}}
-        <div id="error" class="alert alert-danger" hidden></div>
+            <div class="form__group">
+                <label class="form__label sr-only">Security Question</label>
+                <div class="form__select">
+                    <select name="question" required>
+                        <option selected disabled>Security Question</option>
+                        <option value="What is the first name of the person you kissed">What is the first name of the person you kissed</option>
+                        <option value="In what city or town does your nearest sibling work">In what city or town does your nearest sibling work</option>
+                        <option value="What is the name of your primary school">What is the name of your primary school</option>
+                        <option value="Where did you write your first Jamb examination">Where did you write your first Jamb examination</option>
+                        <option value="In what city does your closest family member live">In what city does your closest family member live</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form__group">
+                <label class="form__label sr-only">Security Answer</label>
+                <input type="text" name="answer" placeholder="Security Answer" class="form__input" required>
+            </div>
+            <div class="form__group">
+                <label class="form__label sr-only">Password</label>
+                <input type="password" name="password" id="password_id" placeholder="New Password" class="form__input" required>
+            </div>
+            <div class="form__group">
+                <label class="form__label sr-only">Confirm password</label>
+                <input type="password" name="confirm_password" id="confirm_password_id" placeholder="Confirm Password" class="form__input" required>
+            </div>
+            <div class="form__action">
+                <button type="button" onclick="verify_user()" class="btn btn--full">Create Username</button>
+            </div>
 
-        <div id="forgot-pane">
-            <form id="choose_username_form" action="/verify_user" method="post">
-                <div class="col-md-12">
-                    <p>PLEASE CHOOSE USERNAME</p>
-                    <div id="username_field" class="form-group ">
-                        <input type="text" name="username" id="username_id" placeholder="Username" class="form-control">
-                        <input type="hidden" name="phone" id="phone_id" value="{{phone}}" class="form-control"/>
-                        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-                    </div>
-                </div>
-
-                <p class="col-md-12">PLEASE CHOOSE SECURITY QUESTION</p>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <select name="question" class="form-control">
-                            <option value="What is the first name of the person you kissed">What is the first name of the person you kissed</option>
-                            <option value="In what city or town does your nearest sibling work">In what city or town does your nearest sibling work</option>
-                            <option value="What is the name of your primary school">What is the name of your primary school</option>
-                            <option value="Where did you write your first Jamb examination">Where did you write your first Jamb examination</option>
-                            <option value="In what city does your closest family member live">In what city does your closest family member live</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <input type="text" name="answer" placeholder="Security Answer" class="form-control"/>
-                    </div>
-                </div>
-                <p class="col-md-12">PLEASE CHOOSE A NEW PASSWORD</p>
-                <div class="col-md-6">
-                    <div id="password_field" class="form-group">
-                        <input type="password" name="password" id="password_id" placeholder="New Password" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div id="confirm_password_field" class="form-group">
-                        <input type="password" name="confirm_password" id="confirm_password_id" placeholder="Confirm Password" class="form-control">
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <button type="button" onclick="verify_user()" name="password" class="btn btn-primary btn-block">Create Username</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
 
+<!--<div class="row">-->
+    <!--<div class="col-md-8 col-md-offset-2">-->
+        <!--<h1 class="text-center">First Sign In</h1>-->
+        <!--{{# if hasErrors}}-->
+            <!--<div class="alert alert-danger">-->
+                <!--{{# each messages}}-->
+                    <!--<p>{{this}}</p>-->
+                <!--{{/each}}-->
+            <!--</div>-->
+        <!--{{/if}}-->
+        <!---->
+
+        <!--<div id="forgot-pane">-->
+            <!--<form id="choose_username_form" action="/verify_user" method="post">-->
+                <!--<div class="col-md-12">-->
+                    <!--<p>PLEASE CHOOSE USERNAME</p>-->
+                    <!--<div id="username_field" class="form-group ">-->
+                        <!--<input type="text" name="username" id="username_id" placeholder="Username" class="form-control">-->
+                        <!--<input type="hidden" name="phone" id="phone_id" value="{{phone}}" class="form-control"/>-->
+                        <!--<input type="hidden" name="_csrf" value="{{ csrfToken }}">-->
+                    <!--</div>-->
+                <!--</div>-->
+
+                <!--<p class="col-md-12">PLEASE CHOOSE SECURITY QUESTION</p>-->
+                <!--<div class="col-md-6">-->
+                    <!--<div class="form-group">-->
+                        <!--<select name="question" class="form-control">-->
+                            <!--<option value="What is the first name of the person you kissed">What is the first name of the person you kissed</option>-->
+                            <!--<option value="In what city or town does your nearest sibling work">In what city or town does your nearest sibling work</option>-->
+                            <!--<option value="What is the name of your primary school">What is the name of your primary school</option>-->
+                            <!--<option value="Where did you write your first Jamb examination">Where did you write your first Jamb examination</option>-->
+                            <!--<option value="In what city does your closest family member live">In what city does your closest family member live</option>-->
+                        <!--</select>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<div class="col-md-6">-->
+                    <!--<div class="form-group">-->
+                        <!--<input type="text" name="answer" placeholder="Security Answer" class="form-control"/>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<p class="col-md-12">PLEASE CHOOSE A NEW PASSWORD</p>-->
+                <!--<div class="col-md-6">-->
+                    <!--<div id="password_field" class="form-group">-->
+                        <!--<input type="password" name="password" id="password_id" placeholder="New Password" class="form-control">-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<div class="col-md-6">-->
+                    <!--<div id="confirm_password_field" class="form-group">-->
+                        <!--<input type="password" name="confirm_password" id="confirm_password_id" placeholder="Confirm Password" class="form-control">-->
+                    <!--</div>-->
+                <!--</div>-->
+
+                <!--<div class="col-md-12">-->
+                    <!--<div class="form-group">-->
+                        <!--<button type="button" onclick="verify_user()" name="password" class="btn btn-primary btn-block">Create Username</button>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</form>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
 <script>
     function verify_user() {
+        let error_div = $('#error_div');
         let password_id = $('#password_id').val();
         let confirm_password_id = $('#confirm_password_id').val();
 
@@ -76,5 +123,12 @@
         else{
             $('#choose_username_form').submit();
         }
+    }
+    function Ourfunction() {
+        var name = $('[name="username"]').val();
+        name = name.toLowerCase();
+        $('[name="username"]').val(name);
+
+        console.log(name);
     }
 </script>

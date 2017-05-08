@@ -3,12 +3,18 @@
         <div class="header__logo">Kornet</div>
         <nav>
             <ul class="header__nav">
-                <li><a href="/signin">Login</a></li>
-                <li><a href="/signup">Register</a></li>
+                {{# if user}}
+                    <li><a href="/profile"> Account</a></li>
+                {{ else }}
+                    <li><a href="/signin">Login </a></li>
+                    <li><a href="/signup">Register</a></li>
+                {{/if}}
                 <li><a href="#">About</a></li>
                 <li><a href="#">Contact</a></li>
                 <li><a href="#">Support</a></li>
+                {{# if user}}
                 <li><a href="/logout">Logout</a></li>
+                {{/if}}
             </ul>
         </nav>
     </div>
