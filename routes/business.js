@@ -1,3 +1,4 @@
+// @ts-check
 var express = require('express');
 var router = express.Router();
 let path = require('path');
@@ -26,21 +27,21 @@ let upload = multer({
 // let csrfProtection = csrf();
 // router.use(csrfProtection);
 
-router.get('/', utils.isActivated, function (req, res, next) {
-	BusinessCatalog.find({}, (err, catalog) => {
+router.get('/:catalog', utils.isActivated, function (req, res, next) {
+	BusinessCatalog.findById(req.params.catalog, (err, catalog) => {
 		if (err) console.log(err);
-		res.render('business/catalog', { catalog: catalog[0], business: { name: 'Black Boy Games' }});
+		res.render('business/catalog', { catalog: catalog});
 	});
 });
 
-router.get('/edit', utils.isActivated, function (req, res, next) {
-	BusinessCatalog.find({}, (err, catalog) => {
+router.get('/edit/:catalog', utils.isActivated, function (req, res, next) {
+	BusinessCatalog.findById(req.params.catalog, (err, catalog) => {
 		if (err) console.log(err);
-		res.render('business/edit', { catalog: catalog[0], business: { _id: 1234567890, name: 'Black Boy Games' }});
+		res.render('business/edit', { catalog: catalog, business: { _id: catalog._id, name: catalog.name }});
 	});
 });
 
-router.post('/save', upload.single('attachment'), function(req, res, next){
+router.post('/save/:catalog', upload.single('attachment'), function(req, res, next){
 	let body = req.body;
 	
 	let file_prefix = req.body.attr;
@@ -55,12 +56,13 @@ router.post('/save', upload.single('attachment'), function(req, res, next){
 		}
 	}
 
-	let catalog = new BusinessCatalog({
-		content: body.content,
-		images: files
+	BusinessCatalog.findById(req.params.catalog, (err, catalog) => {
+		if (err) console.log(err);
+		catalog.images = files;
+		catalog.content = body.content;
+		catalog.save();
 	});
-	catalog.save();
-	res.send(200);
+	res.redirect('/business/'+req.params.catalog);
 });
 
 router.post('/upload', upload.single('attachment'), function(req, res, next){

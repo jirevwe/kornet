@@ -8,12 +8,12 @@
     <meta name="author" content="">
 
     <link rel="stylesheet" href="/stylesheets/bootstrap.min.css" media="screen">
-    <link rel="stylesheet" href="/stylesheets/main.css" media="screen">
     <link rel="stylesheet" href="/stylesheets/font-awesome.min.css"  media="screen">
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="/stylesheets/dropzone.min.css">
     <link rel="stylesheet" href="/stylesheets/basic.min.css">
+    <link rel="stylesheet" href="/stylesheets/main.css">
 
 
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -27,14 +27,19 @@
     <script type="text/javascript" src="/javascripts/tinymce/tinymce.min.js"></script>
     <script type="text/javascript">
         tinymce.init({
-            selector: 'textarea'
+            selector: 'textarea',
+             setup: function(editor) {
+                editor.on('init', function() {
+                    tinymce.activeEditor.setContent('{{{catalog.content}}}');
+                });
+             }
         });
     </script>
 </head>
 <body>
 <div class="container">
-    <h1>Edit {{ business.name }} Page</h1>
-    <form id="add-content" role="form" action="/business/save" method="post">
+    <h1>Edit {{ business.name }}</h1>
+    <form id="add-content" role="form" action="/business/save/{{business._id}}" method="post">
         <div class="form-group">
             <textarea rows="10" cols="40" name="content" placeholder="Content" class="form-control"></textarea>
         </div>
@@ -46,94 +51,91 @@
         <div id="stuff" hidden>
         </div>
         <div class="form-group">
-            <button type="submit" name="send" id="submit" value="submit" class="btn btn-success">Send Mail &nbsp;</button>
+            <button type="submit" name="send" id="submit" value="submit" class="btn btn-success">Save &nbsp;</button>
         </div>
     </form>
 </div>
-<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
-        let socketio = io.connect();
-        let business_id = '{{ business._id }}';
+    let business_id = '{{ business._id }}';
+    $('#stuff').html('<input id="attr" type="text" name="attr" value="' + business_id +'"/>');
 
-        $('#stuff').html('<input id="attr" type="text" name="attr" value="' + business_id +'"/>');
+        String.prototype.getExtension = function() {
+        var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
+                                                // (supports `\\` and `/` separators)
+            pos = basename.lastIndexOf(".");       // get last position of `.`
 
-         String.prototype.getExtension = function() {
-            var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
-                                                    // (supports `\\` and `/` separators)
-                pos = basename.lastIndexOf(".");       // get last position of `.`
+        if (basename === "" || pos < 1)            // if file name is empty or ...
+            return "";                             //  `.` not found (-1) or comes first (0)
 
-            if (basename === "" || pos < 1)            // if file name is empty or ...
-                return "";                             //  `.` not found (-1) or comes first (0)
+        return basename.slice(pos + 1);            // extract extension ignoring `.`
+    };
 
-            return basename.slice(pos + 1);            // extract extension ignoring `.`
-        };
+    Array.prototype.indexOf || (Array.prototype.indexOf = function(d, e) {
+        var a;
+        if (null == this) throw new TypeError('"this" is null or not defined');
+        var c = Object(this),
+            b = c.length >>> 0;
+        if (0 === b) return -1;
+        a = +e || 0;
+        Infinity === Math.abs(a) && (a = 0);
+        if (a >= b) return -1;
+        for (a = Math.max(0 <= a ? a : b - Math.abs(a), 0); a < b;) {
+            if (a in c && c[a] === d) return a;
+            a++
+        }
+        return -1
+    });
 
-        Array.prototype.indexOf || (Array.prototype.indexOf = function(d, e) {
-            var a;
-            if (null == this) throw new TypeError('"this" is null or not defined');
-            var c = Object(this),
-                b = c.length >>> 0;
-            if (0 === b) return -1;
-            a = +e || 0;
-            Infinity === Math.abs(a) && (a = 0);
-            if (a >= b) return -1;
-            for (a = Math.max(0 <= a ? a : b - Math.abs(a), 0); a < b;) {
-                if (a in c && c[a] === d) return a;
-                a++
+    let files = [];
+    Dropzone.options.uploadzone = {
+        url:'/business/upload',
+        addRemoveLinks: true,
+        paramName: 'attachment',
+        maxFilesize: 10,
+        maxFiles: 5,
+        dictDefaultMessage: 'Drag an file here to upload, or click to select',
+        acceptedFiles: '.png, .jpg, .jpeg, .gif',
+        renameFilename: (name) => {
+            return business_id + '-' + name;
+        },
+        init: function() {
+            let myDropzone = this;
+            let xhr = undefined;
+
+            this.on('success', function(file, resp){
+                files.push(resp);
+            });
+            this.on('error',  function (file, error, xhr){
+                console.log(error);
+            });
+            this.on('removedfile', function(file){
+                let file_index = files.find((n) => { return n.originalname == business_id + '-' +file.name });
+                xhr = $.ajax({
+                    url: "http://localhost:3000/business/uploads/delete",
+                    type: "POST",
+                    data: {file : file_index}
+                });
+                files.splice(files.indexOf(file_index), 1);
+            });
+
+            let fn = () =>
+            {
+                if(xhr != undefined && xhr.readyState != 4)
+                    xhr.abort(); 
+            };
+            setInterval(fn, 500);
+        },
+        accept: function(file, done) {
+            let ext = file.name.toString().getExtension();
+            if( ext == 'pdf' || ext == 'png' || ext == 'jpeg'|| ext == 'jpg' ||
+                ext == 'docx' || ext == 'doc' || ext == 'xlsx' || ext == 'xls'
+            ){
+                done();
             }
-            return -1
-        });
-
-        let files = [];
-        Dropzone.options.uploadzone = {
-            url:'/business/upload',
-            addRemoveLinks: true,
-            paramName: 'attachment',
-            maxFilesize: 10,
-            maxFiles: 5,
-            dictDefaultMessage: 'Drag an file here to upload, or click to select',
-            acceptedFiles: '.png, .jpg, .jpeg, .gif',
-            renameFilename: (name) => {
-                return business_id + '-' + name;
-            },
-            init: function() {
-                let myDropzone = this;
-                let xhr = undefined;
-
-                this.on('success', function(file, resp){
-                    files.push(resp);
-                });
-                this.on('error',  function (file, error, xhr){
-                    console.log(error);
-                });
-                this.on('removedfile', function(file){
-                    let file_index = files.find((n) => { return n.originalname == business_id + '-' +file.name });
-                    xhr = $.ajax({
-                        url: "http://localhost:3000/business/uploads/delete",
-                        type: "POST",
-                        data: {file : file_index}
-                    });
-                    files.splice(files.indexOf(file_index), 1);
-                });
-
-                let fn = () =>
-                {
-                    if(xhr != undefined && xhr.readyState != 4)
-                        xhr.abort(); 
-                };
-                setInterval(fn, 500);
-            },
-            accept: function(file, done) {
-                let ext = file.name.toString().getExtension();
-                if( ext == 'pdf' || ext == 'png' || ext == 'jpeg'|| ext == 'jpg' ||
-                    ext == 'docx' || ext == 'doc' || ext == 'xlsx' || ext == 'xls'
-                ){
-                    done();
-                }
-                else
-                    done('Invalid file type');
-            }
-        };
+            else
+                done('Invalid file type');
+        }
+    };
 </script>
 </div>
 </body>
