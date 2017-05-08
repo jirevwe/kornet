@@ -93,5 +93,18 @@
         <a href="/chat">
             <div class="dashboard-icon dashboard-icon--chat"></div>
         </a>
+
+        <script>
+            $.ajax({
+                method: "GET",
+                url: "http://localhost:3000/is_admin",
+                success: function (data) {
+                    if(data.result == 'true'){
+                     $('.dashboard-icons').append('<a href="/chat"><div class="dashboard-icon dashboard-icon--chat"></div></a>');
+                    }
+                }
+            });
+        </script>
+
     </div>
 </div>

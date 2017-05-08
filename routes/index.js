@@ -72,6 +72,27 @@ router.get('/',  function (req, res, next) {
         res.render('index', {});
 });
 
+router.get('/is_admin',  function (req, res, next) {
+    Business.findOne({'domain':req.user.user_domain}, function (err, business) {
+        if (err) {
+            //req.flash('error', 'Error getting business.');
+            return res.json({result: "false"});
+        }
+        if (business){
+            console.log(business.admin);
+            console.log(req.user._id);
+            if(""+req.user._id == ""+business.admin){
+                return res.json({result: "true"});
+            }
+        }
+        if (!business){
+            //console.log(business);
+            return res.json({result: "false"});
+        }
+        return res.json({result: "false"});
+    });
+});
+
 router.get('/activate', utils.notActivated, function (req, res, next) {
     let messages = req.flash('error');
     res.render('user/activate', {phone:req.user.phone_number, csrfToken: req.csrfToken(), messages:messages, hasErrors:messages.length > 0});
