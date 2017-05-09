@@ -37,7 +37,7 @@ router.get('/', function (req, res, next) {
 	if (!req.isAuthenticated())
 		return res.redirect('/');
 	setTimeout(() => { www.io.emit('hidden_mail_attr', { content: Date.now().toString() }); }, 1000);
-	res.render('mail/sendmail', {csrfToken: req.csrfToken(), user: req.user, layout: 'mail_layout' });
+	res.render('mail/sendmail', {csrfToken: req.csrfToken(), user: req.user });
 });
 
 router.post('/upload', upload.single('attachment'), function(req, res, next){
@@ -68,7 +68,7 @@ router.get('/q/sent', function (req, res, next) {
 
 router.get('/sent', function (req, res, next) {
 	if (!req.isAuthenticated()) return res.redirect('/');
-	res.render('mail/inbox', { csrfToken: req.csrfToken(), mailbox: 'sent', layout: 'mail_layout' });
+	res.render('mail/inbox', { csrfToken: req.csrfToken(), mailbox: 'sent'});
 });
 
 //------------------------ Inbox -----------------------//
@@ -82,7 +82,7 @@ router.get('/q/inbox', function (req, res, next) {
 
 router.get('/inbox', function (req, res, next) {
 	if (!req.isAuthenticated()) return res.redirect('/');
-	res.render('mail/inbox', {csrfToken: req.csrfToken(), mailbox: 'inbox', layout: 'mail_layout' });
+	res.render('mail/inbox', {csrfToken: req.csrfToken(), mailbox: 'inbox'});
 });
 
 //------------------------ Drafts -----------------------//
@@ -97,7 +97,7 @@ router.get('/q/drafts', function (req, res, next) {
 
 router.get('/drafts', function (req, res, next) {
 	if (!req.isAuthenticated()) return res.redirect('/');
-	res.render('mail/drafts', {csrfToken: req.csrfToken(), mailbox: 'drafts', layout: 'mail_layout' });
+	res.render('mail/drafts', {csrfToken: req.csrfToken(), mailbox: 'drafts'});
 });
 //--------------------------------------------------//
 
@@ -112,7 +112,7 @@ router.get('/q/trash', function (req, res, next) {
 
 router.get('/trash', function (req, res, next) {
 	if (!req.isAuthenticated()) return res.redirect('/');
-	res.render('mail/trash', {csrfToken: req.csrfToken(), mailbox: 'trash', layout: 'mail_layout' });
+	res.render('mail/trash', {csrfToken: req.csrfToken(), mailbox: 'trash'});
 });
 //--------------------------------------------------//
 
@@ -146,7 +146,7 @@ router.get('/reply/:id', function (req, res, next) {
 	}
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/reply', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/reply', {csrfToken: req.csrfToken(), user: req.user, messages: mail});
 	});
 });
 
@@ -156,7 +156,7 @@ router.get('/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/email', {csrfToken: req.csrfToken(), user: req.user, message: mail, layout: 'mail_layout' });
+		res.render('mail/email', {csrfToken: req.csrfToken(), user: req.user, message: mail});
 	});
 });
 
@@ -166,7 +166,7 @@ router.get('/trash/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/trash_item', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/trash_item', {csrfToken: req.csrfToken(), user: req.user, messages: mail});
 	});
 });
 
@@ -176,7 +176,7 @@ router.get('/edit/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/edit_draft', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/edit_draft', {csrfToken: req.csrfToken(), user: req.user, messages: mail});
 	});
 });
 
@@ -186,7 +186,7 @@ router.get('/drafts/:id', function (req, res, next) {
 
 	Mail.findById(req.params.id, function (err, mail) {
 		if (err) console.log(err);
-		res.render('mail/edit_draft', {csrfToken: req.csrfToken(), user: req.user, messages: mail, layout: 'mail_layout' });
+		res.render('mail/edit_draft', {csrfToken: req.csrfToken(), user: req.user, messages: mail});
 	});
 });
 

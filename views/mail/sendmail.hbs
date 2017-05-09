@@ -1,31 +1,32 @@
 {{> mailHeader classString="header--purple" }} {{> sidebar}}
 <div class="inbox">
 	<form id="sendmail" role="form" method="post">
-		<div class="form-group">
-			<label label-for="sender">Sender</label>
-			<input type="text" id="sender" name="sender" value="{{user.email}}" class="form-control" readonly/>
+        <h1 class="form__title">&nbsp;</h1>
+		<div class="form__group">
+			<label class="form__label sr-only" label-for="sender">Sender</label>
+			<input type="text" id="sender" name="sender" value="{{user.email}}" class="form__input" readonly/>
 		</div>
-		<div class="form-group">
-			<label label-for="recepient">Recipients</label>
-			<input type="text" id="recepient" name="recepient" placeholder="foobar@zee.com, &quot;Ray Tuk&quot; &lt;see@saw.com&gt;" class="form-control"/>
+		<div class="form__group">
+			<label class="form__label sr-only" label-for="recepient">Recipients</label>
+			<input type="text" id="recepient" name="recepient" placeholder="To: foobar@zee.com, &quot;Ray Tuk&quot; &lt;see@saw.com&gt;" class="form__input"/>
 		</div>
-		<div class="form-group">
-			<label label-for="cc">Cc</label>
-			<input type="text" id="cc" name="cc" placeholder="foo@bar.com, &quot;Jude Dike&quot; &lt;mon@day.com&gt;" class="form-control"/>
+		<div class="form__group">
+			<label class="form__label sr-only" label-for="cc">Cc</label>
+			<input type="text" id="cc" name="cc" placeholder="CC: foo@bar.com, &quot;Jude Dike&quot; &lt;mon@day.com&gt;" class="form__input"/>
 		</div>
-		<div class="form-group">
-			<label label-for="bcc">Bcc</label>
-			<input type="text" id="bcc" name="bcc" placeholder="wa@wu.com, &quot;Ismail Shomala&quot; &lt;public@holiday.com&gt;" class="form-control"/>
+		<div class="form__group">
+			<label class="form__label sr-only" label-for="bcc">Bcc</label>
+			<input type="text" id="bcc" name="bcc" placeholder="BCC: wa@wu.com, &quot;Ismail Shomala&quot; &lt;public@holiday.com&gt;" class="form__input"/>
 		</div>
-		<div class="form-group">
-			<label label-for="subject">Subject</label>
-			<input type="text" id="subject" name="subject" placeholder="Subject" class="form-control"/>
+		<div class="form__group">
+			<label class="form__label sr-only" label-for="subject">Subject</label>
+			<input type="text" id="subject" name="subject" placeholder="Subject" class="form__input"/>
 		</div>
-		<div class="form-group">
-			<textarea rows="10" id="content" cols="40" name="content" placeholder="Content" class="form-control"></textarea>
-			 <input name="image" type="file" id="upload" class="hidden" onchange="">
+		<div class="form__group">
+			<textarea rows="10" id="content" cols="40" name="content" placeholder="Content" class="form__input"></textarea>
+			 <input name="image" type="file" id="upload" hidden onchange="">
 		</div>
-		<div id="uploadzone" class="form-group dropzone">
+		<div id="uploadzone" class="form__group dropzone">
 			<div hidden>
 				<input type="file" id="attachment" name="attachment"/>
 			</div>
@@ -34,8 +35,8 @@
 		</div>
 		<input type="hidden" name="_csrf" value="{{ csrfToken }}">
 	</form>
-	<div class="form-group">
-		<button name="submit" id="submit" value="submit" class="btn btn-success" onclick="sendMail()">Send Mail &nbsp;</button>
+	<div class="form__action">
+		<button name="submit" id="submit" value="submit" class="btn btn--full" onclick="sendMail()">Send Mail &nbsp;</button>
 	</div>
 </div>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
