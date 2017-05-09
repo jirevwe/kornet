@@ -290,7 +290,8 @@ function refresh(mailbox_name, req, res) {
 									from: mail.from,
 									to: mail.to,
 									subject: mail.subject,
-									date: mail.date
+									date: mail.date,
+									has_attachments: mail.attachments.length > 0
 								});
 
 								Mail.findOne({ messageId: saved_mail.messageId }, function (err, doc) {

@@ -17,7 +17,8 @@ var Mail = new Schema({
   references: Schema.Types.String,
   "reply-to": Schema.Types.String,
   inReplyTo: Schema.Types.String,
-  date: Schema.Types.Date
+  date: Schema.Types.Date,
+  has_attachments: Schema.Types.Boolean
 });
 
 module.exports = mongoose.model('Mail', Mail);

@@ -14,9 +14,9 @@
     </div>
 </div>
 <script>
-{{# if_eq mailbox  'inbox' }}
+{{# ifCond mailbox '==' 'inbox' }}
     getInbox();
 {{else}}
     getSent();
-{{/if_eq}}
+{{/ifCond}}
 </script>

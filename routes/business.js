@@ -22,43 +22,41 @@ let upload = multer({
 	storage : storage
 });
 
-// var csrf = require('csurf');
+var csrf = require('csurf');
 
-// let csrfProtection = csrf();
-// router.use(csrfProtection);
+let csrfProtection = csrf();
+router.use(csrfProtection);
 
 router.get('/:catalog', utils.isActivated, function (req, res, next) {
 	BusinessCatalog.findById(req.params.catalog, (err, catalog) => {
 		if (err) console.log(err);
-		res.render('business/catalog', { catalog: catalog});
+		let file_prefix = catalog._id;
+		let files = [];
+		
+		let _files = fs.readdirSync('./public/uploads/business');
+		if(_files != undefined && _files.length > 0){
+			for (let a_file in _files){
+				if(_files[a_file] != '.DS_Store' && _files[a_file].includes(file_prefix)){
+					files.push({ name: _files[a_file], owner: catalog._id });
+				}
+			}
+		}
+		res.render('business/catalog', { catalog: catalog, images: files, csrfToken: req.csrfToken() });
 	});
 });
 
 router.get('/edit/:catalog', utils.isActivated, function (req, res, next) {
 	BusinessCatalog.findById(req.params.catalog, (err, catalog) => {
 		if (err) console.log(err);
-		res.render('business/edit', { catalog: catalog, business: { _id: catalog._id, name: catalog.name }});
+		res.render('business/edit', { catalog: catalog, csrfToken: req.csrfToken() });
 	});
 });
 
 router.post('/save/:catalog', upload.single('attachment'), function(req, res, next){
 	let body = req.body;
-	
-	let file_prefix = req.body.attr;
-	let files = [];
-	
-	let _files = fs.readdirSync('./public/uploads/business');
-	if(_files != undefined && _files.length > 0){
-		for (let a_file in _files){
-			if(_files[a_file] != '.DS_Store' && _files[a_file].includes(file_prefix)){
-				files.push(_files[a_file]);
-			}
-		}
-	}
 
 	BusinessCatalog.findById(req.params.catalog, (err, catalog) => {
 		if (err) console.log(err);
-		catalog.images = files;
 		catalog.content = body.content;
 		catalog.save();
 	});
@@ -71,17 +69,26 @@ router.post('/upload', upload.single('attachment'), function(req, res, next){
 
 router.post('/uploads/delete', function(req, res, next){
 	let file = req.body.file;
+	if(file == undefined) return res.status(404).send('File Doesn\'t Exist');
 	fs.exists('./'+file.path, (exists) => {
 		if(exists){
 			fs.unlink('./'+file.path, (err) => {
-				if (err) {
-					console.log(err);
-					return res.status(200);
-				}
+				if (err)  return res.status(404).send('Delete Failed');
+				return res.status(200).send('Successfully Deleted');
 			});
-		}
+		}else return res.status(404).send('File Doesn\'t Exist');
 	});
-	return res.status(200);
+});
+
+router.post('/uploads/remove', function(req, res, next){
+	fs.exists('./public/uploads/business/' + req.body.file, (exists) => {
+		if(exists){
+			fs.unlink('./public/uploads/business/' + req.body.file, (err) => {
+				if (err)  return res.status(404).send('Delete Failed');
+				return res.status(200).send('Successfully Deleted');
+			});
+		}else return res.status(404).send('File Doesn\'t Exist');
+	});
 });
 
 module.exports = router;

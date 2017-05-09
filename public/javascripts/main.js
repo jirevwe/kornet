@@ -3,6 +3,14 @@ let pdf   = '<img class="icon icons8-PDF" src="data:image/png;base64,iVBORw0KGgo
 let csv   = '<img class="icon icons8-CSV" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC/0lEQVRoQ+2Z/0sTcRjH3wNPuhNukoO28IzNctZmX0ArZWjkzEiEfsj/x/6F+jf6IdCyCAlBXBSisQ1USrEFGmyBgzxpwuJ57LPmNpxu9/Fm3P1yu92Xz/v13Pv9fG43F8744jrj+vH/A4y/fpGXcZfy+fzT6bGJyXqvXfUOyAA4f07Fzz0TVkDYAjDZG8GzxKIlELYAPI+MILNnWgJhGwB53woIWwGsgLAdoF6IhgCoB6JhAGqFaCiAWiAaDqAUYurRkyM12gJwkscHB0DGs5BzB4oq4GTgJHao5VgnxE6Ia/FN0TnSLLS1vYVkIg7T3OXh/IEAgleuQmlWeHt1dQVrayv8WVU1BLuCMDou4dPHD9j+sY2urm4Eg928P/VtE8ufl6CqKqLR0UPIUgDS6TRisXk0NTXB6/Mhk07DNM2CqPX1L0gmEyzI672IVGoT+/v7GB4e4WNJbFubBwMDERabSMSxsfEVfn8nwuEe+QCiijdv3OKq5n7n8ObtK650NPoACwvzyGTS6O+PwOPxFARS1Q3DwOzsOxY5Pv6Y13Nz75HN7qC37w58Xp98gFKBwjK0JlssLS/ieyoFo70DoVBPwVZCmRA8OHgPmtrC8MVAxQRSLDQ19ZLHEBUuzenu7i+uKtlGURS2RsDfWQARlgmFwtD1Vraj94IXfbfvlkXeFgBSQbZaXVsp+F/XdQwN3WeBIkMkWne3ctgJJhC4fDoAlSxEolwucDiLPxPIQmyePS4yQypnZqahKM3QNI3zQgHXtJbTARAhFqH7F+KDNkjiyD4PR8fYNsIyxa1TXOOgzZa3T0EixULCAuTvdsNAdifLVRRtUAimu6G7dQ50LpcDhdbtbj3U+2mjUvuUCiAmn0QyzpWmhUDC165zxYX/qbfTQvMF+VtMXPQdBV2000rtUzqAGIDEitm3zMB/w3zU/krnSG+j1Qa1cr+UDFgpsNq1HADn90A1j1TZ71jIsZBjIeflrpw/uo/rrLq70HEHsuu4qu9G7RJ23HHPPMAfHrQ7T7VqNrwAAAAASUVORK5CYII=" width="24" height="24">';
 let excel = '<img class="icon icons8-Microsoft-Excel" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACr0lEQVRoQ+2ZMUwTURjH/98pTQebOKIDMSGxpk2Aqy5udqyKsYsG3NSAMhlJ2Boau5nQOKGSqJNoGAQFw1g3BwGjLOqii+hIgoMxps98V+98XK+ldy28d+be0vbuvev/933/73uXO0LIB4VcPyIA1RmMMvC/ZoBSk5nefb+rJhGZgjAAkLleWjvUaeC2LZQupmP41ZUyDMMEhEkgUwD9REi4xb4vrbX9f+5r+rpgciKZ2N8V7ycyLKEEwdFNESjWSmT3FCBdTHcb1ZgpqmKABXN0IdBLRL6gZbA9BegrZEQrUfUzpyfT42e6M1dArL/MP+/zWtwwmjoBsPCl/IKn1gjAjyeCWijKgJ8oN5v77taqc3pwIW99Xzw/33CJPUebDCgFuHRyGBO5cSdahfkiXrxddH4n4gewfHMJiXhtA769PIXHr2e3RVcpACthgYcP1m5nvm5u4HR50BHIcAzJ4+P3T7gwPVRnDeVFfOLIcTy4POMIu/JwBCtfVi0ohrOHfdxNoByABd0ZnkL22ClL25vPK7j6aBSlfBHnzFo22FZsL6+h3EIsyh1tFssAPLZ+/kCufMb61BaAhV3PjuJaduSv6K2mhSuDaJEBFsQdZ27sqVPQzQpXBtCiBmwAuWV6dSUvC2kDILfMjc1vTibuVWZwt3Lf0/98UAsLya2Ui7XwbNLqTPbIlc+CobQtYnkzsyPOewODya1VS4Dt3edfy3RvcDdmx1H58KqOQWkNJLuPYm7siSPK7Xd5M+PbjIvTQ3X7gVIA2Sbscfa6PNwbHN/I8Q2dlvtAwzazwwktulBQ8dq00XYAlNZAO8LttRGARxSj50J+rBXUQoEeLYb+4a5XZEP1eL1Va4TqBUerUADC84rJB9SuTA38tmVX1AS4aAQQIGgdXRJloKPhDHCxP336lkC882iaAAAAAElFTkSuQmCC" width="24" height="24">';
 
+
+function refresh(){
+	$.get('http://localhost:3000/mail/r/inbox');
+	$.get('http://localhost:3000/mail/r/sent');
+	$.get('http://localhost:3000/mail/r/drafts');
+	$.get('http://localhost:3000/mail/r/trash');
+}
+
 function getDrafts(){
 	let xhr = $.get('http://localhost:3000/mail/q/drafts', function(mails){
 		let div = $('#messages');
@@ -44,15 +52,29 @@ function getTrash(){
 function getInbox(){
 	let xhr = $.get('http://localhost:3000/mail/q/inbox', function(mails){
 		let div = $('#messages');
-		let content = '';
+		let content = '<ul class="collapsible popout" data-collapsible="accordion">';
 		for (let i = 0;i < mails.length;i++){
-			content += '<a href="/mail/' + mails[i]._id +'" class="msg list-group-item"><div class="msg__avatar"><img class="avatar avatar--sm" src="/img/avatar/avatar1.jpg" alt=""></div>'
-			content += '<span class="msg__sender">' + mails[i].from.text +'</span>'
-			content += '<span class="msg__subject">' + mails[i].subject +'</span>'
-			content += '<span class="msg__snippet">Some long text about the some kfhjkhsf dfsjkh dsfjd ...</span></a>'
+			content += '<li>';
+			content += mails[i].has_attachments ? '<div class="msg collapsible-header msg--has-attachment">' :  '<div class="msg collapsible-header">';
+							content += '<div class="msg__left">'+
+								'<div class="msg__avatar">'+
+									'<div class="avatar avatar--sm" style="background-color: #eee; background-image: url(https://unsplash.it/50/50/?random)"></div>'+
+								'</div>'+
+								'<span class="msg__sender">' + mails[i].from.text +'</span>'+
+								'<span class="msg__subject">' + mails[i].subject +'</span>'+
+								'<span class="msg__snippet">' + mails[i].text +'</span>'+
+								'<span><img class="msg__attachment-icon" src="/img/icons/inbox/attachment.svg" alt=""></span>'+
+							'</div>'+
+							'<div class="msg__right">'+
+								'<span class="msg__select"><input type="checkbox"></span>'+
+								'<span class="msg__favorite-icon"><img src="/img/icons/inbox/favorite.svg" alt=""></span>'+
+							'</div>'+
+						'</div>'+
+						'<div class="collapsible-body"><span>' + mails[i].text +'</span></div>'+
+					'</li>';
 		}
-		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
-		else div.html(content);
+		content += '</ul>';
+		div.html(content);
 		xhr.abort();
 	});
 }

@@ -38,8 +38,8 @@
 </head>
 <body>
 <div class="container">
-    <h1>Edit {{ business.name }}</h1>
-    <form id="add-content" role="form" action="/business/save/{{business._id}}" method="post">
+    <header class="jumbotron hero-spacer"> <h1> Edit {{ catalog.name }} </h1></header>
+    <form id="add-content" role="form" action="/business/save/{{catalog._id}}" method="post">
         <div class="form-group">
             <textarea rows="10" cols="40" name="content" placeholder="Content" class="form-control"></textarea>
         </div>
@@ -51,17 +51,18 @@
         <div id="stuff" hidden>
         </div>
         <div class="form-group">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <button type="submit" name="send" id="submit" value="submit" class="btn btn-success">Save &nbsp;</button>
         </div>
     </form>
 </div>
 <script type="text/javascript">
-    let business_id = '{{ business._id }}';
+    let business_id = '{{ catalog._id }}';
     $('#stuff').html('<input id="attr" type="text" name="attr" value="' + business_id +'"/>');
 
         String.prototype.getExtension = function() {
         var basename = this.split(/[\\/]/).pop(),  // extract file name from full path ...
-                                                // (supports `\\` and `/` separators)
+                                                   // (supports `\\` and `/` separators)
             pos = basename.lastIndexOf(".");       // get last position of `.`
 
         if (basename === "" || pos < 1)            // if file name is empty or ...
@@ -90,10 +91,11 @@
     Dropzone.options.uploadzone = {
         url:'/business/upload',
         addRemoveLinks: true,
+        headers: {"X-CSRF-Token": "{{csrfToken}}"},
         paramName: 'attachment',
         maxFilesize: 10,
         maxFiles: 5,
-        dictDefaultMessage: 'Drag an file here to upload, or click to select',
+        dictDefaultMessage: 'Add files... Drag an file here to upload, or click to select',
         acceptedFiles: '.png, .jpg, .jpeg, .gif',
         renameFilename: (name) => {
             return business_id + '-' + name;
@@ -113,17 +115,15 @@
                 xhr = $.ajax({
                     url: "http://localhost:3000/business/uploads/delete",
                     type: "POST",
-                    data: {file : file_index}
+                    headers: {"X-CSRF-Token": "{{csrfToken}}" },
+                    data: {file : file_index},
+                    success: (data) => {
+                        console.log(data);
+                        xhr.abort();
+                    }
                 });
                 files.splice(files.indexOf(file_index), 1);
             });
-
-            let fn = () =>
-            {
-                if(xhr != undefined && xhr.readyState != 4)
-                    xhr.abort(); 
-            };
-            setInterval(fn, 500);
         },
         accept: function(file, done) {
             let ext = file.name.toString().getExtension();
