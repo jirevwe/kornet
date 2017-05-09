@@ -133,6 +133,99 @@ router.post('/add-to-business', upload.single('staff_file'), isLoggedIn, functio
 
 });
 
+router.post('/add-to-government', govt_upload.single('staff_file'), isLoggedIn, function (req, res, next) {
+    let government_name = req.body.government_name;
+    let domain_name = req.body.domain_name;
+    let government_type = req.body.government_type;
+    let staff_file = req.file.filename;
+    let government_tier = req.body.government_tier;
+    let created_by = req.session.controller;
+    let numbers = [];
+
+    let csv = loader('./public/uploads/government/' + staff_file);
+    //console.log(csv);
+    _.map(csv, function (num, key) {
+        numbers.push(_.toArray(num));
+    });
+    numbers = _.flatten(numbers);
+
+    Government.findOne({'name':government_name}, function (err, government) {
+        if (err) {
+            req.flash('error', 'Error getting government.');
+        }
+        if (government) {
+            console.log("Government domain "+government.domain);
+
+            let objects = [];
+            let fixed_numbers = [];
+            for (let i = 0; i < numbers.length; i++) {
+                let number = numbers[i];
+                if (number.match("^0")) {
+                    number = number.replace("0", "+234");
+                    fixed_numbers.push(number);
+                    //console.log(number);
+                }
+                if (number.match("^234")) {
+                    number = number.replace("234", "+234");
+                    fixed_numbers.push(number);
+                    //console.log(number);
+                }
+                objects.push({'name': number, 'email': 'none', 'phone_number': number, 'password': government.default_pass, 'network_provider':created_by.telco,
+                    'user_type': 'Government', 'user_domain': government.domain, 'security_token': 'none', 'long_text': 'none'})
+            }
+
+            User.find({'phone_number': {$in : fixed_numbers}}, function (err, users) {
+                let users_id = [];
+                if (err) {
+                    req.flash('error', 'Error getting user.');
+                    return res.redirect('/controller/add-batch-government/'+government._id);
+                }
+                if (users.length > 0){
+                    for (i = 0; i < fixed_numbers.length; i++) {
+                        req.flash('error', '"'+fixed_numbers[i] + '" has already been used.');
+                        //console.log(fixed_numbers[i] + ' has already been used.');
+                    }
+                    return res.redirect('/controller/add-batch-government/'+government._id);
+                }
+                else {
+                    User.insertMany(objects, function (err, result) {
+                        if (err) {
+                            console.log(err);
+                            req.flash('error', 'Error creating users.');
+                            return res.redirect('/controller/add-batch-government/'+government._id);
+                        } else {
+                            for (i = 0; i < result.length; i++) {
+                                users_id.push(result[i]._id)
+                            }
+                            console.log(users_id);
+                            let staff_number = parseInt(government.staff_number, 10) + parseInt(users_id.length, 10);
+                            Government.update({_id: government._id}, {$addToSet: {users: {$each: users_id}}, staff_number:staff_number}, function (err, result) {
+                                if (err) {
+                                    req.flash('error', 'Error creating users.');
+                                    return res.redirect('/controller/add-batch-government/' + government._id);
+                                }
+                                else {
+                                    req.flash('success', 'Numbers have been added to ' + government_name);
+                                    return res.redirect('/controller/add-batch-government/' + government._id);
+                                }
+                            });
+
+                        }
+                    });
+                }
+
+            });
+        }
+        if(!government){
+            req.flash('error', 'Error creating government users.');
+            return res.redirect('/controller/add-batch-government/'+government._id);
+        }
+
+    });
+
+
+});
+
 router.post('/business', upload.single('staff_file'), isLoggedIn, function (req, res, next) {
 	let business_name = req.body.business_name;
 	let domain_name = req.body.domain_name;
@@ -246,6 +339,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
 							//end create user email account
 
 							let success = {
+                                type: "Business",
 								numbers: fixed_numbers,
 								token: token,
 								admin: fixed_numbers[0]
@@ -383,6 +477,7 @@ router.post('/government', govt_upload.single('staff_file'), isLoggedIn, functio
                             //end create user email account
 
                             let success = {
+                                type: "Government",
                                 numbers: fixed_numbers,
                                 token: token,
                                 admin: fixed_numbers[0]
@@ -472,6 +567,7 @@ router.get('/get-network', isLoggedIn, (req, res, next) => {
 router.get('/', isLoggedIn, function (req, res, next) {
 	let user = req.session.controller;
 	let businesses = [];
+    let governments = [];
 	let messages = req.flash('error');
 	let successMsg = req.flash('success')[0];
 	Business.find({'created_by':user.name}).populate("admin").populate("users").exec(function (err, results) {
@@ -482,8 +578,17 @@ router.get('/', isLoggedIn, function (req, res, next) {
 		if(results){
 			businesses = results;
 		}
+        Government.find({'created_by':user.name}).populate("admin").populate("users").exec(function (err, govts) {
+            if (err) {
+                console.log(err);
+                return res.redirect('/controller/');
+            }
+            if (govts) {
+                governments = govts;
+            }
+            return res.render('controller/index', {layout: 'auth_header', businesses: businesses, governments:governments, user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
+        });
 		//console.log(businesses);
-		return res.render('controller/index', {layout: 'auth_header', businesses: businesses, user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
 	});
 });
 
@@ -514,6 +619,26 @@ router.get('/users/:id', isLoggedIn, function (req, res, next) {
 
 });
 
+router.get('/government/:id', isLoggedIn, function (req, res, next) {
+    let id = req.params.id;
+    let governments = [];
+    Government.find({'_id':id}).populate("users", 'id, phone_number is_activated').exec(function (err, results) {
+        if(err){
+            console.log(err);
+            return res.json({});
+        }
+        //console.log(results);
+        if(results){
+            governments = results[0];
+
+            return res.json(governments.users);
+        }
+        return res.json({});
+        //console.log(businesses);
+    });
+
+});
+
 router.get('/create-batch', isLoggedIn, function (req, res, next) {
 	let messages = req.flash('error');
 	let successMsg = req.flash('success')[0];
@@ -537,6 +662,25 @@ router.get('/add-batch/:id', isLoggedIn, function (req, res, next) {
 		req.flash('error', 'Business not found');
 		return res.redirect('/controller/');
 	});
+});
+
+router.get('/add-batch-government/:id', isLoggedIn, function (req, res, next) {
+    let government_id = req.params.id;
+    let messages = req.flash('error');
+    let successMsg = req.flash('success')[0];
+
+    Government.findOne({'_id':government_id}, function (err, governmemt) {
+        if (err) {
+            req.flash('error', 'Error getting government.');
+            return res.redirect('/controller/');
+        }
+        if (governmemt){
+            //console.log(business);
+            return res.render('controller/add_batch_government', {layout: 'auth_header', governmemt:governmemt, user: req.session.controller, csrfToken: req.csrfToken(),  messages:messages, hasErrors:messages.length > 0, successMsg: successMsg, noMessage: !successMsg});
+        }
+        req.flash('error', 'Government not found');
+        return res.redirect('/controller/');
+    });
 });
 
 router.get('/signin', notLoggedIn, function (req, res, next) {
@@ -595,6 +739,7 @@ router.post('/reassign/:id', isLoggedIn, function (req, res, next) {
 	let reassign_id = req.params.id;
 	let domain_name = req.body.domain_name;
 	let password = req.body.password;
+	let type = req.body.type;
 
 	User.findOne({'_id':reassign_id}, function (err, user) {
 		if(err){
@@ -608,7 +753,7 @@ router.post('/reassign/:id', isLoggedIn, function (req, res, next) {
 		user.email = 'none';
 		user.password = password;
 		user.network_provider = telco.telco;
-		user.user_type = 'Business';
+		user.user_type = type;
 		user.security_token= 'none';
 		user.long_text= 'none';
 		user.user_domain = domain_name;

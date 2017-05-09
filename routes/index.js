@@ -6,6 +6,7 @@ let Order = require('../models/order');
 let Cart = require('../models/cart');
 let User = require('../models/user');
 let Business = require('../models/business');
+let Government = require('../models/govt');
 var utils = require('../utils/api');
 let multer = require('multer');
 let randomstring = require("randomstring");
@@ -86,6 +87,27 @@ router.get('/is_admin',  function (req, res, next) {
             }
         }
         if (!business){
+            //console.log(business);
+            return res.json({result: "false"});
+        }
+        return res.json({result: "false"});
+    });
+});
+
+router.get('/is_admin_government',  function (req, res, next) {
+    Government.findOne({'domain':req.user.user_domain}, function (err, government) {
+        if (err) {
+            //req.flash('error', 'Error getting business.');
+            return res.json({result: "false"});
+        }
+        if (government){
+            console.log(government.admin);
+            console.log(req.user._id);
+            if(""+req.user._id == ""+government.admin){
+                return res.json({result: "true"});
+            }
+        }
+        if (!government){
             //console.log(business);
             return res.json({result: "false"});
         }
