@@ -30,8 +30,9 @@
         {{/if}}
         <form class="form form--login" action="/activate" method="post">
             <h1 class="form__title">Enter the account key sent to <em>{{ phone }}</em></h1>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <div class="form__group">
-                <input name="token" id="token" type="text" pattern="[0-9]{4}" maxlength="6" class="form__input u-text-center" autofocus="">
+                <input name="token" id="token" type="text" pattern="[0-9]{5}" maxlength="6" class="form__input u-text-center" autofocus="">
             </div>
             <p class="form__hint">your account key may take a few moments to arrive. Please wait 30 seconds before trying to resend. <em><a href="#">Resend</a></em></p>
             <div class="form__action">

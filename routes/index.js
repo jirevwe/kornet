@@ -189,7 +189,7 @@ router.post('/signin', utils.notLoggedIn, passport.authenticate('local.signin', 
 
 router.get('/profile', utils.isActivated, function (req, res, next) {
     let successMsg = req.flash('success')[0];
-    res.render('user/profile', {successMsg: successMsg, noMessage: !successMsg, user: req.user, csrfToken: req.csrfToken()});
+    res.render('user/profile', {layout: 'auth_header', successMsg: successMsg, noMessage: !successMsg, user: req.user, csrfToken: req.csrfToken()});
 });
 
 
