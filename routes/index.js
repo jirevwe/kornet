@@ -67,6 +67,7 @@ router.use('/', function (req, res, next) {
 });
 
 router.get('/',  function (req, res, next) {
+    console.log(process.env.MONGODB_URI);
     if(req.user)
         res.render('index', {user: req.user});
     else
