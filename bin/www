@@ -11,7 +11,6 @@ let socketio = require("socket.io");
 let fs = require("fs");
 let _ = require('underscore')._;
 let uuid = require("uuid");
-let middleware = require('socketio-wildcard')();
 let rp = require('request-promise');
 
 /**

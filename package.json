@@ -1,7 +1,6 @@
 {
   "name": "kornet",
   "version": "0.0.1",
-  "private": true,
   "engines": {
     "node": "6.10.0",
     "npm": "3.10.0" 
@@ -52,13 +51,11 @@
     "passport-local": "1.0.0",
     "passport-local-mongoose": "4.0.0",
     "password-hasher": "^1.0.1",
-    "paystack": "^1.4.1",
     "randomstring": "^1.1.5",
     "request": "^2.81.0",
     "request-promise": "^4.2.0",
     "serve-favicon": "~2.3.2",
     "socket.io": "^1.7.3",
-    "socketio-wildcard": "^0.4.0",
     "stripe": "^4.16.0",
     "unoconv": "^0.1.2",
     "uuid": "^3.0.1"
