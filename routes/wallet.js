@@ -4,6 +4,7 @@ var utils = require('../utils/api');
 let Wallet = require('../models/wallet');
 let User = require('../models/user');
 let Transaction = require('../models/transaction');
+let async = require('async');
 // var csrf = require('csrf');
 
 // let csrfProtection = csrf();
@@ -47,9 +48,10 @@ router.get('/', utils.isActivated, function (req, res, next) {
 	}
 });
 
-router.get('/t/all', (req, res, next)=>{
-	Transaction.find({}, (err, transactions) => {
-		res.send(transactions);
+router.get('/t/all', (req, res, next) => {
+	Transaction.find({}, (err, transaction) => {
+		if (err) console.log(err);
+		res.send(transaction);
 	});
 });
 
@@ -62,7 +64,7 @@ router.get('/fund', utils.isActivated, function (req, res, next) {
 router.get('/autocomplete/users', utils.isActivated, function (req, res, next) {
 	User.find((err, users) => {
 		let _users = [];
-		for(let i = 0;i < users.length;i++){
+		for (let i = 0;i < users.length;i++) {
 			if(users[i].wallet != undefined && users[i].name != req.user.name)
 				_users.push(users[i].name);
 		}

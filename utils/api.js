@@ -107,9 +107,14 @@ exports.getBanks = function(callback){
 		}
 	};
 
-	request.get('https://api.paystack.co/bank', options, (error, response, body)=> {
-		let all_banks = JSON.parse(body).data;
-		callback(error, all_banks);
+	request.get('https://api.paystack.co/bank', options, (error, response, body) => {
+		if (body != undefined){
+			let all_banks = JSON.parse(body).data;
+			callback(error, all_banks);
+		}
+		else{
+			callback(error, null);
+		}
 	});
 }
 

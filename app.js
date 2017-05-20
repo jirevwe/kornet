@@ -26,8 +26,9 @@ let walletRoutes = require('./routes/wallet');
 let businessRoutes = require('./routes/business');
 let adminRoutes = require('./routes/admin');
 
-var MONGOLAB_URI = "mongodb://localhost:27017/kornet";
-var mongo = MONGOLAB_URI;
+var uri = "mongodb://localhost:27017/kornet";
+var mongo = 'mongodb://heroku_xh1fmvz6:36dnu9rru6elh1cnip8aokhpjo@ds131510.mlab.com:31510/heroku_xh1fmvz6';// process.env.MONGODB_URI || uri;
+// console.log(process.env.MONGODB_URI || uri);
 mongoose.connect(mongo);
 
 let Business = require('./models/business');
