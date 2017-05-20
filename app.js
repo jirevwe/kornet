@@ -25,8 +25,8 @@ var chatRoutes = require('./routes/chat');
 var walletRoutes = require('./routes/wallet');
 var businessRoutes = require('./routes/business');
 
-var MONGOLAB_URI = "mongodb://localhost:27017/kornet";
-var mongo = MONGOLAB_URI;
+var uri = "mongodb://localhost:27017/kornet";
+var mongo = process.env.MONGOLAB_URI || uri;
 mongoose.connect(mongo);
 
 let Business = require('./models/business');
