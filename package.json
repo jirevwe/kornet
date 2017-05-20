@@ -2,6 +2,10 @@
   "name": "kornet",
   "version": "0.0.1",
   "private": true,
+  "engines": {
+    "node": "6.10.0",
+    "npm": "3.10.0" 
+  },
   "scripts": {
     "start": "node ./bin/www"
   },
@@ -58,9 +62,5 @@
     "stripe": "^4.16.0",
     "unoconv": "^0.1.2",
     "uuid": "^3.0.1"
-  },
-  "devDependencies": {
-    "eslint": "^3.19.0",
-    "eslint-config-google": "^0.7.1"
   }
 }

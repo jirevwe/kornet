@@ -14,15 +14,29 @@ function refresh(){
 function getDrafts(){
 	let xhr = $.get('http://localhost:3000/mail/q/drafts', function(mails){
 		let div = $('#messages');
-		let content = '';
+		let content = '<ul class="collapsible popout" data-collapsible="accordion">';
 		for (let i = 0;i < mails.length;i++){
-			content += '<a href="/mail/edit/' + mails[i]._id +'" class="list-group-item">';
-			content += '<h4 class="list-group-item-heading">' + mails[i].subject +'</h4>'
-			content += '<p class="list-group-item-text">To: ' + mails[i].to.text +'</p>'
-			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
-			content += '</a>'
+			content += '<li>';
+			content += mails[i].has_attachments ? '<div class="msg collapsible-header msg--has-attachment">' :  '<div class="msg collapsible-header">';
+							content += '<div class="msg__left">'+
+								'<div class="msg__avatar">'+
+									'<div class="avatar avatar--sm" style="background-color: #eee; background-image: url(https://unsplash.it/50/50/?random)"></div>'+
+								'</div>'+
+								'<span class="msg__sender">' + mails[i].to.text +'</span>'+
+								'<span class="msg__subject">' + mails[i].subject +'</span>'+
+								'<span class="msg__snippet">' + mails[i].text +'</span>'+
+								'<span><img class="msg__attachment-icon" src="/img/icons/inbox/attachment.svg" alt=""></span>'+
+							'</div>'+
+							'<div class="msg__right">'+
+								'<span class="msg__select"><input type="checkbox"></span>'+
+								'<span class="msg__favorite-icon"><img src="/img/icons/inbox/favorite.svg" alt=""></span>'+
+							'</div>'+
+						'</div>'+
+						'<div class="collapsible-body"><span>' + mails[i].text +'</span></div>'+
+					'</li>';
 		}
-		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
+		content += '</ul>';
+		if(content === '<ul class="collapsible popout" data-collapsible="accordion"></ul>') div.html('<h3>Nothing to see here... Go away 😑🙄</h3>')
 		else div.html(content);
 		xhr.abort();
 	});
@@ -31,19 +45,30 @@ function getDrafts(){
 function getTrash(){
 	let xhr = $.get('http://localhost:3000/mail/q/trash', function(mails){
 		let div = $('#messages');
-		let content = '';
+		let content = '<ul class="collapsible popout" data-collapsible="accordion">';
 		for (let i = 0;i < mails.length;i++){
-			content += '<a href="/mail/trash/' + mails[i]._id +'" class="list-group-item">';
-			content += '<h4 class="list-group-item-heading">' + mails[i].subject +'</h4>'
-
-			if(mails[i].mailbox == 'Inbox') content += '<p class="list-group-item-text">From: ' + mails[i].from.text +'</p>'
-			else if(mails[i].mailbox == 'Sent') content += '<p class="list-group-item-text">To: ' + mails[i].to.text +'</p>'
-			
-			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
-			content += '</a>'
+			content += '<li>';
+			content += mails[i].has_attachments ? '<div class="msg collapsible-header msg--has-attachment">' :  '<div class="msg collapsible-header">';
+							content += '<div class="msg__left">'+
+								'<div class="msg__avatar">'+
+									'<div class="avatar avatar--sm" style="background-color: #eee; background-image: url(https://unsplash.it/50/50/?random)"></div>'+
+								'</div>';
+								if(mails[i].mailbox == 'Inbox') content += '<span class="msg__sender">' + mails[i].from.text +'</span>';
+								else if(mails[i].mailbox == 'Sent') content += '<span class="msg__sender">' + mails[i].to.text +'</span>';
+								content += '<span class="msg__subject">' + mails[i].subject +'</span>'+
+								'<span class="msg__snippet">' + mails[i].text +'</span>'+
+								'<span><img class="msg__attachment-icon" src="/img/icons/inbox/attachment.svg" alt=""></span>'+
+							'</div>'+
+							'<div class="msg__right">'+
+								'<span class="msg__select"><input type="checkbox"></span>'+
+								'<span class="msg__favorite-icon"><img src="/img/icons/inbox/favorite.svg" alt=""></span>'+
+							'</div>'+
+						'</div>'+
+						'<div class="collapsible-body"><span>' + mails[i].text +'</span></div>'+
+					'</li>';
 		}
-
-		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
+		content += '</ul>';
+		if(content === '<ul class="collapsible popout" data-collapsible="accordion"></ul>') div.html('<h3>Nothing to see here... Go away 😑🙄</h3>')
 		else div.html(content);
 		xhr.abort();
 	});
@@ -74,6 +99,8 @@ function getInbox(){
 					'</li>';
 		}
 		content += '</ul>';
+		if(content === '<ul class="collapsible popout" data-collapsible="accordion"></ul>') div.html('<h3>Nothing to see here... Go away 😑🙄</h3>')
+		else div.html(content);
 		div.html(content);
 		xhr.abort();
 	});
@@ -82,15 +109,29 @@ function getInbox(){
 function getSent(){
 	let xhr = $.get('http://localhost:3000/mail/q/sent', function(mails){
 		let div = $('#messages');
-		let content = '';
+		let content = '<ul class="collapsible popout" data-collapsible="accordion">';
 		for (let i = 0;i < mails.length;i++){
-			content += '<a href="/mail/' + mails[i]._id +'" class="list-group-item">';
-			content += '<h4 class="list-group-item-heading">' + mails[i].subject +'</h4>'
-			content += '<p class="list-group-item-text">To: ' + mails[i].to.text +'</p>'
-			content += '<p class="list-group-item-text">Date: ' + mails[i].date +'</p>'
-			content += '</a>'
+			content += '<li>';
+			content += mails[i].has_attachments ? '<div class="msg collapsible-header msg--has-attachment">' :  '<div class="msg collapsible-header">';
+							content += '<div class="msg__left">'+
+								'<div class="msg__avatar">'+
+									'<div class="avatar avatar--sm" style="background-color: #eee; background-image: url(https://unsplash.it/50/50/?random)"></div>'+
+								'</div>'+
+								'<span class="msg__sender">' + mails[i].to.text +'</span>'+
+								'<span class="msg__subject">' + mails[i].subject +'</span>'+
+								'<span class="msg__snippet">' + mails[i].text +'</span>'+
+								'<span><img class="msg__attachment-icon" src="/img/icons/inbox/attachment.svg" alt=""></span>'+
+							'</div>'+
+							'<div class="msg__right">'+
+								'<span class="msg__select"><input type="checkbox"></span>'+
+								'<span class="msg__favorite-icon"><img src="/img/icons/inbox/favorite.svg" alt=""></span>'+
+							'</div>'+
+						'</div>'+
+						'<div class="collapsible-body"><span>' + mails[i].text +'</span></div>'+
+					'</li>';
 		}
-		if(content == '') div.html('<h3>Nothing to see here... go away</h3>')
+		content += '</ul>';
+		if(content === '<ul class="collapsible popout" data-collapsible="accordion"></ul>') div.html('<h3>Nothing to see here... Go away 😑🙄</h3>')
 		else div.html(content);
 		xhr.abort();
 	});
