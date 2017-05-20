@@ -1,0 +1,69 @@
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="col-md-12">
+            <h1>Create Kornet Batch Users</h1>
+            {{> telco_nav }}
+        </div>
+
+        {{# if hasErrors}}
+            <div class="alert alert-danger">
+                {{# each messages}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        <div id="success" class="alert alert-success {{#if noMessage }}hidden{{/if}}">
+            <p> <strong>Kornet {{successMsg.type}} has been created</strong> </p>
+            <p> <strong>Admin: </strong>{{successMsg.admin}} </p>
+            <p> <strong>Dafault Passwords: </strong>{{successMsg.token}} </p>
+        </div>
+
+        <form action="/controller/government" id="government_form" method="post" enctype="multipart/form-data" hidden>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" name="government_name" id="government_name" placeholder="Institution Name" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" name="domain_name" id="domain_name" placeholder="Domain Name" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-12">
+                <label for="government_type"> Government Type</label>
+                <div class="form-group">
+                    <select name="government_type" id="government_type" class="form-control">
+                        <option value="Ministry">Ministry</option>
+                        <option value="Parastatal">Parastatal</option>
+                        <option value="Court">Court</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="government_tier"> Government Tier</label>
+                    <select name="government_tier" id="government_tier" class="form-control">
+                        <option value="Federal">Federal</option>
+                        <option value="State">State</option>
+                        <option value="Local">Local</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="file" name="staff_file" id="staff_file" placeholder="Staff File" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-group">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" name="submit_government"  class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+

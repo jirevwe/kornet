@@ -1,29 +1,30 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var session = require('express-session');
-var passport = require('passport');
-var expressHbs = require('express-handlebars');
-var LocalStrategy = require('passport-local');
-var flash = require('connect-flash');
-var validator = require('express-validator');
-var MongoStore = require('connect-mongo')(session);
-var moment = require('moment');
-var request = require('request');
+let logger = require('morgan');
+let cookieParser = require('cookie-parser');
+let bodyParser = require('body-parser');
+let mongoose = require('mongoose');
+let session = require('express-session');
+let passport = require('passport');
+let expressHbs = require('express-handlebars');
+let LocalStrategy = require('passport-local');
+let flash = require('connect-flash');
+let validator = require('express-validator');
+let MongoStore = require('connect-mongo')(session);
+let moment = require('moment');
+let request = require('request');
 
 
 //define the routes
-var controllerRoutes = require('./routes/controller');
-var marketRoutes = require('./routes/market');
-var mailRoutes = require('./routes/mail');
-var homeRoutes = require('./routes/index');
-var chatRoutes = require('./routes/chat');
-var walletRoutes = require('./routes/wallet');
-var businessRoutes = require('./routes/business');
+let controllerRoutes = require('./routes/controller');
+let marketRoutes = require('./routes/market');
+let mailRoutes = require('./routes/mail');
+let homeRoutes = require('./routes/index');
+let chatRoutes = require('./routes/chat');
+let walletRoutes = require('./routes/wallet');
+let businessRoutes = require('./routes/business');
+let adminRoutes = require('./routes/admin');
 
 var MONGOLAB_URI = "mongodb://localhost:27017/kornet";
 var mongo = MONGOLAB_URI;
@@ -108,6 +109,7 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use('/admin', adminRoutes);
 app.use('/controller', controllerRoutes);
 app.use('/business', businessRoutes);
 app.use('/wallet', walletRoutes);

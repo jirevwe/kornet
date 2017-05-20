@@ -1,5 +1,7 @@
 var request = require('request');
 var utils =  require('./api');
+let Business = require('../models/business');
+let Government = require('../models/govt');
 
 /* ------------------------  PAYSTACK STUFF --------------------------- */
 let SECRET_KEY = 'sk_test_4844e2650b69fd92f0af204275ca74b9f1d1336f';
@@ -249,6 +251,48 @@ exports.notLoggedIn = function(req, res, next){
 	if(!req.isAuthenticated())
 		return next();
 	res.redirect('/');
+}
+
+exports.isAdminBusiness = function(req, res, next){
+    Business.findOne({'domain':req.user.user_domain}, function (err, business) {
+        if (err) {
+            //req.flash('error', 'Error getting business.');
+            res.redirect('/');
+        }
+        if (business){
+            console.log(business.admin);
+            console.log(req.user._id);
+            if(""+req.user._id == ""+business.admin){
+                return next();
+            }
+        }
+        if (!business){
+            //console.log(business);
+            res.redirect('/');
+        }
+        res.redirect('/');
+    });
+}
+
+exports.isAdminGovernment = function(req, res, next){
+    Government.findOne({'domain':req.user.user_domain}, function (err, government) {
+        if (err) {
+            //req.flash('error', 'Error getting business.');
+            return res.json({result: "false"});
+        }
+        if (government){
+            console.log(government.admin);
+            console.log(req.user._id);
+            if(""+req.user._id == ""+government.admin){
+                return res.json({result: "true"});
+            }
+        }
+        if (!government){
+            //console.log(business);
+            return res.json({result: "false"});
+        }
+        return res.json({result: "false"});
+    });
 }
 
 exports.setLong = function(cleartext){

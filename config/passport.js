@@ -176,7 +176,7 @@ passport.serializeUser(function (user, done) {
          return done(null, false, req.flash('error', messages));
      }
 
-     User.findOne({'name':username}, function (err, user) {
+     User.findOne({ $or: [ {'name':username}, {'phone_number':username} ] }, function (err, user) {
          if(err){
              return done(user);
          }
