@@ -13,4 +13,4 @@ var Transaction = new Schema({
 	to: Schema.Types.String
 });
 
-module.exports = mongoose.model('Transaction', Transaction);
+module.exports = mongoose.model('transaction', Transaction);

@@ -5,10 +5,6 @@ let Wallet = require('../models/wallet');
 let User = require('../models/user');
 let Transaction = require('../models/transaction');
 let async = require('async');
-// var csrf = require('csrf');
-
-// let csrfProtection = csrf();
-// router.use(csrfProtection);
 
 router.get('/', utils.isActivated, function (req, res, next) {
 	let successMsg = req.flash('success')[0];

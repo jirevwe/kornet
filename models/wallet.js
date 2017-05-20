@@ -13,8 +13,3 @@ var Wallet = new Schema({
 });
 
 module.exports = mongoose.model('Wallet', Wallet);
-
-/*
-sk_test_4844e2650b69fd92f0af204275ca74b9f1d1336f
-pk_test_12f7f084eaae304fcc2cd7993ba67143888232ee
-*/
