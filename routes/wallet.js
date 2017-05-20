@@ -3,7 +3,7 @@ var router = express.Router();
 var utils = require('../utils/api');
 let Wallet = require('../models/wallet');
 let User = require('../models/user');
-let Transaction = require('../models/transaction');
+let Transaction = require('../models/Transaction');
 let async = require('async');
 
 router.get('/', utils.isActivated, function (req, res, next) {
