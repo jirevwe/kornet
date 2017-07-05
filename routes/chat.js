@@ -12,9 +12,11 @@ let csrfProtection = csrf();
 router.post('/chathistory', function(req, res, next) {
     let room = req.body.room;
     let chatHistory = req.body.chatHistory;
-   // console.log("details: ");
+    console.log("chat history");
+    console.log(chatHistory);
     Room.update({room_id: room.id}, {history: chatHistory}, function (err, result) {
         if (err) {
+            console.log(err);
             return res.status(500);
         }
         console.log(result);
@@ -212,7 +214,6 @@ router.get('/enter-room/:id', utils.isActivated, function(req, res, next) {
 
 router.get('/room-user/', utils.isActivated, function(req, res, next) {
     return res.json(req.user);
-
 });
 
 router.get('/room-creator/:id', utils.isActivated, function(req, res, next) {

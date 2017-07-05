@@ -10,8 +10,8 @@ let messagebird = require('messagebird')(
 
 function maildirFolder(username) {
     let temp = username.substr(0,3);
-    let res = temp[0] + '/' + temp[1] + '/' + temp[2] + '/' + username + '/';
-    return res;
+    let result = temp[0] + '/' + temp[1] + '/' + temp[2] + '/' + username + '/';
+    return result;
 }
 
 function ssha512(cleartext) {

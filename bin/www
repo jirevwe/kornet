@@ -178,7 +178,13 @@ io.sockets.on("connection", function(socket){
                     // console.log("room");
                     // console.log(room);
                     let password = '';
-                    chatHistory[room.room_id] = [];
+                    chatHistory[room.room_id] = [
+                        {
+                            name:"",
+                            message:"",
+                            time:""
+                        }
+                    ];
                     if(room.password != undefined){
                         password = room.password;
                     }
@@ -238,7 +244,7 @@ io.sockets.on("connection", function(socket){
         // console.log("create history");
         // console.log(chatHistory);
 
-        chatHistory[roomId] = [];
+        chatHistory[roomId] = [{name:"",message:"",time:""}];
 
         console.log("create toMem");
         console.log(toMem);
@@ -294,7 +300,7 @@ io.sockets.on("connection", function(socket){
         //console.log("user in room "+user.inRoom);
         console.log(user.name + ": " + data["message"]); // log it to the Node.JS output
 
-        chatHistory[user.inRoom].push("<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> " + data['message'] + "<div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>");
+        chatHistory[user.inRoom].push({name:user.name,message:data['message'],time:timeFormat(new Date().getTime())});
         console.log(chatHistory[user.inRoom]);
 
         let options = {
@@ -343,44 +349,44 @@ io.sockets.on("connection", function(socket){
             switch(extension) {
                 case 'pdf':
                     let pdf = '<img class="icon icons8-PDF" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgklEQVRoQ+2ZP2hTURTGv4CToksJCAoJdmo2oUWnOlXw39RAxaWoS1v8s6jtUFoVl2gX09B2qriI1ehkW6hTI4KlGVxMJ4OCpaWhi1InId6Py+XFR5Pw7ns3N0/egUBC3p/zO993zr0viSHkEQt5/vj/AaoDJ6pGVKriQexV+b7fazdVwAhAx1FgdxsIAMIKwJ/JPA7kbgQCYQcg+1EkvxUIhD0Amj8ACLsAAUDYB/AJ0R4APiDaB0ATor0ANCDaD8AFEVsoN8zRCoCX7UMEYGQv5EGCSAEtBRJdwPBj4NARIJ8FVt94qPm/h9pRYLoAxI85mdzsBSqbWhB2AF5+lcmW1oDUKeDhFfleI+wAzH8GDh4Gvm8AtFPoAO7MAd19Tr1DB3DuKjA47gBc7tQwjzzFjoVon9wHaSN6nwpohh0AJssxeqYf+FYCxi5ppm9LAaZbO0qfPwKWn2lB2FGAkyfzDvj9S9po76dQ4aLWWmAHQNmHVY8flxOJVmIvEMpDtB6AFad9uI3gCszqZxblylz6BLx+CiRTEiwplNr5IRu98HZfrNYDpG8D6VvO9KGd+LnnbOO6Uy32iitaD6BWYVabVearXtQeQ6Wun7QMoKpfmwY3ccUV4IuwCRM+f00q4o7ie2BqyBIAm5Qrr6o2G3VdJL0kbMH9kDvYDwnRB+wFRkX0QZ0tt1kL0d9MPHXaSZGVnLnredrUc5k5ACY/8UJOGxWs/OgFrXnfegC10tLj6uFl9p6vp6/9IMwpoKaNuisfHfNixgcc5gDYuCNP5ELFZtXc6zTjNQfQ7M4BfR8BaP2sElD1eZlIgUgBn3bybSGf9zd+etP/B4xn4PMGoQf4C530g0CEOCIsAAAAAElFTkSuQmCC" width="48" height="48">';
-                    message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <a href='"+filepaths+"'> " + pdf + " <p>"+filename+"</p> </a><div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
-                    chatHistory[user.inRoom].push(message);
+                    message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
+                    chatHistory[user.inRoom].push({name:user.name,message:"<a href='"+filepaths+"'> " + pdf + " <p>"+filename+"</p> </a>",time:timeFormat(new Date().getTime())});
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
                     break;
                 case "csv":
                     let csv = '<img class="icon icons8-CSV" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC/UlEQVRoQ+2Z/0sTYRzH3wMn7YSb5KAtnOEqZ232BbRShkaujEToh/p/7F+of6MfAi2LkBBkRiEabqBSii1wwRY4aBdNWM/nqY+da7i53ePNuIOxu92X5/36PO/3526bC8d8cR1z/fj/ASZePC2pmKVSqfRoevzhZKPXrjoDKgBOnvDg2w8DVkDYAjDZH8Pj5KIlELYAPIndRk7MgBUQtgGQ962AsBXACgjbARqFaAqARiCaBqBeiKYCqAei6QDKIabuPThQoy0Ah3l8cABUPAs5M2CqgJOBw9ihnmOdEDshrsc3pnOUWWg7s41UcgWGUZDDdYdCCJ+/AHerW26vra1ifX1Vrns8GsI9YQS7zuD9u7fIfM2gp6cX4XCv3J/+vIXlD0viOA/i8bF9yEoAstksFhbm0dLSAn8ggJzYNgxjT9TGxkekUkkpyO8/jXR6C7u7uxgdFd/ExLEktqPDh6GhmBSbFIXY3PyE7u6ziEb71ANwFa9cviqrWvxZxMtXz2Wl4/E7SCTmkctlMTgYg8/n2xNIVQ8Gg5idfS1FTkzcl+9zc2+Qz++gf+A6Av6AeoBygWwZeidbLC0v4ks6jWBnFyKRvj1bsTIWPDx8E5qnTcKbgcwESiw0NfVMjsEV3lcysVEofJdVJdu43W5pjZB4cT7YMpFIFLreLu3oP+XHwLUb5ZeCLQCkgmy1JkLM/td1HSMjt6RAzhCJ1r3tMuwEEwqdOxqAShYiUS7xYELhNK8TSEJUmDzOmSGVMzPTYnZaoWmazAsFXNPajgaAQ8yh+xvi322QxJF97o6NS9uwZcytk69Biiu1TyZRYiG2APm7U3SV/E5eVpHbIAum2dC9ugx0sVgEhdYrLEML935ar9Q+lQKwgGRqRVaaFgKJXrwkK87+p95OC90vyN9846LPKOjcTiu1T+UAPACJ5e7yj4H/hPmg/ZXOMX+mxELVBrVyvwPgPE436CfHQo6FHAs5v42q+Z+4Vmc5XajWStl1XNXfRu0SVuu4xx7gFx60O08KRdMlAAAAAElFTkSuQmCC" width="48" height="48">';
                     message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <a href='"+filepaths+"'> " + csv + " <p>"+filename+"</p> </a><div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
-                    chatHistory[user.inRoom].push(message);
+                    chatHistory[user.inRoom].push({name:user.name,message:"<a href='"+filepaths+"'> " + csv + " <p>"+filename+"</p> </a>",time:timeFormat(new Date().getTime())});
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
                     break;
                 case "xlxs":
                     let xlsx = '<img class="icon icons8-Microsoft-Excel" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACs0lEQVRoQ+1ZTUwTQRR+s0LTg004ogdi0oSakiBbvHCjx4IYe9GINyCgnowk3BoaeiOh4YTQRD2BhIOgYDjWmwf+glyAC1xAjyR4MIZ0nbd1l2HYYndamFmy79J2dmb6fe99773JLAGPG/E4fvAJyI6gH4HrGgESHY6Fb5wUdEKIbhBoASD6Vmb9VrUJVyyhpnRTAP7URjVN0wEMnVCgBsA9QiDEg/2eWa/4//g9XW0YGYqEamqDFJxmAiUUMPVulH4PlOPZKyVAPVuvFQK6UTBaEDB6FwwIU0m4Is0Su1ICzakYVUJ1rSHWILShAcbWl+SnZqfFJb2pEgEEvpRccMTqE3CjCVEJ+RFw4+WL5m6OrNmPuxaS5vfFR/Mll1hzlImAVALP2rphKDFoeys1n4bPG4v271DwJiy/XoJQsNiAR5fHYPrbzBnvSiWASBDg7bricebg6BA6sl02QCSHJNF2fu7C44mn56QhPYnv32mFtz05G1jvu35Y3V8zSSE5y6xxnoF0AghovHsM4nfbTWwre6vQ934AMsk0PNSL0UBZobycTLqEEBTvbQSLBNCOf/+CRLbT/FSWAAJ7ER+A5/H+f6CPL0xclogSEUBAWHHmXs7aCY1jpRKXJaBEDlgE2JKJY3xVcpKQMgTYknl49MOOxGQ+B2/yU476x0ElJMSWUkzW1MdhszJZlsg+ACSlbBKzzczyOPYGJIZmlVYlCZytPqclk29wr2YGIb/99RwHqTkQqW+kleeDDYrXO9vMMKGf0KME3w+kEmBlghpHrbPGNzg8yOGBTsk+ULLM/OeBElVIFLwyZbQSAlJzoBLg1lqfgIMX/XshN9ISlZDQ1aLnL3edPOup6/VypeGpFxzlkqLzvPOKyQWpS5kq/LblUtAIbOoTEHBaVZf4EaiqOwU2+wt9+pZAWlPPbQAAAABJRU5ErkJggg==" width="48" height="48">';
                     message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <a href='"+filepaths+"'> " + xlsx + " <p>"+filename+"</p> </a><div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
-                    chatHistory[user.inRoom].push(message);
+                    chatHistory[user.inRoom].push({name:user.name,message:"<a href='"+filepaths+"'> " + xlsx + " <p>"+filename+"</p> </a>",time:timeFormat(new Date().getTime())});
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
                     break;
                 case "docx" || "doc":
                     let word = '<img class="icon icons8-Microsoft-Word" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC50lEQVRoQ+1ZPWgUQRR+c3In4VhFEJIISZGrjPHOLSz0FLSQE39QTBWUxFLPUhBTiZUi2F5sQohEAmJQ8AcPCwuNFlYmopUGksZUouYqIeN+A++cW1fZvd1kdnUHDjJv5ua+773ve0N2BSV8iITjp5SA6QqmFfhHKyDFxspUIbsqbSlW7QyJXVJIe6V+tjtqwuEltONuLr+t0U8ZYQspbKct2IJkiUhYbrDf6yPhf891aLADy+OW1ZEtyYy0hZNRKckBLPqdQ3J+MruuBPIHJrpkLmNvIOmU38kuEQAXhGi/9a4rAasyKf1kNcierSdOBdn+a6+k+YULVtHry3+UUKwIOMgXqpYn1pRAEE20LaG0AkHS/Je9354OBzqpb2yluT8WHjBCYGffFpqtHVeZuDb1Vn14II51jE2Hbzfjo2dKhM/Xxg/qGZxuxo15gDN359lHOn9ztglIz+iRS3V6Obes1qavHKSje3rUHHEexgg8uVGhfcXOFkCYI84DxEAQgyvjrpgRCQHQ9XO7qXpye4tUMEecR+3BB7p8642aMtChq8/p8eslz4r5cXNkJj59qEBjF8vqNwdGZmhxudEiE706umd4r3EJ6aBY6+8mB6m3M688weRgZGgfHnAbGCSMeUCXBXRdu/+elmaGFMiB4Xvqb4xy9SEd29urOpDbwPoZfuSDPZFJCIexkWHUR68WVZYZJFcDmgcBSM5tYOME2MgA/WLus8oyg+S2ifn+YpfqWHpbNe4BANCNDBIAyV2GLy6OYz8uMEhMH0Y9oBt5/tMXdQNzl+E7gQmgS2HNPYzdAwwEZt2cz6qp3mUQYyNjDb0f1YkdATYygLm7DBsZa14GRtyohACAte4Fko2MNS8Dx4LAb5oIGDDugYB44+eBsASMeyAl0O6DLSdzsfif+P+VUDuPFhP/cNfTsEl6vO674yTqBYdvVkl6xeSb1NpsDPaKaW0whDo1JRAqfRF8Oa1ABEkMdcRP9kbKQMlP+z4AAAAASUVORK5CYII=" width="48" height="48">';
                     message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <a href='"+filepaths+"'> " + word + " <p>"+filename+"</p> </a><div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
-                    chatHistory[user.inRoom].push(message);
+                    chatHistory[user.inRoom].push({name:user.name,message:"<a href='"+filepaths+"'> " + word + " <p>"+filename+"</p> </a>",time:timeFormat(new Date().getTime())});
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
                     break;
                 case "zip":
                     let zip = '<img class="icon icons8-ZIP" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACEElEQVRoQ+2YgVEDIRBFkwrUCkwqUCtQK1ArUCuwBe3AElKCVmCsQDtQO4gV6P4Z1mHwYNmDA5KBmZ3J5RbYt3+545jPdqTNd4RjJoH8TAS6onFvc45dCwQMWWFiQSQ/TXJtldfU8YpsoxlgyFcKkCeV/DRx8Jjf1GmP7J3sPBVGCnBKkBMKHopkgakJgrmPc8HUBkFJLsieyI5SyqwFEMDsG2VGw7QCkgzTEkgSTGsgQzDYAeARHWwtgrgweFniPROEaRVEDVMTRKoW9z6UOfB12iYQMHjjrQGiVQL+4lapg4xJa0KfrggnT8xEQpY1XcU4aqwRbBCxOUT7IvuMICoC4jug4CS5Qbj+awLBNiQEVAQEgXDjbCPTC/OnDwTf6jdkF2QYA9sQXysCYk/+SBd3JsMrAYQVgxKHZKEyLwoCBT7IbDXA4lOEA4cap2RLMkANtaIgUODalAiC4xYCQSkCHlD47WvFQHCI8Eb2SnbmROMDuSe/SzL0fSDDdXWQFwOABWurgcBCTy2cbWFdhSCGxvgHnOM9AgUA8mwy7E4irZGAEH+3ipQWq4EvOPvokx+nWwMy9oUoVYOtVBFFYkoj1aeDcAbFTKSmOrK/GIdUp+IAkYGkuolxdJDUFCv7d0X6YleWTKx7L61eWrG1ovTrpeWWljKBk7knn8ZPFply4NEgynnquUt7rXqRKWf+Bev3sDPMM3MqAAAAAElFTkSuQmCC" width="50" height="50">';
                     message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <a href='"+filepaths+"'> " + zip + " <p>"+filename+"</p> </a><div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
-                    chatHistory[user.inRoom].push(message);
+                    chatHistory[user.inRoom].push({name:user.name,message:"<a href='"+filepaths+"'> " + zip + " <p>"+filename+"</p> </a>",time:timeFormat(new Date().getTime())});
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
                     break;
                 case "jpg" || "JPG" || "JPEG" || "jpeg" || "png":
                     let image = '<img class="icon icons8-Picture" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACLUlEQVRoQ+2Zi1HDMAyG2wmADWCCsgFlAzYAJoANKBvABJRJ6AbABu0E0AlAf8+6E744lhITO77ozpe6VWx9esVt57NKZF4Jx2wCKS2SiMhPaUZ1sadKkLHWyyGjZESqAxlLzbDjgxGpDqTUVGNHqyMygXR5DhjumSJicNYgqsVG5JjwH2hcOTes6frY4pJiQZ7I6DvP8Gea3wdgigX5IoMRFSlbmpwNDQIj3tyml3T9NlYK9I+8e3Y0Px0S5NxBsEc/aG6FWbkakXajRvB+kyRPLQnx6TwIz24cjCUwqBNZ7CEIrJkUxIdYOhBAAGZN49ZCYtBNBnJDm764jV/pijkLAP8bJglIGwTDIDpc/G25bgjCH9XeIBoI3lHqIsWQaqmkFwhSiVNIa5gWxtq+O4N0gWDvr+gFjh8QtGXUjxSGQG1BNO27E0gfCDYYaXVNAw8+wMBYiIRA+4YsFDBmEGwIT+1pLIUBnlNVUx9mS3ehIWB9QGB9yEYBYwbBwikgmBRGXtBAZAAiIfhYgyjFYMwgKSEAI43EnCPhn81iMGaQE+c9Ve4olPyaQDqFDphtMGaQlD8+WCDYJyGYrCDvgZqIBbIJBt9fIFl+DuKW25ZOISgfhp85WUBino997jeKbBGJGar53IcZZURkA8haIxqPa3Wydi2tkRo9M4hm0Zw66hrJaaRm7yiIZpGSdA6pVuV/iCV52WxLVf+zm+lLvCHlUT0r3wSS1f0Nm/8CXjn8CUHLVacAAAAASUVORK5CYII=" width="50" height="50">';
                     message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <a href='"+filepaths+"'> " + image + " <p>"+filename+"</p> </a><div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
-                    chatHistory[user.inRoom].push(message);
+                    chatHistory[user.inRoom].push({name:user.name,message:"<a href='"+filepaths+"'> " + image + " <p>"+filename+"</p> </a>",time:timeFormat(new Date().getTime())});
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
                     break;
                 default:
                     let file = '<img class="icon icons8-File" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABNklEQVRoQ+2Z6wnCQBCEkwq0A1OCnWgJ2oGdaAdaglaiJWgFagW6Cwoi8Rxu93J3MIGD/Mg+vtlHAmmbyq+28vwbAuSuIFqBThJdy5nK0XvLtRPjpcXBpy0CoAkf5Yy9goofNwgEYC8BZ47Jv125QCAAVyf1tW22X0KYIRCAh5P6GmvhDTE0gGrhCpEDwBUiF4AbRE4AF4jcAGaIEgBMEKUAREOUBPALIphjaQB9EMUAxL7QCeD1LcQK9Ckw5BCzAqxAbA8Y7bhGuUbZQgEF+B4wtgdizi3ELYT0SeyccoiN6iLmHGIOMdInKYf4Js5HxiRizS9i2IWMkS2U6hcTAnWQh+ZWAFXglKEKd4mpf0XPVgC1V4jNy+EEkc7wjLaNCrb6l7zGQFrIkEt6UwKk1zgcofoKPAEB4UYxJhguJQAAAABJRU5ErkJggg==" width="48" height="48">';
                     message = "<pre style='background-color:transparent; border:0;'><strong>" + user.name + "</strong>: <br> <a href='"+filepaths+"'> " + file + " <p>"+filename+"</p> </a><div class='pull-right text-mute'>"+timeFormat(new Date().getTime())+"</div></pre>";
-                    chatHistory[user.inRoom].push(message);
+                    chatHistory[user.inRoom].push({name:user.name, message:"<a href='"+filepaths+"'> " + file + " <p>"+filename+"</p> </a>", time:timeFormat(new Date().getTime())});
                     io.sockets.in(user.inRoom).emit("send_pic_to_client", {user: user.name, message:message, room:room}); // broadcast the message to other users
             }
 

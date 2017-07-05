@@ -7,7 +7,11 @@ var roomSchema = new Schema({
     room_id: { type:String, required: true, index: { unique: true }},
     creator: { type: Schema.Types.ObjectId, ref:'User'},
     members: [{ type: Schema.Types.ObjectId, ref:'User'}],
-    history: [],
+    history: [{
+        name:Schema.Types.String,
+        message:Schema.Types.String,
+        time:Schema.Types.String
+    }],
     isDM: { type:String, required: true},
     isPrivate: { type:String, required: true},
     password: { type:String},

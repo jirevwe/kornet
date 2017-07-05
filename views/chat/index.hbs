@@ -721,20 +721,12 @@
 
                 if (chathistory.length != 0) {
                     $("#chatlog").empty();
-                    //$("#chatlog").append("<li><strong><span class='text-warning'>Last 10 messages:</li>");
                     $.each(chathistory, function (chathistory, msg) {
-                        var str = msg;
-                        newstr = str.replace("<pre style='background-color:transparent; border:0;'>", "");
-                        str = newstr.substr(0, msg.indexOf(':'));
-                        console.log(str);
-                        console.log(newstr);
-                        //str = str.split(":").pop();
-
-                        //console.log("str is "+str);
-                        //console.log("user is "+user.name);
-                        if (str.indexOf("<strong>" + user.name + "</strong>") >= 0) {
+                        console.log("message user");
+                        console.log(msg);
+                        if (msg.name == user.name) {
                             $("#chatlog").append("<div class='row'> " +
-                                    "<div style='padding: 2%;'  class='col-md-6 pull-left bg-success'>" + msg +
+                                    "<div style='padding: 2%;'  class='col-md-6 pull-left bg-success'>" + "<pre style='background-color:transparent; border:0;'><strong>" + msg.name + "</strong>: <br> "+ msg.message +"<div class='pull-right text-mute'>"+msg.time+"</div></pre>" +
                                     "</div> " +
                                     "</div>");
 
@@ -743,7 +735,7 @@
                             //document.getElementById("chatlog").append("<div class='half-col pull-left bg-success'>" +  data['user'] + ": " + data['message'] + "</div>");
                         } else {
                             $("#chatlog").append("<div class='row'> " +
-                                    "<div style='padding: 2%;'  class='col-md-6 pull-right bg-warning'>" + msg +
+                                    "<div style='padding: 2%;'  class='col-md-6 pull-right bg-warning'>" + "<pre style='background-color:transparent; border:0;'><strong>" + msg.name + "</strong>: <br> "+ msg.message +"<div class='pull-right text-mute'>"+msg.time+"</div></pre>" +
                                     "</div> " +
                                     "</div>");
 
