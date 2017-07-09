@@ -99,8 +99,8 @@ function getInbox(){
 					'</li>';
 		}
 		content += '</ul>';
-		if(content === '<ul class="collapsible popout" data-collapsible="accordion"></ul>') div.html('<h3>Nothing to see here... Go away 😑🙄</h3>')
-		else div.html(content);
+		//if(content === '<ul class="collapsible popout" data-collapsible="accordion"></ul>') div.html('<h3>Nothing to see here... Go away 😑🙄</h3>')
+		//else div.html(content);
 		div.html(content);
 		xhr.abort();
 	});
