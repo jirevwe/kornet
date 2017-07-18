@@ -1,7 +1,7 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-let logger = require('morgan');
+let morgan = require('morgan');
 let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let mongoose = require('mongoose');
@@ -14,7 +14,7 @@ let validator = require('express-validator');
 let MongoStore = require('connect-mongo')(session);
 let moment = require('moment');
 let request = require('request');
-
+let fs = require('fs');
 
 //define the routes
 let controllerRoutes = require('./routes/controller');
@@ -85,7 +85,12 @@ app.set('view engine', '.hbs');
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(morgan('dev'));
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'})
+// setup the logger
+app.use(morgan('combined', {stream: accessLogStream}))
+
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true }));
 app.use(cookieParser());
@@ -110,11 +115,11 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use('/admin', adminRoutes);
 app.use('/controller', controllerRoutes);
 app.use('/business', businessRoutes);
 app.use('/wallet', walletRoutes);
 app.use('/market', marketRoutes);
+app.use('/admin', adminRoutes);
 app.use('/chat', chatRoutes);
 app.use('/mail', mailRoutes);
 app.use('/', homeRoutes);
