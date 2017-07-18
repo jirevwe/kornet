@@ -205,7 +205,7 @@ function getMailBody(mail, req, res) {
 	let imap = new Imap({
 		user: req.user.email,
 		password: utils.getLong(req.user.long_text),
-		host: 'mail.kornet-test.com',
+		host: 'mail.kornet.com',
 		port: 993,
 		tls: true
 	});
@@ -261,7 +261,7 @@ function refresh(mailbox_name, req, res) {
 	let imap = new Imap({
 		user: req.user.email,
 		password: utils.getLong(req.user.long_text),
-		host: 'mail.kornet-test.com',
+		host: 'mail.kornet.com',
 		port: 993,
 		tls: true
 	});
@@ -346,7 +346,7 @@ router.post('/send/:id', function (req, res, next) {
 	}
 
 	let smtpConfig = {
-		host: 'mail.kornet-test.com',
+		host: 'mail.kornet.com',
 		port: 587,
 		secure: false,
 		logger: true,
@@ -405,7 +405,7 @@ router.post('/save-mail', function (req, res, next) {
 		let imap = new Imap({
 			user: req.user.email,
 			password: utils.getLong(req.user.long_text),
-			host: 'mail.kornet-test.com',
+			host: 'mail.kornet.com',
 			port: 993,
 			tls: true
 		});

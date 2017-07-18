@@ -39,7 +39,7 @@ userSchema.methods.validatePassword = function (password) {
     return bcrypt.compareSync(password, this.password);
 };
 
-userSchema.methods.validateToken = function (token) {I
+userSchema.methods.validateToken = function (token) {
     return bcrypt.compareSync(token, this.security_token);
 };
 

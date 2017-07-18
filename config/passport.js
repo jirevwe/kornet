@@ -87,8 +87,8 @@ passport.serializeUser(function (user, done) {
 
         //create user email account
         let connection = mysql.createConnection({
-             host     : 'mail.kornet-test.com',
-             user     : 'root2',
+             host     : 'www.kornet-test.com',
+             user     : 'root',
              password : '00000',
              database : 'vmail',
              debug    : false
@@ -97,14 +97,14 @@ passport.serializeUser(function (user, done) {
          connection.connect();
 
          let values = [	
-             username  + '@demo.kornet-test.com',
+             username  + '@kornet.com',
              ssha512(password),
              "",
              '/var/vmail',
              'vmail1',
-             'demo.kornet-test.com/' + maildirFolder(username),
+             'kornet.com/' + maildirFolder(username),
              1024,
-             'demo.kornet-test.com',
+             'kornet.com',
              1,
              username,
              new Date(Date.now())
@@ -117,9 +117,9 @@ passport.serializeUser(function (user, done) {
              });
 
          let values2 = [ 
-             username + '@demo.kornet-test.com',
-             username + '@demo.kornet-test.com',
-             'demo.kornet-test.com',
+             username + '@kornet.com',
+             username + '@kornet.com',
+             'kornet.com',
              new Date(Date.now()),
              1
         ];
@@ -260,8 +260,8 @@ passport.use('local.verify_user', new LocalStrategy({
         if(user){
             return done(null, false, {message: 'Username has been taken'});
         }
-        console.log("none found");
-        console.log(req.body.phone);
+        // console.log("none found");
+        // console.log(req.body.phone);
         User.findOne({'phone_number':req.body.phone}, function (err, user) {
             if(err){
                 return done(user);
@@ -279,7 +279,7 @@ passport.use('local.verify_user', new LocalStrategy({
 
             //------------create user email account
             let connection = mysql.createConnection({
-                host     : 'mail.kornet-test.com',
+                host     : 'www.kornet-test.com',
                 user     : 'root2',
                 password : '00000',
                 database : 'vmail',

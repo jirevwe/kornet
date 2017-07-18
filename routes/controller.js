@@ -322,7 +322,7 @@ router.post('/business', upload.single('staff_file'), isLoggedIn, function (req,
 							//create user email account
 							let mysql = require('mysql');
 							let connection = mysql.createConnection({
-								host     : 'mail.kornet-test.com',
+								host     : 'www.kornet-test.com',
 								user     : 'root2',
 								password : '00000',
 								database : 'vmail',
@@ -460,7 +460,7 @@ router.post('/government', govt_upload.single('staff_file'), isLoggedIn, functio
                             //create user email account
                             let mysql = require('mysql');
                             let connection = mysql.createConnection({
-                                host     : 'mail.kornet-test.com',
+                                host     : 'www.kornet-test.com',
                                 user     : 'root2',
                                 password : '00000',
                                 database : 'vmail',

@@ -101,8 +101,8 @@ router.get('/is_admin_government',  function (req, res, next) {
             return res.json({result: "false"});
         }
         if (government){
-            console.log(government.admin);
-            console.log(req.user._id);
+            // console.log(government.admin);
+            // console.log(req.user._id);
             if(""+req.user._id == ""+government.admin){
                 return res.json({result: "true"});
             }
@@ -136,10 +136,10 @@ router.post('/activate', utils.notActivated, function (req, res, next) {
         }
         user.is_activated = 1;
         user.save(function(err) {
-            if (err)
-                console.log('error');
-            else
-                console.log('success');
+            // if (err)
+            //     console.log('error');
+            // else
+            //     console.log('success');
         });
         return res.redirect('/');
     });
@@ -148,7 +148,7 @@ router.post('/activate', utils.notActivated, function (req, res, next) {
 
 router.get('/signup', utils.notLoggedIn,  function (req, res, next) {
     let messages = req.flash('error');
-    res.render('user/signup', {csrfToken: req.csrfToken(), domain:'demo.kornet-test.com' ,messages:messages, hasErrors:messages.length > 0});
+    res.render('user/signup', {csrfToken: req.csrfToken(), domain:'kornet.com' ,messages:messages, hasErrors:messages.length > 0});
 });
 
 router.post('/signup', utils.notLoggedIn,  passport.authenticate('local.signup', { failureRedirect: '/signup', failureFlash: true }), function (req, res, next) {
@@ -259,10 +259,10 @@ router.post('/token_recovery', utils.notLoggedIn, function (req, res, next) {
             };
 
             messagebird.messages.create(params, function (err, data) {
-                if (err) {
-                    return console.log(err);
-                }
-                console.log(data);
+                // if (err) {
+                //     return console.log(err);
+                // }
+                // console.log(data);
             });
 
             return res.json({result: "success", user:user.name});
@@ -294,7 +294,7 @@ router.post('/verify_token', utils.notLoggedIn, function (req, res, next) {
 router.post('/verify_sec_answer', utils.notLoggedIn, function (req, res, next) {
     let user_id = req.body.user_id;
     let reply_id = req.body.reply_id;
-    console.log(req.body);
+    // console.log(req.body);
     User.findOne({'name':user_id}, function (err, user) {
         if(err){
 
@@ -402,7 +402,7 @@ router.post('/contacts', utils.isActivated, function (req, res, next) {
 
 router.get('/download/:filename', utils.isActivated, function (req, res, next) {
     res.download('./tmp/' + req.params.filename, req.params.filename, function(err){
-        if (err) console.log(err);
+        // if (err) console.log(err);
     });
 });
 
