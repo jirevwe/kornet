@@ -26,11 +26,11 @@ let walletRoutes = require('./routes/wallet');
 let businessRoutes = require('./routes/business');
 let adminRoutes = require('./routes/admin');
 
-var uri = "mongodb://localhost:27017/kornet";
-var mongo = uri;//'mongodb://heroku_xh1fmvz6:36dnu9rru6elh1cnip8aokhpjo@ds131510.mlab.com:31510/heroku_xh1fmvz6';// process.env.MONGODB_URI || uri;
-// console.log(process.env.MONGODB_URI || uri);
-mongoose.connect(uri);
+//todo: replace this with remote MONGO DB URI
+var LOCAL_MONGO_DB = "mongodb://localhost:27017/kornet";
+mongoose.connect(process.env.MONGO_DB_KORNET || LOCAL_MONGO_DB);
 
+//todo: WHY IS THIS HERE??
 let Business = require('./models/business');
 
 require('./config/passport');

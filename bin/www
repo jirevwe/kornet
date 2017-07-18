@@ -17,7 +17,7 @@ let rp = require('request-promise');
  * Get port from environment and store in Express.
  */
 
-let port = normalizePort('3000');
+let port = normalizePort(process.env.PORT_KORNET || '5000');
 app.set('port', port);
 
 /**
