@@ -2,11 +2,11 @@
   "name": "kornet",
   "version": "0.0.1",
   "engines": {
-    "node": "6.10.0",
+    "node": "8.9.0",
     "npm": "3.10.0" 
   },
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "NODE_ENV=production node ./bin/www"
   },
   "dependencies": {
     "async": "2.1.5",

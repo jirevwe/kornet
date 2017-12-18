@@ -2,6 +2,13 @@
     {{> header classString="header--purple" }}
     <div class="container container--sm">
         <form id="signup-form" method="post" class="form form--login" action="/signup">
+            {{# if hasErrors}}
+                <div class="alert alert-danger">
+                    {{# each messages}}
+                        <p>{{this}}</p>
+                    {{/each}}
+                </div>
+            {{/if}}
             <h1 class="form__title">Sign up</h1>
             <!--<div class="form__group form__group--split">-->
                 <!--<div class="form__group">-->

@@ -1,6 +1,6 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
+let express = require('express');
+let path = require('path');
+let favicon = require('serve-favicon');
 let logger = require('morgan');
 let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
@@ -16,6 +16,7 @@ let moment = require('moment');
 let request = require('request');
 
 
+
 //define the routes
 let controllerRoutes = require('./routes/controller');
 let marketRoutes = require('./routes/market');
@@ -29,7 +30,7 @@ let adminRoutes = require('./routes/admin');
 var uri = "mongodb://localhost:27017/kornet";
 var mongo = 'mongodb://heroku_xh1fmvz6:36dnu9rru6elh1cnip8aokhpjo@ds131510.mlab.com:31510/heroku_xh1fmvz6';// process.env.MONGODB_URI || uri;
 // console.log(process.env.MONGODB_URI || uri);
-mongoose.connect(uri);
+mongoose.connect(mongo);
 
 let Business = require('./models/business');
 

@@ -109,10 +109,10 @@ router.post('/update-room', utils.isActivated, (r, s, n)  => {
     let room = r.body;
 
     if(room.creator != r.user.id){
-        let members = newroom.members;
+        let members = room.members;
         let isArray = _.isArray(members);
         if(isArray) {
-            Room.update({room_id: newroom.id}, {$addToSet: {members: {$each: members}}})
+            Room.update({room_id: room.id}, {$addToSet: {members: {$each: members}}})
                 .then(room => {
                     return s.send({message: 'success', result: room });
                 })
