@@ -184,10 +184,12 @@
         // Get the Login Name value and trim it
         var name = $('[name="username"]').val();
         name = name.toLowerCase();
-        var phone = "+234"+$('[name="phone"]').val();
+
         var email = name+"@{{ domain }}";
 
-        $('[name="phone"]').val(phone);
+        let phone = $('[name="phone"]').val();
+
+        $('[name="phone"]').val(trimPhone(phone));
         $('[name="email"]').val(email);
         $('[name="username"]').val(name);
 
@@ -207,6 +209,22 @@
         $('[name="username"]').val(name);
 
         console.log(name);
+    }
+
+    function trimPhone(phone){
+        if (phone.match("^0")) {
+            phone = phone.replace("0", "+234");
+        }
+        else if (phone.match("^234")) {
+            phone = phone.replace("234", "+234");
+        }
+        else if (phone.indexOf("+234") !== -1) {
+            //phone = phone.replace("+234", "+234");
+        }
+        else {
+            phone = "+234" + phone;
+        }
+        return(phone.trim());
     }
 </script>
 
