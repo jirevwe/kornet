@@ -17,7 +17,7 @@ let rp = require('request-promise');
  * Get port from environment and store in Express.
  */
 
-let port = normalizePort(process.env.PORT || '3000');
+let port = normalizePort(process.env.PORT_KORNET || '5000');
 app.set('port', port);
 
 /**
@@ -414,7 +414,6 @@ io.sockets.on("connection", function(socket){
 
     });
 
-
     socket.on('kick_mem_to_server', function(data) {
         // This callback runs when the server receives a new message from the client.
         let fromMem = data['fromMem'];
@@ -438,9 +437,7 @@ io.sockets.on("connection", function(socket){
         io.sockets.to(toMem.id).emit("banned_mem_to_client", {room:room, message:"You have been banned!"});
         rooms[room].removeMember(users[toMem.id].id);
         console.log(room);
-    });
-
-    
+    });    
 });
 
 module.exports.io = io;

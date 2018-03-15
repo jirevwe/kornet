@@ -148,7 +148,7 @@ exports.sendEmail = function(user, emails, options, callback){
 
 			if(utils.validateEmail(email)){
 				let smtpConfig = {
-					host: 'mail.kornet-test.com',
+					host: 'mail.kornet.com',
 					port: 587,
 					secure: false,
 					logger: true,
@@ -178,7 +178,7 @@ exports.sendEmail = function(user, emails, options, callback){
 						let imap = new Imap({
 							user: user.email,
 							password: utils.getLong(user.long_text),
-							host: 'mail.kornet-test.com',
+							host: 'mail.kornet.com',
 							port: 993,
 							tls: true
 						});

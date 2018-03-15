@@ -1,7 +1,8 @@
+
 let express = require('express');
 let path = require('path');
 let favicon = require('serve-favicon');
-let logger = require('morgan');
+let morgan = require('morgan');
 let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let mongoose = require('mongoose');
@@ -14,7 +15,7 @@ let validator = require('express-validator');
 let MongoStore = require('connect-mongo')(session);
 let moment = require('moment');
 let request = require('request');
-
+let fs = require('fs');
 
 
 //define the routes
@@ -31,7 +32,11 @@ var uri = "mongodb://localhost:27017/kornet";
 var mongo = 'mongodb://heroku_xh1fmvz6:36dnu9rru6elh1cnip8aokhpjo@ds131510.mlab.com:31510/heroku_xh1fmvz6';// process.env.MONGODB_URI || uri;
 // console.log(process.env.MONGODB_URI || uri);
 mongoose.connect(mongo);
+// //todo: replace this with remote MONGO DB URI
+// var LOCAL_MONGO_DB = "mongodb://localhost:27017/kornet";
+// mongoose.connect(process.env.MONGO_DB_KORNET || LOCAL_MONGO_DB);
 
+//todo: WHY IS THIS HERE??
 let Business = require('./models/business');
 
 require('./config/passport');
@@ -86,7 +91,12 @@ app.set('view engine', '.hbs');
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(morgan('dev'));
+// create a write stream (in append mode)
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'})
+// setup the logger
+app.use(morgan('combined', {stream: accessLogStream}))
+
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true }));
 app.use(cookieParser());
@@ -111,11 +121,11 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use('/admin', adminRoutes);
 app.use('/controller', controllerRoutes);
 app.use('/business', businessRoutes);
 app.use('/wallet', walletRoutes);
 app.use('/market', marketRoutes);
+app.use('/admin', adminRoutes);
 app.use('/chat', chatRoutes);
 app.use('/mail', mailRoutes);
 app.use('/', homeRoutes);
